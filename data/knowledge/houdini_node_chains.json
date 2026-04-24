@@ -1,0 +1,4656 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "description": "Houdini node chain training data for AI agents. Covers SOP, DOP, LOP, and CHOP networks with parameters, connections, and expected outputs.",
+    "terminology": {
+      "node": "A single operator in a network",
+      "network": "A graph of connected nodes (e.g. /obj/geo1/)",
+      "context": "The type of network \u2014 SOP (Surface OPs), DOP (Dynamics), LOP (USD/Solaris), CHOP (Channel), ROP (Render)",
+      "wire": "A connection from the output of one node to the input of another",
+      "parm": "A parameter on a node that controls its behavior",
+      "cook": "When Houdini evaluates a node to produce output geometry/data",
+      "input": "Numbered inputs on the left side of a node (0-indexed)",
+      "display_flag": "The node whose output is rendered in the viewport",
+      "render_flag": "The node used for final render output"
+    }
+  },
+  "chains": [
+    {
+      "id": "sop_001",
+      "title": "Basic procedural box",
+      "context": "SOP",
+      "goal": "Create a simple box primitive at the origin",
+      "tags": [
+        "beginner",
+        "geometry",
+        "primitives"
+      ],
+      "nodes": [
+        {
+          "name": "box1",
+          "type": "box",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {},
+          "display_flag": true
+        }
+      ],
+      "connections": [],
+      "output_description": "A single unit cube centered at the world origin with 6 quad faces."
+    },
+    {
+      "id": "sop_002",
+      "title": "Subdivided sphere with noise displacement",
+      "context": "SOP",
+      "goal": "Create an organic lumpy sphere by subdividing and displacing with noise",
+      "tags": [
+        "beginner",
+        "noise",
+        "displacement",
+        "vex"
+      ],
+      "nodes": [
+        {
+          "name": "sphere1",
+          "type": "sphere",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "type": "prim",
+            "rows": 32,
+            "cols": 32
+          }
+        },
+        {
+          "name": "subdivide1",
+          "type": "subdivide",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "iterations": 2
+          }
+        },
+        {
+          "name": "attribwrangle1",
+          "type": "attribwrangle",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {
+            "class": "point",
+            "snippet": "float freq = 2.5;\nfloat amp = 0.2;\nvector noisepos = @P * freq;\nfloat n = noise(noisepos);\n@P += @N * n * amp;"
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "sphere1",
+          "from_output": 0,
+          "to": "subdivide1",
+          "to_input": 0
+        },
+        {
+          "from": "subdivide1",
+          "from_output": 0,
+          "to": "attribwrangle1",
+          "to_input": 0
+        }
+      ],
+      "output_description": "A high-resolution polygon sphere with lumpy noise displacement applied along normals."
+    },
+    {
+      "id": "sop_003",
+      "title": "Scatter points on a surface and copy spheres",
+      "context": "SOP",
+      "goal": "Scatter random points on a torus, then copy small spheres at each point",
+      "tags": [
+        "instancing",
+        "copy",
+        "scatter",
+        "intermediate"
+      ],
+      "nodes": [
+        {
+          "name": "torus1",
+          "type": "torus",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "rows": 24,
+            "cols": 24
+          }
+        },
+        {
+          "name": "scatter1",
+          "type": "scatter::2.0",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "npts": 200,
+            "seed": 42,
+            "relaxiterations": 0
+          }
+        },
+        {
+          "name": "sphere1",
+          "type": "sphere",
+          "position": [
+            2,
+            -1
+          ],
+          "parms": {
+            "type": "prim",
+            "rows": 8,
+            "cols": 8
+          }
+        },
+        {
+          "name": "copytopoints1",
+          "type": "copytopoints::2.0",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {
+            "pack": false,
+            "pivot": "origin"
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "torus1",
+          "from_output": 0,
+          "to": "scatter1",
+          "to_input": 0
+        },
+        {
+          "from": "scatter1",
+          "from_output": 0,
+          "to": "copytopoints1",
+          "to_input": 1
+        },
+        {
+          "from": "sphere1",
+          "from_output": 0,
+          "to": "copytopoints1",
+          "to_input": 0
+        }
+      ],
+      "output_description": "200 small spheres distributed randomly across the surface of a torus."
+    },
+    {
+      "id": "sop_004",
+      "title": "Extrude polygon faces by attribute",
+      "context": "SOP",
+      "goal": "Randomly extrude faces of a subdivided box using a random attribute",
+      "tags": [
+        "extrude",
+        "polyextrude",
+        "attributes",
+        "intermediate"
+      ],
+      "nodes": [
+        {
+          "name": "box1",
+          "type": "box",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {}
+        },
+        {
+          "name": "attribwrangle1",
+          "type": "attribwrangle",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "class": "primitive",
+            "snippet": "f@extrude_dist = fit01(rand(@primnum * 1.73), 0.0, 0.4);\nif (rand(@primnum) > 0.7) @extrude_dist = 0;"
+          }
+        },
+        {
+          "name": "polyextrude1",
+          "type": "polyextrude::2.0",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {
+            "extrusionmode": 1,
+            "inset": 0.01,
+            "outputfrontgrp": 1,
+            "dist": 0.1
+          },
+          "note": "Use the extrude_dist prim attribute to drive per-face extrusion. Use $EXTRUDE_DIST or ch() to reference the attribute in the dist field.",
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "box1",
+          "from_output": 0,
+          "to": "attribwrangle1",
+          "to_input": 0
+        },
+        {
+          "from": "attribwrangle1",
+          "from_output": 0,
+          "to": "polyextrude1",
+          "to_input": 0
+        }
+      ],
+      "output_description": "A box with ~30% of its faces randomly extruded outward by varying distances, creating a spiky look."
+    },
+    {
+      "id": "sop_005",
+      "title": "Boolean union of two shapes",
+      "context": "SOP",
+      "goal": "Merge a sphere and a box using boolean union to create a compound shape",
+      "tags": [
+        "boolean",
+        "modeling",
+        "beginner"
+      ],
+      "nodes": [
+        {
+          "name": "sphere1",
+          "type": "sphere",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "type": "prim",
+            "rows": 32,
+            "cols": 32
+          }
+        },
+        {
+          "name": "box1",
+          "type": "box",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {}
+        },
+        {
+          "name": "boolean1",
+          "type": "boolean::2.0",
+          "position": [
+            1,
+            -1
+          ],
+          "parms": {
+            "booleanop": "union"
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "sphere1",
+          "from_output": 0,
+          "to": "boolean1",
+          "to_input": 0
+        },
+        {
+          "from": "box1",
+          "from_output": 0,
+          "to": "boolean1",
+          "to_input": 1
+        }
+      ],
+      "output_description": "A single clean mesh combining the sphere and the overlapping box into one unified shape."
+    },
+    {
+      "id": "sop_006",
+      "title": "Procedural helix curve",
+      "context": "SOP",
+      "goal": "Generate a helix curve using a wrangle and then sweep a circle along it",
+      "tags": [
+        "curves",
+        "sweep",
+        "vex",
+        "intermediate"
+      ],
+      "nodes": [
+        {
+          "name": "add1",
+          "type": "add",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "keep": 1
+          },
+          "note": "Create a single seed point at origin"
+        },
+        {
+          "name": "attribwrangle1",
+          "type": "attribwrangle",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "class": "detail",
+            "snippet": "int n = 100;\nfloat turns = 3.0;\nfloat height = 3.0;\nfloat radius = 1.0;\nfor(int i=0; i<n; i++){\n  float t = float(i)/float(n-1);\n  float angle = t * turns * PI * 2;\n  vector pos = set(cos(angle)*radius, t*height, sin(angle)*radius);\n  int pt = addpoint(0, pos);\n}\nremoveprim(0, 0, 1);\nfor(int i=0; i<n-1; i++){\n  addprim(0, \"polyline\", i, i+1);\n}"
+          }
+        },
+        {
+          "name": "circle1",
+          "type": "circle",
+          "position": [
+            2,
+            -1
+          ],
+          "parms": {
+            "type": "prim",
+            "divs": 8
+          }
+        },
+        {
+          "name": "sweep1",
+          "type": "sweep::2.0",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {
+            "scale": 1.0,
+            "surfaceshape": 1
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "add1",
+          "from_output": 0,
+          "to": "attribwrangle1",
+          "to_input": 0
+        },
+        {
+          "from": "attribwrangle1",
+          "from_output": 0,
+          "to": "sweep1",
+          "to_input": 0
+        },
+        {
+          "from": "circle1",
+          "from_output": 0,
+          "to": "sweep1",
+          "to_input": 1
+        }
+      ],
+      "output_description": "A 3-turn helical tube with a circular cross-section, rising 3 units in height and 1 unit in radius."
+    },
+    {
+      "id": "sop_007",
+      "title": "VEX color gradient by height (Y position)",
+      "context": "SOP",
+      "goal": "Apply a red-to-blue color gradient based on each point's Y position using a VEX wrangle",
+      "tags": [
+        "vex",
+        "color",
+        "attributes",
+        "beginner"
+      ],
+      "nodes": [
+        {
+          "name": "sphere1",
+          "type": "sphere",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "type": "prim",
+            "rows": 64,
+            "cols": 64
+          }
+        },
+        {
+          "name": "attribwrangle1",
+          "type": "attribwrangle",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "class": "point",
+            "snippet": "float ymin = -1.0;\nfloat ymax = 1.0;\nfloat t = fit(@P.y, ymin, ymax, 0.0, 1.0);\nvector red = {1, 0.1, 0.05};\nvector blue = {0.05, 0.3, 1.0};\n@Cd = lerp(red, blue, t);"
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "sphere1",
+          "from_output": 0,
+          "to": "attribwrangle1",
+          "to_input": 0
+        }
+      ],
+      "output_description": "A sphere shaded red at the bottom, blending smoothly to blue at the top."
+    },
+    {
+      "id": "sop_008",
+      "title": "L-System tree",
+      "context": "SOP",
+      "goal": "Generate a branching tree structure using an L-System node",
+      "tags": [
+        "lsystem",
+        "procedural",
+        "organic",
+        "beginner"
+      ],
+      "nodes": [
+        {
+          "name": "lsystem1",
+          "type": "lsystem",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "rule1": "F=FF",
+            "generations": 5,
+            "rule2": "X=F-[[X]+X]+F[+FX]-X",
+            "premise": "X",
+            "angleinit": 25,
+            "stepinit": 0.1,
+            "thickinit": 0.01,
+            "smooth": true
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [],
+      "output_description": "A 2D-style organic branching tree generated by Prusinkiewicz's L-System rule."
+    },
+    {
+      "id": "sop_009",
+      "title": "VDB from polygon mesh and smooth",
+      "context": "SOP",
+      "goal": "Convert a polygon mesh to a VDB volume, smooth it, then convert back to mesh",
+      "tags": [
+        "vdb",
+        "volume",
+        "mesh",
+        "intermediate"
+      ],
+      "nodes": [
+        {
+          "name": "sphere1",
+          "type": "sphere",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "type": "prim",
+            "rows": 8,
+            "cols": 8
+          }
+        },
+        {
+          "name": "vdbfrompolygons1",
+          "type": "vdbfrompolygons",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "voxelsize": 0.05,
+            "builddistance": true,
+            "buildfog": false,
+            "exteriorband": 3,
+            "interiorband": 3
+          }
+        },
+        {
+          "name": "vdbsmooth1",
+          "type": "vdbsmooth",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {
+            "iterations": 5,
+            "operation": "gaussian",
+            "radius": 1
+          }
+        },
+        {
+          "name": "convertVDB1",
+          "type": "convertvdb",
+          "position": [
+            0,
+            -3
+          ],
+          "parms": {
+            "isovalue": 0,
+            "adaptivity": 0.1,
+            "conversion": "volume"
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "sphere1",
+          "from_output": 0,
+          "to": "vdbfrompolygons1",
+          "to_input": 0
+        },
+        {
+          "from": "vdbfrompolygons1",
+          "from_output": 0,
+          "to": "vdbsmooth1",
+          "to_input": 0
+        },
+        {
+          "from": "vdbsmooth1",
+          "from_output": 0,
+          "to": "convertVDB1",
+          "to_input": 0
+        }
+      ],
+      "output_description": "A smooth remeshed sphere. The VDB round-trip repairs the low-poly topology and produces a clean, even mesh."
+    },
+    {
+      "id": "sop_010",
+      "title": "Voronoi fracture with connectivity",
+      "context": "SOP",
+      "goal": "Fracture a box into Voronoi shards and separate them by connectivity",
+      "tags": [
+        "fracture",
+        "voronoi",
+        "dynamics",
+        "intermediate"
+      ],
+      "nodes": [
+        {
+          "name": "box1",
+          "type": "box",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {}
+        },
+        {
+          "name": "scatter1",
+          "type": "scatter::2.0",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "npts": 40,
+            "seed": 12345
+          }
+        },
+        {
+          "name": "voronoifracture1",
+          "type": "voronoifracture::2.0",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "cutplaneoffset": true,
+            "createinteriorsurfaces": true,
+            "mergegroups": true
+          }
+        },
+        {
+          "name": "assemble1",
+          "type": "assemble",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {
+            "newname": true,
+            "pieceattrib": "name",
+            "pack_geo": true
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "box1",
+          "from_output": 0,
+          "to": "voronoifracture1",
+          "to_input": 0
+        },
+        {
+          "from": "scatter1",
+          "from_output": 0,
+          "to": "voronoifracture1",
+          "to_input": 1
+        },
+        {
+          "from": "voronoifracture1",
+          "from_output": 0,
+          "to": "assemble1",
+          "to_input": 0
+        }
+      ],
+      "output_description": "40 packed packed primitives representing Voronoi shards of the original box, ready for RBD simulation."
+    },
+    {
+      "id": "sop_011",
+      "title": "Point cloud from geometry with velocity",
+      "context": "SOP",
+      "goal": "Scatter points on a sphere, assign outward velocity attribute, visualize with trails",
+      "tags": [
+        "points",
+        "velocity",
+        "attributes",
+        "vex",
+        "intermediate"
+      ],
+      "nodes": [
+        {
+          "name": "sphere1",
+          "type": "sphere",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "type": "prim",
+            "rows": 20,
+            "cols": 20
+          }
+        },
+        {
+          "name": "scatter1",
+          "type": "scatter::2.0",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "npts": 500
+          }
+        },
+        {
+          "name": "attribwrangle1",
+          "type": "attribwrangle",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {
+            "class": "point",
+            "snippet": "v@v = normalize(@P) * fit01(rand(@ptnum), 0.5, 2.0);"
+          }
+        },
+        {
+          "name": "trailsop1",
+          "type": "trail",
+          "position": [
+            0,
+            -3
+          ],
+          "parms": {
+            "result": "velocity",
+            "length": 1
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "sphere1",
+          "from_output": 0,
+          "to": "scatter1",
+          "to_input": 0
+        },
+        {
+          "from": "scatter1",
+          "from_output": 0,
+          "to": "attribwrangle1",
+          "to_input": 0
+        },
+        {
+          "from": "attribwrangle1",
+          "from_output": 0,
+          "to": "trailsop1",
+          "to_input": 0
+        }
+      ],
+      "output_description": "500 points on a sphere surface with randomized outward velocity vectors visualized as short trail lines."
+    },
+    {
+      "id": "sop_012",
+      "title": "UV unwrap and texture projection",
+      "context": "SOP",
+      "goal": "Create a UV layout on a torus using auto UV and visualize it",
+      "tags": [
+        "uv",
+        "texturing",
+        "beginner"
+      ],
+      "nodes": [
+        {
+          "name": "torus1",
+          "type": "torus",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "rows": 32,
+            "cols": 32
+          }
+        },
+        {
+          "name": "uvunwrap1",
+          "type": "uvunwrap",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "uvattrib": "uv"
+          }
+        },
+        {
+          "name": "uvquickshade1",
+          "type": "uvquickshade",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {
+            "texture_su": 4,
+            "texture_sv": 4,
+            "texture": "checker"
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "torus1",
+          "from_output": 0,
+          "to": "uvunwrap1",
+          "to_input": 0
+        },
+        {
+          "from": "uvunwrap1",
+          "from_output": 0,
+          "to": "uvquickshade1",
+          "to_input": 0
+        }
+      ],
+      "output_description": "A torus with unwrapped UVs, visualized with a 4x4 checker pattern to verify UV stretching."
+    },
+    {
+      "id": "sop_013",
+      "title": "Procedural building facade",
+      "context": "SOP",
+      "goal": "Create a grid of rectangular panels on a box face using polyextrude and copy stamping",
+      "tags": [
+        "architecture",
+        "procedural",
+        "intermediate",
+        "extrude"
+      ],
+      "nodes": [
+        {
+          "name": "box1",
+          "type": "box",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {}
+        },
+        {
+          "name": "groupexpression1",
+          "type": "groupexpression",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "grouptype": "primitive",
+            "groupname1": "facade",
+            "snippet1": "primnormal(0, @primnum, {0,0,1}).z > 0.5"
+          }
+        },
+        {
+          "name": "polyextrude1",
+          "type": "polyextrude::2.0",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {
+            "extrusionmode": 1,
+            "inset": 0.01,
+            "group": "facade",
+            "dist": 0.1
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "box1",
+          "from_output": 0,
+          "to": "groupexpression1",
+          "to_input": 0
+        },
+        {
+          "from": "groupexpression1",
+          "from_output": 0,
+          "to": "polyextrude1",
+          "to_input": 0
+        }
+      ],
+      "output_description": "A building-like box with the front face divided into inset panel windows by per-face extrusion."
+    },
+    {
+      "id": "sop_014",
+      "title": "Point cloud particle burst",
+      "context": "SOP",
+      "goal": "Create an animated point burst using sin/cos in a wrangle driven by $T (time)",
+      "tags": [
+        "animation",
+        "vex",
+        "time",
+        "particles",
+        "intermediate"
+      ],
+      "nodes": [
+        {
+          "name": "add1",
+          "type": "add",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "keep": true
+          }
+        },
+        {
+          "name": "attribwrangle1",
+          "type": "attribwrangle",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "class": "detail",
+            "snippet": "int n = 500;\nfloat T = @Time;\nfor(int i=0; i<n; i++){\n  float seed = float(i);\n  float spd = fit01(rand(seed), 0.5, 3.0);\n  float lat = fit01(rand(seed+0.1), 0, PI);\n  float lon = fit01(rand(seed+0.2), 0, PI*2);\n  vector dir = set(sin(lat)*cos(lon), cos(lat), sin(lat)*sin(lon));\n  vector pos = dir * spd * T;\n  int pt = addpoint(0, pos);\n  setpointattrib(0, 'v', pt, dir*spd);\n}\nremoveprim(0,0,1);"
+          }
+        },
+        {
+          "name": "null1",
+          "type": "null",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {},
+          "display_flag": true,
+          "note": "OUT_BURST \u2014 label the final node for clarity"
+        }
+      ],
+      "connections": [
+        {
+          "from": "add1",
+          "from_output": 0,
+          "to": "attribwrangle1",
+          "to_input": 0
+        },
+        {
+          "from": "attribwrangle1",
+          "from_output": 0,
+          "to": "null1",
+          "to_input": 0
+        }
+      ],
+      "output_description": "500 points exploding outward from the origin in random directions, animated over time using $T."
+    },
+    {
+      "id": "dop_001",
+      "title": "Basic RBD rigid body simulation",
+      "context": "DOP",
+      "goal": "Drop Voronoi-fractured pieces onto a static ground plane using RBD",
+      "tags": [
+        "rbd",
+        "simulation",
+        "dynamics",
+        "intermediate"
+      ],
+      "network_path": "/obj/geo1/",
+      "sop_setup": {
+        "description": "Inside a geometry node, create fractured pieces (see sop_010) and a ground plane. Bring both into DOP via dopimport.",
+        "nodes_needed": [
+          "voronoifracture output as packed prims (name: 'pieces')",
+          "ground plane box"
+        ]
+      },
+      "nodes": [
+        {
+          "name": "groundplane1",
+          "type": "groundplane",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "friction": 0.8,
+            "bounce": 0.1
+          }
+        },
+        {
+          "name": "rbdpackedobjects1",
+          "type": "rbdpackedobject",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "soppath": "/obj/geo1/OUT_PIECES",
+            "initialstate": "static",
+            "density": 1000,
+            "friction": 0.5,
+            "bounce": 0.2
+          }
+        },
+        {
+          "name": "gravity1",
+          "type": "gravity",
+          "position": [
+            1,
+            -1
+          ],
+          "parms": {
+            "forcex": 0,
+            "forcey": -9.81,
+            "forcez": 0
+          }
+        },
+        {
+          "name": "rbdsolver1",
+          "type": "rbdsolver",
+          "position": [
+            1,
+            -2
+          ],
+          "parms": {},
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "groundplane1",
+          "from_output": 0,
+          "to": "gravity1",
+          "to_input": 0
+        },
+        {
+          "from": "rbdpackedobjects1",
+          "from_output": 0,
+          "to": "gravity1",
+          "to_input": 1
+        },
+        {
+          "from": "gravity1",
+          "from_output": 0,
+          "to": "rbdsolver1",
+          "to_input": 0
+        }
+      ],
+      "output_description": "Fractured pieces fall under gravity and come to rest on the ground plane with real-world physics."
+    },
+    {
+      "id": "dop_002",
+      "title": "FLIP fluid simulation (water pouring)",
+      "context": "DOP",
+      "goal": "Simulate a small volume of water pouring from a source into a container",
+      "tags": [
+        "flip",
+        "fluid",
+        "simulation",
+        "advanced"
+      ],
+      "nodes": [
+        {
+          "name": "flipsolver1",
+          "type": "flipsolver::2.0",
+          "position": [
+            1,
+            -3
+          ],
+          "parms": {
+            "viscosity": 0.0,
+            "surfacetension": 0.0,
+            "substeps": 2
+          }
+        },
+        {
+          "name": "flipfluidconfigureobject1",
+          "type": "flipconfigureobject",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {}
+        },
+        {
+          "name": "flipfluidobject1",
+          "type": "flipobject",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "particlesep": 0.1
+          }
+        },
+        {
+          "name": "fluidcompress1",
+          "type": "vdbcompress",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {}
+        },
+        {
+          "name": "staticobject1",
+          "type": "staticobject",
+          "position": [
+            2,
+            -1
+          ],
+          "parms": {
+            "soppath": "/obj/container/"
+          }
+        }
+      ],
+      "connections": [
+        {
+          "from": "flipfluidobject1",
+          "from_output": 0,
+          "to": "flipfluidconfigureobject1",
+          "to_input": 0
+        },
+        {
+          "from": "flipfluidconfigureobject1",
+          "from_output": 0,
+          "to": "flipsolver1",
+          "to_input": 0
+        },
+        {
+          "from": "fluidcompress1",
+          "from_output": 0,
+          "to": "flipsolver1",
+          "to_input": 1
+        },
+        {
+          "from": "staticobject1",
+          "from_output": 0,
+          "to": "flipsolver1",
+          "to_input": 2
+        }
+      ],
+      "output_description": "A FLIP fluid simulation where particles flow into a container. Render by converting particles to VDB surface."
+    },
+    {
+      "id": "dop_003",
+      "title": "Pyro fire and smoke simulation",
+      "context": "DOP",
+      "goal": "Emit fire and smoke from a sphere source using Pyro solver",
+      "tags": [
+        "pyro",
+        "fire",
+        "smoke",
+        "simulation",
+        "advanced"
+      ],
+      "nodes": [
+        {
+          "name": "pyrosolver1",
+          "type": "pyrosolver::2.0",
+          "position": [
+            1,
+            -3
+          ],
+          "parms": {
+            "timescale": 1.0,
+            "substeps": 2
+          }
+        },
+        {
+          "name": "pyro_source",
+          "type": "pyrosource",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {}
+        },
+        {
+          "name": "pyroobject1",
+          "type": "smokeobject",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "divsize": 0.1
+          }
+        }
+      ],
+      "connections": [
+        {
+          "from": "pyro_source",
+          "from_output": 0,
+          "to": "pyroobject1",
+          "to_input": 0
+        },
+        {
+          "from": "pyroobject1",
+          "from_output": 0,
+          "to": "pyrosolver1",
+          "to_input": 0
+        }
+      ],
+      "output_description": "A pyro volume simulation with rising fire and smoke emitted from a sphere-shaped source."
+    },
+    {
+      "id": "lop_001",
+      "title": "USD stage setup with sphere light and Karma render",
+      "context": "LOP",
+      "goal": "Create a USD stage with a sphere primitive, a sphere light, and render with Karma",
+      "tags": [
+        "lop",
+        "usd",
+        "karma",
+        "render",
+        "beginner"
+      ],
+      "nodes": [
+        {
+          "name": "sphere1",
+          "type": "sphere",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "primpath": "/World/sphere",
+            "primtype": "Sphere",
+            "radius": 1.0
+          }
+        },
+        {
+          "name": "material1",
+          "type": "materiallibrary",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "matpathprefix": "/materials/",
+            "materials": [
+              {
+                "name": "mymaterial",
+                "type": "principledshader"
+              }
+            ]
+          }
+        },
+        {
+          "name": "assign_material1",
+          "type": "assignmaterial",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {
+            "primpattern1": "/World/sphere"
+          }
+        },
+        {
+          "name": "spherelight1",
+          "type": "light::2.0",
+          "position": [
+            2,
+            -1
+          ],
+          "parms": {
+            "t": [
+              3,
+              4,
+              3
+            ],
+            "inputs:intensity": 50,
+            "inputs:color": [
+              1,
+              0.95,
+              0.85
+            ],
+            "inputs:radius": 0.5
+          }
+        },
+        {
+          "name": "karmarendersettings1",
+          "type": "karmarendersettings",
+          "position": [
+            1,
+            -3
+          ],
+          "parms": {}
+        },
+        {
+          "name": "karma1",
+          "type": "karma",
+          "position": [
+            1,
+            -4
+          ],
+          "parms": {
+            "picture": "render/$F4.exr"
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "sphere1",
+          "from_output": 0,
+          "to": "material1",
+          "to_input": 0
+        },
+        {
+          "from": "material1",
+          "from_output": 0,
+          "to": "assign_material1",
+          "to_input": 0
+        },
+        {
+          "from": "assign_material1",
+          "from_output": 0,
+          "to": "karmarendersettings1",
+          "to_input": 0
+        },
+        {
+          "from": "spherelight1",
+          "from_output": 0,
+          "to": "karmarendersettings1",
+          "to_input": 1
+        },
+        {
+          "from": "karmarendersettings1",
+          "from_output": 0,
+          "to": "karma1",
+          "to_input": 0
+        }
+      ],
+      "output_description": "A USD stage with a shaded sphere illuminated by a warm sphere light, rendered to EXR via Karma."
+    },
+    {
+      "id": "sop_015",
+      "title": "Attribute transfer between meshes",
+      "context": "SOP",
+      "goal": "Transfer Cd color from a dense sphere to a low-poly grid based on proximity",
+      "tags": [
+        "attribute transfer",
+        "vex",
+        "intermediate"
+      ],
+      "nodes": [
+        {
+          "name": "sphere1",
+          "type": "sphere",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "type": "prim",
+            "rows": 64,
+            "cols": 64
+          }
+        },
+        {
+          "name": "attribwrangle1",
+          "type": "attribwrangle",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "class": "point",
+            "snippet": "@Cd = set(sin(@P.y * 5)*0.5+0.5, cos(@P.x*3)*0.5+0.5, 0.5);"
+          }
+        },
+        {
+          "name": "grid1",
+          "type": "grid",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "rows": 20,
+            "cols": 20,
+            "orient": "xy"
+          }
+        },
+        {
+          "name": "attribtransfer1",
+          "type": "attribtransfer",
+          "position": [
+            1,
+            -2
+          ],
+          "parms": {
+            "pointattribs": "Cd"
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "attribwrangle1",
+          "from_output": 0,
+          "to": "attribtransfer1",
+          "to_input": 0
+        },
+        {
+          "from": "grid1",
+          "from_output": 0,
+          "to": "attribtransfer1",
+          "to_input": 1
+        }
+      ],
+      "output_description": "A flat grid colored by proximity-sampling the colorful sphere \u2014 a gradient UV-like pattern projected from 3D."
+    },
+    {
+      "id": "sop_016",
+      "title": "Soft body deformation using wire solver input",
+      "context": "SOP",
+      "goal": "Create a worm-like mesh that deforms along a curve using wire deform",
+      "tags": [
+        "wire",
+        "deformation",
+        "curves",
+        "intermediate"
+      ],
+      "nodes": [
+        {
+          "name": "tube1",
+          "type": "tube",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "type": "poly",
+            "height": 3.0,
+            "rows": 20,
+            "cols": 12,
+            "orient": "y"
+          }
+        },
+        {
+          "name": "line1",
+          "type": "line",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "originx": 0,
+            "originy": 0,
+            "originz": 0,
+            "dirx": 0,
+            "diry": 1,
+            "dirz": 0,
+            "dist": 3.0,
+            "points": 20
+          }
+        },
+        {
+          "name": "curve1_deformed",
+          "type": "add",
+          "position": [
+            4,
+            0
+          ],
+          "parms": {
+            "keep": true
+          },
+          "note": "This is the target deformed spine curve"
+        },
+        {
+          "name": "wiredeform1",
+          "type": "wiredeform",
+          "position": [
+            1,
+            -2
+          ],
+          "parms": {},
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "tube1",
+          "from_output": 0,
+          "to": "wiredeform1",
+          "to_input": 0
+        },
+        {
+          "from": "line1",
+          "from_output": 0,
+          "to": "wiredeform1",
+          "to_input": 1
+        },
+        {
+          "from": "curve1_deformed",
+          "from_output": 0,
+          "to": "wiredeform1",
+          "to_input": 2
+        }
+      ],
+      "output_description": "A tube mesh deformed to follow a curved spine, bending like a worm or snake body."
+    },
+    {
+      "id": "sop_017",
+      "title": "Measure and visualize curvature",
+      "context": "SOP",
+      "goal": "Measure mean curvature on a bumpy sphere and visualize it as color",
+      "tags": [
+        "curvature",
+        "analysis",
+        "vex",
+        "intermediate"
+      ],
+      "nodes": [
+        {
+          "name": "sphere1",
+          "type": "sphere",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "type": "prim",
+            "rows": 64,
+            "cols": 64
+          }
+        },
+        {
+          "name": "attribwrangle1",
+          "type": "attribwrangle",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "class": "point",
+            "snippet": "@P += @N * noise(@P * 2.0) * 0.15;"
+          }
+        },
+        {
+          "name": "measure1",
+          "type": "measure::2.0",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {
+            "measure": "curvature",
+            "attribname": "curvature"
+          }
+        },
+        {
+          "name": "attribwrangle2",
+          "type": "attribwrangle",
+          "position": [
+            0,
+            -3
+          ],
+          "parms": {
+            "class": "point",
+            "snippet": "float cv = fit(@curvature, -0.1, 0.1, 0.0, 1.0);\n@Cd = set(cv, 1.0-cv, 0.5);"
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "sphere1",
+          "from_output": 0,
+          "to": "attribwrangle1",
+          "to_input": 0
+        },
+        {
+          "from": "attribwrangle1",
+          "from_output": 0,
+          "to": "measure1",
+          "to_input": 0
+        },
+        {
+          "from": "measure1",
+          "from_output": 0,
+          "to": "attribwrangle2",
+          "to_input": 0
+        }
+      ],
+      "output_description": "A noisy sphere colored green where convex (positive curvature) and red where concave (negative curvature)."
+    },
+    {
+      "id": "sop_018",
+      "title": "Procedural city block grid",
+      "context": "SOP",
+      "goal": "Generate a grid of city blocks with random building heights using copy stamping",
+      "tags": [
+        "architecture",
+        "copy",
+        "grid",
+        "stamping",
+        "intermediate"
+      ],
+      "nodes": [
+        {
+          "name": "grid1",
+          "type": "grid",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "rows": 6,
+            "cols": 6,
+            "orient": "xy"
+          }
+        },
+        {
+          "name": "attribwrangle1",
+          "type": "attribwrangle",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "class": "primitive",
+            "snippet": "f@height = fit01(rand(@primnum * 7.3 + 1.1), 1.0, 10.0);\nf@width = fit01(rand(@primnum * 3.7), 0.6, 0.9);"
+          }
+        },
+        {
+          "name": "box1",
+          "type": "box",
+          "position": [
+            2,
+            -1
+          ],
+          "parms": {}
+        },
+        {
+          "name": "copytopoints1",
+          "type": "copytopoints::2.0",
+          "position": [
+            1,
+            -2
+          ],
+          "parms": {
+            "targetattribs": "height width"
+          }
+        },
+        {
+          "name": "attribwrangle2",
+          "type": "attribwrangle",
+          "position": [
+            1,
+            -3
+          ],
+          "parms": {
+            "class": "point",
+            "snippet": "vector scale = set(@width, @height, @width);\n@P.y *= @height;\nv@scale = scale;"
+          },
+          "note": "Scale each building individually after copy. More reliable: use copytopoints with transform by attribute.",
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "grid1",
+          "from_output": 0,
+          "to": "attribwrangle1",
+          "to_input": 0
+        },
+        {
+          "from": "attribwrangle1",
+          "from_output": 0,
+          "to": "copytopoints1",
+          "to_input": 1
+        },
+        {
+          "from": "box1",
+          "from_output": 0,
+          "to": "copytopoints1",
+          "to_input": 0
+        },
+        {
+          "from": "copytopoints1",
+          "from_output": 0,
+          "to": "attribwrangle2",
+          "to_input": 0
+        }
+      ],
+      "output_description": "A 6x6 grid of randomized box buildings with varying heights and footprint sizes, forming a stylized city block."
+    },
+    {
+      "id": "sop_019",
+      "title": "Edge group selection and bevel",
+      "context": "SOP",
+      "goal": "Select all hard edges on a box and bevel them for a smooth industrial look",
+      "tags": [
+        "groups",
+        "edges",
+        "bevel",
+        "modeling",
+        "beginner"
+      ],
+      "nodes": [
+        {
+          "name": "box1",
+          "type": "box",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {}
+        },
+        {
+          "name": "groupexpression1",
+          "type": "groupexpression",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "grouptype": "primitive",
+            "groupname1": "hard_edges",
+            "snippet1": "1"
+          },
+          "note": "Select all edges (expression=1 means all)"
+        },
+        {
+          "name": "polybevel1",
+          "type": "polybevel::3.0",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {
+            "group": "hard_edges",
+            "offset": "distance"
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "box1",
+          "from_output": 0,
+          "to": "groupexpression1",
+          "to_input": 0
+        },
+        {
+          "from": "groupexpression1",
+          "from_output": 0,
+          "to": "polybevel1",
+          "to_input": 0
+        }
+      ],
+      "output_description": "A box with all 12 edges chamfered into 3-segment rounded fillets, giving it a clean machined appearance."
+    },
+    {
+      "id": "sop_020",
+      "title": "Vellum cloth simulation setup",
+      "context": "SOP",
+      "goal": "Prepare a grid mesh for Vellum cloth simulation with constraints",
+      "tags": [
+        "vellum",
+        "cloth",
+        "simulation",
+        "advanced"
+      ],
+      "nodes": [
+        {
+          "name": "grid1",
+          "type": "grid",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "rows": 20,
+            "cols": 20,
+            "orient": "xy"
+          }
+        },
+        {
+          "name": "groupexpression1",
+          "type": "groupexpression",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "grouptype": "point",
+            "groupname1": "pin",
+            "snippet1": "@P.x < -1.9 || @P.x > 1.9"
+          }
+        },
+        {
+          "name": "vellumconstraints1",
+          "type": "vellumconstraints",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {
+            "constrainttype": "cloth",
+            "stretchstiffness": 1.0,
+            "bendstiffness": 0.01
+          }
+        },
+        {
+          "name": "vellumsolver1",
+          "type": "vellumsolver",
+          "position": [
+            0,
+            -3
+          ],
+          "parms": {
+            "substeps": 5,
+            "gravityx": 0,
+            "gravityy": -9.81,
+            "gravityz": 0
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "grid1",
+          "from_output": 0,
+          "to": "groupexpression1",
+          "to_input": 0
+        },
+        {
+          "from": "groupexpression1",
+          "from_output": 0,
+          "to": "vellumconstraints1",
+          "to_input": 0
+        },
+        {
+          "from": "vellumconstraints1",
+          "from_output": 0,
+          "to": "vellumsolver1",
+          "to_input": 0
+        }
+      ],
+      "output_description": "A cloth panel pinned at its left and right edges, drooping under gravity like a curtain hung between two poles."
+    },
+    {
+      "id": "sop_021",
+      "title": "Crowd placement on terrain",
+      "context": "SOP",
+      "goal": "Scatter agent placeholder points on a terrain mesh respecting slope angle",
+      "tags": [
+        "crowd",
+        "scatter",
+        "terrain",
+        "intermediate"
+      ],
+      "nodes": [
+        {
+          "name": "heightfield1",
+          "type": "heightfield",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {}
+        },
+        {
+          "name": "heightfield_convert1",
+          "type": "heightfield_convert",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {}
+        },
+        {
+          "name": "attribwrangle1",
+          "type": "attribwrangle",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {
+            "class": "point",
+            "snippet": "float slope = degrees(acos(dot(normalize(@N), {0,1,0})));\nf@slope = slope;"
+          }
+        },
+        {
+          "name": "scatter1",
+          "type": "scatter::2.0",
+          "position": [
+            0,
+            -3
+          ],
+          "parms": {
+            "npts": 500,
+            "densityattrib": "slope",
+            "usedensityattrib": true,
+            "seed": 42
+          }
+        },
+        {
+          "name": "null1",
+          "type": "null",
+          "position": [
+            0,
+            -4
+          ],
+          "display_flag": true,
+          "parms": {}
+        }
+      ],
+      "connections": [
+        {
+          "from": "heightfield_quicksetup",
+          "from_output": 0,
+          "to": "heightfield_convert1",
+          "to_input": 0
+        },
+        {
+          "from": "heightfield_convert1",
+          "from_output": 0,
+          "to": "attribwrangle1",
+          "to_input": 0
+        },
+        {
+          "from": "attribwrangle1",
+          "from_output": 0,
+          "to": "scatter1",
+          "to_input": 0
+        },
+        {
+          "from": "scatter1",
+          "from_output": 0,
+          "to": "null1",
+          "to_input": 0
+        }
+      ],
+      "output_description": "500 agent placement points distributed across flat areas of a procedural terrain, avoiding steep slopes."
+    },
+    {
+      "id": "vex_patterns_001",
+      "title": "Common VEX snippets reference",
+      "context": "SOP (attribwrangle)",
+      "goal": "Reference card for frequently used VEX patterns in Houdini wrangles",
+      "tags": [
+        "vex",
+        "reference",
+        "beginner",
+        "intermediate"
+      ],
+      "snippets": [
+        {
+          "label": "Remap attribute range",
+          "code": "float val = fit(@myattr, srcmin, srcmax, dstmin, dstmax);"
+        },
+        {
+          "label": "Random color per point",
+          "code": "@Cd = set(rand(@ptnum), rand(@ptnum+1), rand(@ptnum+2));"
+        },
+        {
+          "label": "Delete every other prim",
+          "code": "if (@primnum % 2 == 0) removeprim(0, @primnum, 1);"
+        },
+        {
+          "label": "Orient points to face camera (billboard)",
+          "code": "vector cam = {0,0,1};\n@N = cam - @P;\n@N = normalize(@N);"
+        },
+        {
+          "label": "Soft selection falloff by distance",
+          "code": "vector center = {0,0,0};\nfloat maxdist = 2.0;\nfloat d = distance(@P, center);\nfloat falloff = 1.0 - clamp(d / maxdist, 0, 1);\n@P.y += falloff * 0.5;"
+        },
+        {
+          "label": "Read neighbor point positions (pcfind)",
+          "code": "int npts[] = pcfind(0, 'P', @P, 0.5, 5);\nvector avg = {0,0,0};\nforeach(int n; npts){ avg += point(0,'P',n); }\navg /= max(1, len(npts));\n@P = lerp(@P, avg, 0.3);"
+        },
+        {
+          "label": "Drive transform by time (oscillation)",
+          "code": "float freq = 2.0;\nfloat amp = 0.5;\n@P.y += sin(@Time * freq * PI * 2 + @ptnum * 0.1) * amp;"
+        },
+        {
+          "label": "Turbulent noise displacement",
+          "code": "float freq = 1.5;\nfloat amp = 0.3;\nvector offset = set(@ptnum*0.1, 0, @ptnum*0.3);\n@P += @N * turbulent_noise(@P * freq + offset, 4) * amp;"
+        }
+      ]
+    },
+    {
+      "id": "sop_022",
+      "title": "Procedural chain link geometry",
+      "context": "SOP",
+      "goal": "Create a 3D chain of interlocked torus rings using copy-to-curve instancing",
+      "tags": [
+        "instancing",
+        "curves",
+        "modeling",
+        "intermediate"
+      ],
+      "nodes": [
+        {
+          "name": "line1",
+          "type": "line",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "originx": 0,
+            "originy": 0,
+            "originz": 0,
+            "dirx": 0,
+            "diry": 1,
+            "dirz": 0,
+            "dist": 8,
+            "points": 9
+          }
+        },
+        {
+          "name": "torus1",
+          "type": "torus",
+          "position": [
+            3,
+            0
+          ],
+          "parms": {
+            "rows": 16,
+            "cols": 32,
+            "orient": "x"
+          }
+        },
+        {
+          "name": "copytopoints1",
+          "type": "copytopoints::2.0",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "pack": false,
+            "pivot": "origin"
+          }
+        },
+        {
+          "name": "attribwrangle1",
+          "type": "attribwrangle",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {
+            "class": "point",
+            "snippet": "if (@ptnum % 2 == 0) { matrix3 m = ident(); rotate(m, PI * 0.5, {0,1,0}); @orient = quaternion(m); }"
+          },
+          "note": "Alternate every other ring 90 degrees so they interlock"
+        },
+        {
+          "name": "OUT_chain",
+          "type": "null",
+          "position": [
+            0,
+            -3
+          ],
+          "parms": {},
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "line1",
+          "from_output": 0,
+          "to": "copytopoints1",
+          "to_input": 1
+        },
+        {
+          "from": "torus1",
+          "from_output": 0,
+          "to": "copytopoints1",
+          "to_input": 0
+        },
+        {
+          "from": "copytopoints1",
+          "from_output": 0,
+          "to": "attribwrangle1",
+          "to_input": 0
+        },
+        {
+          "from": "attribwrangle1",
+          "from_output": 0,
+          "to": "OUT_chain",
+          "to_input": 0
+        }
+      ],
+      "output_description": "A chain of 9 torus rings along a vertical line, every alternating ring rotated 90\u00b0 to simulate interlocking chain links."
+    },
+    {
+      "id": "sop_023",
+      "title": "Signed distance field based selection",
+      "context": "SOP",
+      "goal": "Use a VDB SDF to mask which points of a scattered set fall inside a volume",
+      "tags": [
+        "vdb",
+        "sdf",
+        "selection",
+        "intermediate"
+      ],
+      "nodes": [
+        {
+          "name": "sphere1",
+          "type": "sphere",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "type": "prim",
+            "rows": 32,
+            "cols": 32
+          }
+        },
+        {
+          "name": "vdbfrompolygons1",
+          "type": "vdbfrompolygons",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "voxelsize": 0.05,
+            "builddistance": true,
+            "buildfog": false
+          }
+        },
+        {
+          "name": "box1",
+          "type": "box",
+          "position": [
+            3,
+            0
+          ],
+          "parms": {}
+        },
+        {
+          "name": "scatter1",
+          "type": "scatter::2.0",
+          "position": [
+            3,
+            -1
+          ],
+          "parms": {
+            "npts": 2000,
+            "seed": 99
+          }
+        },
+        {
+          "name": "attribfromvolume1",
+          "type": "attribfromvolume",
+          "position": [
+            1.5,
+            -2
+          ],
+          "parms": {}
+        },
+        {
+          "name": "attribwrangle1",
+          "type": "attribwrangle",
+          "position": [
+            1.5,
+            -3
+          ],
+          "parms": {
+            "class": "point",
+            "snippet": "if (f@sdf_val > 0) removepoint(0, @ptnum);"
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "sphere1",
+          "from_output": 0,
+          "to": "vdbfrompolygons1",
+          "to_input": 0
+        },
+        {
+          "from": "vdbfrompolygons1",
+          "from_output": 0,
+          "to": "attribfromvolume1",
+          "to_input": 1
+        },
+        {
+          "from": "box1",
+          "from_output": 0,
+          "to": "scatter1",
+          "to_input": 0
+        },
+        {
+          "from": "scatter1",
+          "from_output": 0,
+          "to": "attribfromvolume1",
+          "to_input": 0
+        },
+        {
+          "from": "attribfromvolume1",
+          "from_output": 0,
+          "to": "attribwrangle1",
+          "to_input": 0
+        }
+      ],
+      "output_description": "Only points that fall inside the sphere volume remain; outer points are deleted using SDF sign testing."
+    },
+    {
+      "id": "sop_024",
+      "title": "Animated growing vine on surface",
+      "context": "SOP",
+      "goal": "Simulate a vine growing along a surface using a timeshift-driven carve on a curve",
+      "tags": [
+        "animation",
+        "curves",
+        "carve",
+        "timeshift",
+        "intermediate"
+      ],
+      "nodes": [
+        {
+          "name": "sphere1",
+          "type": "sphere",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "type": "prim",
+            "rows": 48,
+            "cols": 48
+          }
+        },
+        {
+          "name": "scatter1",
+          "type": "scatter::2.0",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "npts": 1,
+            "seed": 7
+          }
+        },
+        {
+          "name": "findshortestpath1",
+          "type": "findshortestpath",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {
+            "cost": "edgelength"
+          }
+        },
+        {
+          "name": "resample1",
+          "type": "resample",
+          "position": [
+            0,
+            -3
+          ],
+          "parms": {
+            "dolength": false,
+            "dosegs": true,
+            "segs": 200
+          }
+        },
+        {
+          "name": "carve1",
+          "type": "carve",
+          "position": [
+            0,
+            -4
+          ],
+          "parms": {
+            "firstu": 0,
+            "secondu": "fit($F, 1, 120, 0, 1)",
+            "domainu1": true
+          },
+          "note": "Animates the vine growing from frame 1 to 120"
+        },
+        {
+          "name": "sweep1",
+          "type": "sweep::2.0",
+          "position": [
+            0,
+            -5
+          ],
+          "parms": {
+            "scale": 0.02,
+            "cols": 6,
+            "surfaceshape": "normalaxis"
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "sphere1",
+          "from_output": 0,
+          "to": "findshortestpath1",
+          "to_input": 0
+        },
+        {
+          "from": "scatter1",
+          "from_output": 0,
+          "to": "findshortestpath1",
+          "to_input": 1
+        },
+        {
+          "from": "findshortestpath1",
+          "from_output": 0,
+          "to": "resample1",
+          "to_input": 0
+        },
+        {
+          "from": "resample1",
+          "from_output": 0,
+          "to": "carve1",
+          "to_input": 0
+        },
+        {
+          "from": "carve1",
+          "from_output": 0,
+          "to": "sweep1",
+          "to_input": 0
+        }
+      ],
+      "output_description": "A tubular vine that grows across the sphere surface along a shortest-path curve, animating from point to point over 120 frames."
+    },
+    {
+      "id": "dop_004",
+      "title": "FLIP fluid with collision object",
+      "context": "DOP",
+      "goal": "Set up a FLIP fluid sim with a sphere emitter and a static box collider",
+      "tags": [
+        "flip",
+        "fluids",
+        "simulation",
+        "advanced"
+      ],
+      "nodes": [
+        {
+          "name": "flipsolver1",
+          "type": "flipsolver::2.0",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "substeps": 2
+          }
+        },
+        {
+          "name": "flipfluidobject1",
+          "type": "flipobject",
+          "position": [
+            -2,
+            -1
+          ],
+          "parms": {
+            "soppath": "/obj/emitter_sphere/sphere1",
+            "particlesep": 0.1
+          }
+        },
+        {
+          "name": "staticobject1",
+          "type": "staticobject",
+          "position": [
+            2,
+            -1
+          ],
+          "parms": {
+            "soppath": "/obj/collider_box/box1"
+          }
+        },
+        {
+          "name": "merge1",
+          "type": "merge",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {}
+        },
+        {
+          "name": "output1",
+          "type": "output",
+          "position": [
+            0,
+            -3
+          ],
+          "parms": {},
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "flipfluidobject1",
+          "from_output": 0,
+          "to": "flipsolver1",
+          "to_input": 0
+        },
+        {
+          "from": "staticobject1",
+          "from_output": 0,
+          "to": "merge1",
+          "to_input": 0
+        },
+        {
+          "from": "flipsolver1",
+          "from_output": 0,
+          "to": "merge1",
+          "to_input": 1
+        },
+        {
+          "from": "merge1",
+          "from_output": 0,
+          "to": "output1",
+          "to_input": 0
+        }
+      ],
+      "output_description": "A FLIP fluid emitted from a sphere, falling under gravity and colliding with a static box collision object."
+    },
+    {
+      "id": "dop_005",
+      "title": "Pyro fire and smoke from object",
+      "context": "DOP",
+      "goal": "Emit fire and smoke from an SOP geometry using the Pyro solver",
+      "tags": [
+        "pyro",
+        "fire",
+        "smoke",
+        "simulation",
+        "advanced"
+      ],
+      "nodes": [
+        {
+          "name": "pyrosolver1",
+          "type": "pyrosolver::2.0",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "timescale": 1.0,
+            "temp_diffusion": 0.1,
+            "cooling_rate": 0.85
+          }
+        },
+        {
+          "name": "pyroobject1",
+          "type": "smokeobject",
+          "position": [
+            -2,
+            -1
+          ],
+          "parms": {
+            "divsize": 0.1,
+            "enabletemperature": 1.5,
+            "enablefuel": 1.0
+          }
+        },
+        {
+          "name": "sourcevolume1",
+          "type": "sourcevolume",
+          "position": [
+            2,
+            -1
+          ],
+          "parms": {}
+        },
+        {
+          "name": "merge1",
+          "type": "merge",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {}
+        },
+        {
+          "name": "output1",
+          "type": "output",
+          "position": [
+            0,
+            -3
+          ],
+          "parms": {},
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "pyroobject1",
+          "from_output": 0,
+          "to": "pyrosolver1",
+          "to_input": 0
+        },
+        {
+          "from": "sourcevolume1",
+          "from_output": 0,
+          "to": "merge1",
+          "to_input": 0
+        },
+        {
+          "from": "pyrosolver1",
+          "from_output": 0,
+          "to": "merge1",
+          "to_input": 1
+        },
+        {
+          "from": "merge1",
+          "from_output": 0,
+          "to": "output1",
+          "to_input": 0
+        }
+      ],
+      "output_description": "A Pyro sim emitting temperature and fuel from a sphere, producing rising fire and smoke driven by buoyancy."
+    },
+    {
+      "id": "dop_006",
+      "title": "Constraint network for RBD glue",
+      "context": "DOP",
+      "goal": "Simulate fractured geometry with glue constraints that break on impact",
+      "tags": [
+        "rbd",
+        "constraints",
+        "fracture",
+        "simulation",
+        "advanced"
+      ],
+      "nodes": [
+        {
+          "name": "rbdpackedobject1",
+          "type": "rbdpackedobject",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "soppath": "/obj/fractured_box/assemble1",
+            "density": 1000
+          }
+        },
+        {
+          "name": "constraintnetwork1",
+          "type": "constraintnetwork",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "soppath": "/obj/fractured_box/constraints1"
+          }
+        },
+        {
+          "name": "rbdsolver1",
+          "type": "rbdsolver",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {}
+        },
+        {
+          "name": "output1",
+          "type": "output",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {},
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "rbdpackedobject1",
+          "from_output": 0,
+          "to": "rbdsolver1",
+          "to_input": 0
+        },
+        {
+          "from": "constraintnetwork1",
+          "from_output": 0,
+          "to": "rbdsolver1",
+          "to_input": 1
+        },
+        {
+          "from": "rbdsolver1",
+          "from_output": 0,
+          "to": "output1",
+          "to_input": 0
+        }
+      ],
+      "output_description": "Voronoi-fractured packed geo held together by glue constraints; pieces break apart when impact impulse exceeds the strength threshold."
+    },
+    {
+      "id": "lop_002",
+      "title": "USD asset assembly with materials",
+      "context": "LOP",
+      "goal": "Import SOP geometry, assign a USD preview material, and export to a USD file",
+      "tags": [
+        "usd",
+        "materials",
+        "solaris",
+        "intermediate"
+      ],
+      "nodes": [
+        {
+          "name": "sopimport1",
+          "type": "sopimport",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "soppath": "/obj/geo1/OUT",
+            "primpath": "/World/geo1"
+          }
+        },
+        {
+          "name": "materiallibrary1",
+          "type": "materiallibrary",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "materials": [
+              {
+                "name": "mat_preview",
+                "shader": "UsdPreviewSurface",
+                "diffuseColor": [
+                  0.8,
+                  0.3,
+                  0.1
+                ],
+                "roughness": 0.4,
+                "metallic": 0.0
+              }
+            ]
+          }
+        },
+        {
+          "name": "assignmaterial1",
+          "type": "assignmaterial",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "primpattern1": "/World/geo1"
+          }
+        },
+        {
+          "name": "usdexport1",
+          "type": "usd",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {},
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "sopimport1",
+          "from_output": 0,
+          "to": "assignmaterial1",
+          "to_input": 0
+        },
+        {
+          "from": "materiallibrary1",
+          "from_output": 0,
+          "to": "assignmaterial1",
+          "to_input": 1
+        },
+        {
+          "from": "assignmaterial1",
+          "from_output": 0,
+          "to": "usdexport1",
+          "to_input": 0
+        }
+      ],
+      "output_description": "A USD stage with a single geo prim bound to a UsdPreviewSurface material, written to a binary USD file."
+    },
+    {
+      "id": "lop_003",
+      "title": "Karma render setup with environment light",
+      "context": "LOP",
+      "goal": "Set up a Karma CPU render in Solaris with a dome light, camera, and render settings",
+      "tags": [
+        "karma",
+        "rendering",
+        "solaris",
+        "usd",
+        "advanced"
+      ],
+      "nodes": [
+        {
+          "name": "sopimport1",
+          "type": "sopimport",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "soppath": "/obj/geo1/OUT",
+            "primpath": "/World/asset"
+          }
+        },
+        {
+          "name": "domelight1",
+          "type": "domelight::3.0",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {}
+        },
+        {
+          "name": "camera1",
+          "type": "camera",
+          "position": [
+            4,
+            0
+          ],
+          "parms": {
+            "tx": 0,
+            "ty": 1,
+            "tz": 5,
+            "rx": -10,
+            "ry": 0,
+            "rz": 0,
+            "aperture": 41.4
+          }
+        },
+        {
+          "name": "karmarendersettings1",
+          "type": "karmarendersettings",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "camera": "/cameras/camera1"
+          }
+        },
+        {
+          "name": "karma1",
+          "type": "karma",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {
+            "picture": "$HIP/render/frame.$F4.exr"
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "sopimport1",
+          "from_output": 0,
+          "to": "karmarendersettings1",
+          "to_input": 0
+        },
+        {
+          "from": "domelight1",
+          "from_output": 0,
+          "to": "karmarendersettings1",
+          "to_input": 1
+        },
+        {
+          "from": "camera1",
+          "from_output": 0,
+          "to": "karmarendersettings1",
+          "to_input": 2
+        },
+        {
+          "from": "karmarendersettings1",
+          "from_output": 0,
+          "to": "karma1",
+          "to_input": 0
+        }
+      ],
+      "output_description": "A Karma CPU render outputting 1920x1080 EXR frames with HDRI dome lighting, a 50mm camera, and AI denoising enabled."
+    },
+    {
+      "id": "lop_004",
+      "title": "USD point instancer for crowd",
+      "context": "LOP",
+      "goal": "Use a USD PointInstancer prim to scatter thousands of instances efficiently",
+      "tags": [
+        "usd",
+        "instancing",
+        "crowd",
+        "solaris",
+        "advanced"
+      ],
+      "nodes": [
+        {
+          "name": "sopimport1",
+          "type": "sopimport",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "soppath": "/obj/crowd_points/null1",
+            "primpath": "/World/crowd_pts"
+          }
+        },
+        {
+          "name": "sopimport2",
+          "type": "sopimport",
+          "position": [
+            3,
+            0
+          ],
+          "parms": {
+            "soppath": "/obj/agent_geo/OUT",
+            "primpath": "/World/prototypes/agent"
+          }
+        },
+        {
+          "name": "instancer1",
+          "type": "instancer",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {}
+        },
+        {
+          "name": "null_out",
+          "type": "null",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {},
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "sopimport1",
+          "from_output": 0,
+          "to": "instancer1",
+          "to_input": 0
+        },
+        {
+          "from": "sopimport2",
+          "from_output": 0,
+          "to": "instancer1",
+          "to_input": 1
+        },
+        {
+          "from": "instancer1",
+          "from_output": 0,
+          "to": "null_out",
+          "to_input": 0
+        }
+      ],
+      "output_description": "A USD PointInstancer prim placing agent geometry at each crowd point position \u2014 renders thousands of characters with near-zero memory overhead."
+    },
+    {
+      "id": "chop_001",
+      "title": "Audio-driven parameter animation",
+      "context": "CHOP",
+      "goal": "Read an audio file, extract amplitude, and use it to drive a geometry parameter",
+      "tags": [
+        "chop",
+        "audio",
+        "animation",
+        "intermediate"
+      ],
+      "nodes": [
+        {
+          "name": "audioin1",
+          "type": "audioin",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "rate": 44100
+          }
+        },
+        {
+          "name": "bandpass1",
+          "type": "filter",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {}
+        },
+        {
+          "name": "envelope1",
+          "type": "envelope",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {}
+        },
+        {
+          "name": "rename1",
+          "type": "rename",
+          "position": [
+            0,
+            -3
+          ],
+          "parms": {
+            "renameto": "bass_amplitude"
+          }
+        },
+        {
+          "name": "chopnet_out",
+          "type": "null",
+          "position": [
+            0,
+            -4
+          ],
+          "parms": {},
+          "display_flag": true,
+          "note": "Reference channel with ch('/obj/geo1/chopnet1/chopnet_out/bass_amplitude')"
+        }
+      ],
+      "connections": [
+        {
+          "from": "audioin1",
+          "from_output": 0,
+          "to": "bandpass1",
+          "to_input": 0
+        },
+        {
+          "from": "bandpass1",
+          "from_output": 0,
+          "to": "envelope1",
+          "to_input": 0
+        },
+        {
+          "from": "envelope1",
+          "from_output": 0,
+          "to": "rename1",
+          "to_input": 0
+        },
+        {
+          "from": "rename1",
+          "from_output": 0,
+          "to": "chopnet_out",
+          "to_input": 0
+        }
+      ],
+      "output_description": "A channel named 'bass_amplitude' that tracks the RMS energy of bass frequencies in an audio file \u2014 reference it in any parm with ch()."
+    },
+    {
+      "id": "chop_002",
+      "title": "Procedural camera shake",
+      "context": "CHOP",
+      "goal": "Generate procedural camera shake using noise and apply it to a camera transform",
+      "tags": [
+        "chop",
+        "camera",
+        "animation",
+        "noise",
+        "intermediate"
+      ],
+      "nodes": [
+        {
+          "name": "noise1",
+          "type": "noise",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "period": 0.5
+          }
+        },
+        {
+          "name": "filter1",
+          "type": "filter",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "type": "gauss",
+            "width": 3
+          },
+          "note": "Smooth out high-frequency jitter for more natural motion"
+        },
+        {
+          "name": "math1",
+          "type": "math",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {
+            "chopop": "mul"
+          }
+        },
+        {
+          "name": "constraintgeotransform1",
+          "type": "object",
+          "position": [
+            0,
+            -3
+          ],
+          "parms": {},
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "noise1",
+          "from_output": 0,
+          "to": "filter1",
+          "to_input": 0
+        },
+        {
+          "from": "filter1",
+          "from_output": 0,
+          "to": "math1",
+          "to_input": 0
+        },
+        {
+          "from": "math1",
+          "from_output": 0,
+          "to": "constraintgeotransform1",
+          "to_input": 0
+        }
+      ],
+      "output_description": "All 6 DOF of a camera driven by Gaussian-filtered sparse noise, creating smooth organic camera shake."
+    },
+    {
+      "id": "chop_003",
+      "title": "Spring constraint for secondary animation",
+      "context": "CHOP",
+      "goal": "Add spring follow and overshoot to an animated object's translation channel",
+      "tags": [
+        "chop",
+        "spring",
+        "secondary",
+        "animation",
+        "intermediate"
+      ],
+      "nodes": [
+        {
+          "name": "object1",
+          "type": "object",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {}
+        },
+        {
+          "name": "spring1",
+          "type": "spring",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "springk": 80.0,
+            "dampingk": 15.0,
+            "mass": 1.0
+          }
+        },
+        {
+          "name": "object_chout1",
+          "type": "null",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {},
+          "display_flag": true,
+          "note": "Wire this into /obj/secondary_null CHOP constraint"
+        }
+      ],
+      "connections": [
+        {
+          "from": "object1",
+          "from_output": 0,
+          "to": "spring1",
+          "to_input": 0
+        },
+        {
+          "from": "spring1",
+          "from_output": 0,
+          "to": "object_chout1",
+          "to_input": 0
+        }
+      ],
+      "output_description": "Position channels with spring follow behaviour \u2014 the secondary object lags and overshoots the primary driven object for juicy secondary animation."
+    },
+    {
+      "id": "rop_001",
+      "title": "Mantra render with AOVs",
+      "context": "ROP",
+      "goal": "Set up a Mantra ROP with multiple image planes (AOVs) for compositing",
+      "tags": [
+        "mantra",
+        "rendering",
+        "aov",
+        "compositing",
+        "intermediate"
+      ],
+      "nodes": [
+        {
+          "name": "ifd1",
+          "type": "ifd",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {},
+          "display_flag": true
+        }
+      ],
+      "connections": [],
+      "output_description": "A Mantra IFD render outputting multi-layer EXR with beauty, N, P, diffuse, and specular AOVs for deep compositing."
+    },
+    {
+      "id": "rop_002",
+      "title": "Geometry cache export (bgeo sequence)",
+      "context": "ROP",
+      "goal": "Write a simulation cache to disk as a bgeo.sc sequence for geometry import",
+      "tags": [
+        "rop",
+        "cache",
+        "simulation",
+        "beginner"
+      ],
+      "nodes": [
+        {
+          "name": "geometry1",
+          "type": "geometry",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "sopoutput": "$HIP/cache/sim.$F4.bgeo.sc",
+            "soppath": "/obj/sim_geo/dopimport1",
+            "initsim": true,
+            "trange": "on",
+            "f1": 1,
+            "f2": 240,
+            "f3": 1
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [],
+      "output_description": "Writes frames 1\u2013240 of a DOP import geometry to compressed bgeo.sc files, one per frame."
+    },
+    {
+      "id": "rop_003",
+      "title": "Deadline render farm submission",
+      "context": "ROP",
+      "goal": "Configure a Houdini ROP network for submission to a Deadline render farm",
+      "tags": [
+        "rop",
+        "deadline",
+        "farm",
+        "pipeline",
+        "advanced"
+      ],
+      "nodes": [
+        {
+          "name": "karma1",
+          "type": "karma",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "picture": "$JOB/render/shot010/$HIPNAME.$F4.exr",
+            "trange": "on",
+            "f1": 1001,
+            "f2": 1100
+          }
+        },
+        {
+          "name": "deadline_submitter1",
+          "type": "job",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {},
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "karma1",
+          "from_output": 0,
+          "to": "deadline_submitter1",
+          "to_input": 0
+        }
+      ],
+      "output_description": "Submits the Karma render of frames 1001\u20131100 to Deadline in chunks of 5 frames at priority 60."
+    },
+    {
+      "id": "vex_patterns_002",
+      "title": "Advanced VEX snippets reference",
+      "context": "SOP (attribwrangle)",
+      "goal": "Reference card for advanced VEX patterns: matrices, noise types, tet/prim ops",
+      "tags": [
+        "vex",
+        "reference",
+        "advanced"
+      ],
+      "snippets": [
+        {
+          "label": "Rotate point around arbitrary axis",
+          "code": "vector axis = normalize({1,1,0});\nfloat angle = radians(45);\nmatrix3 m = ident();\nrotate(m, angle, axis);\n@P *= m;"
+        },
+        {
+          "label": "Curl noise for velocity field",
+          "code": "vector grad_x, grad_y, grad_z;\nfloat freq = 0.5;\nvector p = @P * freq;\ncurl_noise(p, grad_x, grad_y, grad_z);\nv@v = set(grad_y.z - grad_z.y,\n          grad_z.x - grad_x.z,\n          grad_x.y - grad_y.x);"
+        },
+        {
+          "label": "Build orient quaternion from velocity",
+          "code": "vector up = {0,1,0};\nvector vel = normalize(v@v);\nif (length(v@v) < 0.001) vel = up;\nvector right = normalize(cross(vel, up));\nvector realup = cross(right, vel);\nmatrix3 m = set(right, realup, vel);\n@orient = quaternion(m);"
+        },
+        {
+          "label": "Pack/unpack float attribute from int bits",
+          "code": "// Store 2 shorts in a single int attribute\nint lo = int(@myval_a) & 0xFFFF;\nint hi = (int(@myval_b) & 0xFFFF) << 16;\ni@packed = lo | hi;\n// Unpack:\nint a = i@packed & 0xFFFF;\nint b = (i@packed >> 16) & 0xFFFF;"
+        },
+        {
+          "label": "Voronoi cell coloring by cell ID",
+          "code": "vector pos, bound_pos;\nfloat dist_to_edge;\nolvdf(3, @P, 1.5, pos, bound_pos, dist_to_edge);\n@Cd = rand(pos * 17.3);"
+        },
+        {
+          "label": "Project point onto plane",
+          "code": "vector plane_n = normalize({0,1,0.5});\nvector plane_p = {0,0,0};\nfloat d = dot(@P - plane_p, plane_n);\n@P -= d * plane_n;"
+        },
+        {
+          "label": "Smooth step ease between two values",
+          "code": "float t = fit(@myattr, 0, 1, 0, 1);\nt = t*t*(3.0 - 2.0*t); // smoothstep\n@P.y += t * 2.0;"
+        },
+        {
+          "label": "Ray-cast to find intersection with another mesh",
+          "code": "vector hitpos, hitnml;\nfloat dist;\nint hit = intersect(1, @P, {0,-1,0} * 100, hitpos, hitnml);\nif (hit >= 0) @P = hitpos;"
+        },
+        {
+          "label": "Create polyline between every pair of nearby points",
+          "code": "int nbs[] = pcfind(0, 'P', @P, 0.8, 4);\nforeach(int nb; nbs){\n  if(nb > @ptnum)\n    addprim(0, 'polyline', @ptnum, nb);\n}"
+        },
+        {
+          "label": "Chladni pattern on a grid",
+          "code": "float a = 3.0, b = 4.0;\nfloat val = cos(a * PI * @P.x) * cos(b * PI * @P.z)\n          - cos(b * PI * @P.x) * cos(a * PI * @P.z);\nif(abs(val) < 0.05) @Cd = {1,1,0};\nelse @Cd = {0.1,0.1,0.1};"
+        }
+      ]
+    },
+    {
+      "id": "dop_007",
+      "title": "Vellum grain simulation (sand pile)",
+      "context": "DOP",
+      "goal": "Pour a stream of Vellum sand grains into a bowl-shaped collision object",
+      "tags": [
+        "vellum",
+        "grains",
+        "sand",
+        "simulation",
+        "advanced"
+      ],
+      "sop_setup": {
+        "description": "In a SOP network, create an emitter sphere (small, positioned above the bowl) and a static bowl mesh. Connect both to dopimport nodes or reference them via soppath.",
+        "nodes_needed": [
+          "emitter sphere at /obj/grain_emitter/",
+          "bowl collision mesh at /obj/bowl/"
+        ]
+      },
+      "nodes": [
+        {
+          "name": "vellumgrainsource1",
+          "type": "vellumsource",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "soppath": "/obj/grain_emitter/sphere1"
+          }
+        },
+        {
+          "name": "vellumconstraints1",
+          "type": "vellumconstraints",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "constrainttype": "none",
+            "stretchstiffness": 0
+          }
+        },
+        {
+          "name": "staticobject1",
+          "type": "staticobject",
+          "position": [
+            2,
+            -1
+          ],
+          "parms": {
+            "soppath": "/obj/bowl/",
+            "friction": 0.5
+          }
+        },
+        {
+          "name": "vellumsolver1",
+          "type": "vellumsolver",
+          "position": [
+            1,
+            -2
+          ],
+          "parms": {
+            "substeps": 5,
+            "gravityx": 0,
+            "gravityy": -9.81,
+            "gravityz": 0
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "vellumgrainsource1",
+          "from_output": 0,
+          "to": "vellumconstraints1",
+          "to_input": 0
+        },
+        {
+          "from": "vellumconstraints1",
+          "from_output": 0,
+          "to": "vellumsolver1",
+          "to_input": 0
+        },
+        {
+          "from": "staticobject1",
+          "from_output": 0,
+          "to": "vellumsolver1",
+          "to_input": 2
+        }
+      ],
+      "output_description": "Thousands of small sand grains pile up inside the bowl under gravity, exhibiting realistic grain-on-grain and grain-on-surface friction."
+    },
+    {
+      "id": "dop_008",
+      "title": "Vellum wire simulation (hanging rope)",
+      "context": "DOP",
+      "goal": "Simulate a rope hanging between two pinned endpoints using Vellum wire constraints",
+      "tags": [
+        "vellum",
+        "wire",
+        "rope",
+        "simulation",
+        "intermediate"
+      ],
+      "sop_setup": {
+        "description": "Create a resampled line (20+ points) in SOPs with two point groups: 'pin_start' (pt 0) and 'pin_end' (last pt). Wire the SOP path into the Vellum solver.",
+        "nodes_needed": [
+          "resampled line at /obj/rope_geo/OUT"
+        ]
+      },
+      "nodes": [
+        {
+          "name": "vellumconstraints1",
+          "type": "vellumconstraints",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "constrainttype": "none",
+            "stretchstiffness": 100000000.0,
+            "bendstiffness": 1000,
+            "thickness": 0.02
+          }
+        },
+        {
+          "name": "vellumsolver1",
+          "type": "vellumsolver",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "substeps": 10,
+            "gravityx": 0,
+            "gravityy": -9.81,
+            "gravityz": 0
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "vellumconstraints1",
+          "from_output": 0,
+          "to": "vellumsolver1",
+          "to_input": 0
+        }
+      ],
+      "output_description": "A rope that droops naturally under gravity between its two fixed endpoints, responding to secondary forces like wind or collisions."
+    },
+    {
+      "id": "dop_009",
+      "title": "POP particle network with forces",
+      "context": "DOP",
+      "goal": "Emit particles from a surface, apply turbulence, drag, and kill them past a life threshold",
+      "tags": [
+        "pop",
+        "particles",
+        "simulation",
+        "forces",
+        "intermediate"
+      ],
+      "nodes": [
+        {
+          "name": "popnet1",
+          "type": "popnet",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {},
+          "note": "Double-click to enter the POP network. The nodes below live inside popnet1."
+        },
+        {
+          "name": "popsource1",
+          "type": "popsource::2.0",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "soppath": "/obj/emitter/sphere1",
+            "impulserate": 300,
+            "life": 3.0
+          }
+        },
+        {
+          "name": "popturbulence1",
+          "type": "popturbulence",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {}
+        },
+        {
+          "name": "popdrag1",
+          "type": "popdrag",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {
+            "airresist": 0.3
+          }
+        },
+        {
+          "name": "popkill1",
+          "type": "popkill",
+          "position": [
+            0,
+            -3
+          ],
+          "parms": {}
+        },
+        {
+          "name": "output1",
+          "type": "output",
+          "position": [
+            0,
+            -4
+          ],
+          "parms": {},
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "popsource1",
+          "from_output": 0,
+          "to": "popturbulence1",
+          "to_input": 0
+        },
+        {
+          "from": "popturbulence1",
+          "from_output": 0,
+          "to": "popdrag1",
+          "to_input": 0
+        },
+        {
+          "from": "popdrag1",
+          "from_output": 0,
+          "to": "popkill1",
+          "to_input": 0
+        },
+        {
+          "from": "popkill1",
+          "from_output": 0,
+          "to": "output1",
+          "to_input": 0
+        }
+      ],
+      "output_description": "A continuous stream of short-lived particles emitted from a sphere surface, curling through turbulence and slowing via drag before dying after their lifetime."
+    },
+    {
+      "id": "dop_010",
+      "title": "Whitewater (foam/spray) from FLIP surface",
+      "context": "DOP",
+      "goal": "Generate whitewater foam and spray on top of a cached FLIP sim using the Whitewater solver",
+      "tags": [
+        "whitewater",
+        "foam",
+        "flip",
+        "simulation",
+        "advanced"
+      ],
+      "sop_setup": {
+        "description": "Cache a FLIP sim to disk first (rop_002 pattern). Point the whitewater source at the cached particle sequence.",
+        "nodes_needed": [
+          "cached FLIP particles at $HIP/cache/flip.$F4.bgeo.sc"
+        ]
+      },
+      "nodes": [
+        {
+          "name": "whitewatersource1",
+          "type": "whitewatersource::3.0",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {}
+        },
+        {
+          "name": "whitewaterobject1",
+          "type": "whitewaterobject::2.0",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {}
+        },
+        {
+          "name": "whitewatersolver1",
+          "type": "whitewatersolver::2.0",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {
+            "buoyancy": 2.0
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "whitewatersource1",
+          "from_output": 0,
+          "to": "whitewaterobject1",
+          "to_input": 0
+        },
+        {
+          "from": "whitewaterobject1",
+          "from_output": 0,
+          "to": "whitewatersolver1",
+          "to_input": 0
+        }
+      ],
+      "output_description": "Foam and spray particles generated at high-curvature and high-velocity regions of the FLIP surface, driven by the Whitewater solver."
+    },
+    {
+      "id": "sop_025",
+      "title": "SOP pyro emission attribute prep",
+      "context": "SOP",
+      "goal": "Prepare a mesh as a Pyro emitter by baking temperature, fuel, and velocity attributes onto points",
+      "tags": [
+        "pyro",
+        "fx",
+        "emission",
+        "attributes",
+        "intermediate"
+      ],
+      "nodes": [
+        {
+          "name": "sphere1",
+          "type": "sphere",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "type": "prim",
+            "rows": 16,
+            "cols": 16
+          }
+        },
+        {
+          "name": "attribwrangle1",
+          "type": "attribwrangle",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "class": "point",
+            "snippet": "// Emission attributes used by sourcevolume DOP\nf@temperature = 2.5;\nf@fuel = 1.0;\nf@density = 0.3;\n// Outward normal velocity for rising flames\nv@v = normalize(@P) * 2.0 + {0,3,0};"
+          }
+        },
+        {
+          "name": "volumebound1",
+          "type": "volumebound",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {},
+          "note": "Optional: creates an initial volume boundary to pre-size the Pyro container"
+        },
+        {
+          "name": "OUT_emitter",
+          "type": "null",
+          "position": [
+            0,
+            -3
+          ],
+          "parms": {},
+          "display_flag": true,
+          "note": "Reference this node in the DOP sourcevolume soppath"
+        }
+      ],
+      "connections": [
+        {
+          "from": "sphere1",
+          "from_output": 0,
+          "to": "attribwrangle1",
+          "to_input": 0
+        },
+        {
+          "from": "attribwrangle1",
+          "from_output": 0,
+          "to": "volumebound1",
+          "to_input": 0
+        },
+        {
+          "from": "volumebound1",
+          "from_output": 0,
+          "to": "OUT_emitter",
+          "to_input": 0
+        }
+      ],
+      "output_description": "An emitter sphere carrying temperature, fuel, density, and outward velocity attributes, ready to be sourced into a Pyro DOP via sourcevolume."
+    },
+    {
+      "id": "sop_026",
+      "title": "Smoke trail from moving object (SOP to Pyro)",
+      "context": "SOP",
+      "goal": "Build a time-delayed point trail behind a moving object to use as a Pyro smoke emitter",
+      "tags": [
+        "pyro",
+        "trail",
+        "smoke",
+        "fx",
+        "animation",
+        "intermediate"
+      ],
+      "nodes": [
+        {
+          "name": "object_merge1",
+          "type": "object_merge",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "objpath1": "/obj/moving_sphere/sphere1",
+            "xformtype": "none"
+          }
+        },
+        {
+          "name": "trail1",
+          "type": "trail",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "result": "preserve",
+            "length": 0.5
+          }
+        },
+        {
+          "name": "resample1",
+          "type": "resample",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {
+            "dolength": true,
+            "length": 0.05
+          }
+        },
+        {
+          "name": "attribwrangle1",
+          "type": "attribwrangle",
+          "position": [
+            0,
+            -3
+          ],
+          "parms": {
+            "class": "point",
+            "snippet": "f@density = fit(@curveu, 0, 1, 0.8, 0.0);\nf@temperature = fit(@curveu, 0, 1, 1.5, 0.0);\nv@v = v@up * 0.5;"
+          }
+        },
+        {
+          "name": "OUT_trail_emitter",
+          "type": "null",
+          "position": [
+            0,
+            -4
+          ],
+          "parms": {},
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "object_merge1",
+          "from_output": 0,
+          "to": "trail1",
+          "to_input": 0
+        },
+        {
+          "from": "trail1",
+          "from_output": 0,
+          "to": "resample1",
+          "to_input": 0
+        },
+        {
+          "from": "resample1",
+          "from_output": 0,
+          "to": "attribwrangle1",
+          "to_input": 0
+        },
+        {
+          "from": "attribwrangle1",
+          "from_output": 0,
+          "to": "OUT_trail_emitter",
+          "to_input": 0
+        }
+      ],
+      "output_description": "A uniformly spaced point trail following a moving object with density and temperature falling off toward the tail \u2014 ideal for a lingering smoke or exhaust Pyro emission source."
+    },
+    {
+      "id": "sop_027",
+      "title": "Hard-surface crease and SubDivide workflow",
+      "context": "SOP",
+      "goal": "Model a chamfered mechanical part by creasing control edges before OpenSubdiv subdivision",
+      "tags": [
+        "modeling",
+        "subdivision",
+        "crease",
+        "hard-surface",
+        "intermediate"
+      ],
+      "nodes": [
+        {
+          "name": "box1",
+          "type": "box",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {}
+        },
+        {
+          "name": "polyextrude1",
+          "type": "polyextrude::2.0",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "extrusionmode": 1,
+            "outputfrontgrp": 1,
+            "group": "",
+            "dist": 0.0,
+            "inset": 0.08
+          }
+        },
+        {
+          "name": "groupexpression1",
+          "type": "groupexpression",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {
+            "grouptype": "primitive",
+            "groupname1": "crease_edges",
+            "snippet1": "hedge_isprimary(0, @hedge)"
+          },
+          "note": "Select the support loop edges added by the inset"
+        },
+        {
+          "name": "attribwrangle1",
+          "type": "attribwrangle",
+          "position": [
+            0,
+            -3
+          ],
+          "parms": {
+            "class": "point",
+            "snippet": "// Mark crease on selected edges via crease attribute\n// Alternatively use the 'crease' SOP directly"
+          }
+        },
+        {
+          "name": "crease1",
+          "type": "crease",
+          "position": [
+            0,
+            -4
+          ],
+          "parms": {
+            "group": "crease_edges",
+            "crease": 10.0
+          }
+        },
+        {
+          "name": "subdivide1",
+          "type": "subdivide",
+          "position": [
+            0,
+            -5
+          ],
+          "parms": {
+            "iterations": 3,
+            "algorithm": "houdini"
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "box1",
+          "from_output": 0,
+          "to": "polyextrude1",
+          "to_input": 0
+        },
+        {
+          "from": "polyextrude1",
+          "from_output": 0,
+          "to": "groupexpression1",
+          "to_input": 0
+        },
+        {
+          "from": "groupexpression1",
+          "from_output": 0,
+          "to": "attribwrangle1",
+          "to_input": 0
+        },
+        {
+          "from": "attribwrangle1",
+          "from_output": 0,
+          "to": "crease1",
+          "to_input": 0
+        },
+        {
+          "from": "crease1",
+          "from_output": 0,
+          "to": "subdivide1",
+          "to_input": 0
+        }
+      ],
+      "output_description": "A smooth subdivided box that retains sharp, machined edges at the inset support loops \u2014 a classic hard-surface subdivision workflow."
+    },
+    {
+      "id": "sop_028",
+      "title": "Skin node between profile curves",
+      "context": "SOP",
+      "goal": "Build an organic hull by skinning across a series of cross-section NURBS curves",
+      "tags": [
+        "modeling",
+        "skin",
+        "nurbs",
+        "curves",
+        "intermediate"
+      ],
+      "nodes": [
+        {
+          "name": "circle1",
+          "type": "circle",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "type": "nurbs",
+            "divs": 12
+          }
+        },
+        {
+          "name": "circle2",
+          "type": "circle",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "type": "nurbs",
+            "divs": 12
+          }
+        },
+        {
+          "name": "circle3",
+          "type": "circle",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {
+            "type": "nurbs",
+            "divs": 12
+          }
+        },
+        {
+          "name": "circle4",
+          "type": "circle",
+          "position": [
+            0,
+            -3
+          ],
+          "parms": {
+            "type": "nurbs",
+            "divs": 12
+          }
+        },
+        {
+          "name": "merge1",
+          "type": "merge",
+          "position": [
+            0,
+            -4
+          ],
+          "parms": {}
+        },
+        {
+          "name": "skin1",
+          "type": "skin",
+          "position": [
+            0,
+            -5
+          ],
+          "parms": {
+            "surftype": "rows"
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "circle1",
+          "from_output": 0,
+          "to": "merge1",
+          "to_input": 0
+        },
+        {
+          "from": "circle2",
+          "from_output": 0,
+          "to": "merge1",
+          "to_input": 1
+        },
+        {
+          "from": "circle3",
+          "from_output": 0,
+          "to": "merge1",
+          "to_input": 2
+        },
+        {
+          "from": "circle4",
+          "from_output": 0,
+          "to": "merge1",
+          "to_input": 3
+        },
+        {
+          "from": "merge1",
+          "from_output": 0,
+          "to": "skin1",
+          "to_input": 0
+        }
+      ],
+      "output_description": "A smooth vase-shaped NURBS surface created by skinning four circular cross-sections at different heights and radii."
+    },
+    {
+      "id": "sop_029",
+      "title": "PolyBridge between two polygon loops",
+      "context": "SOP",
+      "goal": "Bridge two circular holes in a mesh to create a handle or tunnel connection",
+      "tags": [
+        "modeling",
+        "polybridge",
+        "topology",
+        "intermediate"
+      ],
+      "nodes": [
+        {
+          "name": "box1",
+          "type": "box",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {}
+        },
+        {
+          "name": "groupexpression1",
+          "type": "groupexpression",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "grouptype": "primitive",
+            "groupname1": "hole_prims",
+            "snippet1": "(@P.x > 0.8 && @P.y > 0.3) || (@P.x < -0.8 && @P.y > 0.3)"
+          },
+          "note": "Select face groups to delete to create the two openings"
+        },
+        {
+          "name": "blast1",
+          "type": "blast",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {
+            "group": "hole_prims",
+            "negate": false
+          }
+        },
+        {
+          "name": "groupexpression2",
+          "type": "groupexpression",
+          "position": [
+            0,
+            -3
+          ],
+          "parms": {
+            "grouptype": "primitive",
+            "groupname1": "loop_A",
+            "snippet1": "nedges(@primnum) == 4 && @P.x > 0.6"
+          },
+          "note": "Group each border loop for the bridge. In practice use Select mode in viewport."
+        },
+        {
+          "name": "polybridge1",
+          "type": "polybridge",
+          "position": [
+            0,
+            -4
+          ],
+          "parms": {
+            "dstgroup": "loop_B",
+            "divisions": 4
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "box1",
+          "from_output": 0,
+          "to": "groupexpression1",
+          "to_input": 0
+        },
+        {
+          "from": "groupexpression1",
+          "from_output": 0,
+          "to": "blast1",
+          "to_input": 0
+        },
+        {
+          "from": "blast1",
+          "from_output": 0,
+          "to": "groupexpression2",
+          "to_input": 0
+        },
+        {
+          "from": "groupexpression2",
+          "from_output": 0,
+          "to": "polybridge1",
+          "to_input": 0
+        }
+      ],
+      "output_description": "A box with two holes bridged by a 4-division tunnel of quads \u2014 the classic technique for adding handles or through-holes in hard-surface models."
+    },
+    {
+      "id": "sop_030",
+      "title": "Mirror and merge for symmetrical modelling",
+      "context": "SOP",
+      "goal": "Model half of an object, mirror it, and fuse the seam for a symmetrical result",
+      "tags": [
+        "modeling",
+        "mirror",
+        "symmetry",
+        "beginner"
+      ],
+      "nodes": [
+        {
+          "name": "box1",
+          "type": "box",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {},
+          "note": "Model only the X+ half. Center at [0.5,0,0] so left edge sits exactly on X=0 plane."
+        },
+        {
+          "name": "edit1",
+          "type": "edit",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {},
+          "note": "Hand-sculpt the half-model here using the Edit SOP in symmetry mode or freehand"
+        },
+        {
+          "name": "mirror1",
+          "type": "mirror",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {
+            "originx": 0,
+            "originy": 0,
+            "originz": 0,
+            "dist": 0,
+            "dirx": "x",
+            "consolidatepts": true
+          }
+        },
+        {
+          "name": "fuse1",
+          "type": "fuse::2.0",
+          "position": [
+            0,
+            -3
+          ],
+          "parms": {}
+        },
+        {
+          "name": "normals1",
+          "type": "normal",
+          "position": [
+            0,
+            -4
+          ],
+          "parms": {
+            "type": "typepoint"
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "box1",
+          "from_output": 0,
+          "to": "edit1",
+          "to_input": 0
+        },
+        {
+          "from": "edit1",
+          "from_output": 0,
+          "to": "mirror1",
+          "to_input": 0
+        },
+        {
+          "from": "mirror1",
+          "from_output": 0,
+          "to": "fuse1",
+          "to_input": 0
+        },
+        {
+          "from": "fuse1",
+          "from_output": 0,
+          "to": "normals1",
+          "to_input": 0
+        }
+      ],
+      "output_description": "A symmetrical object built by mirroring one half across the X axis and fusing coincident seam points into clean shared vertices."
+    },
+    {
+      "id": "sop_031",
+      "title": "Boolean subtract hard-surface panel cut",
+      "context": "SOP",
+      "goal": "Cut a recessed panel into a flat surface using boolean subtraction of an inset box",
+      "tags": [
+        "modeling",
+        "boolean",
+        "hard-surface",
+        "panelling",
+        "beginner"
+      ],
+      "nodes": [
+        {
+          "name": "box1",
+          "type": "box",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {}
+        },
+        {
+          "name": "box2",
+          "type": "box",
+          "position": [
+            3,
+            0
+          ],
+          "parms": {}
+        },
+        {
+          "name": "boolean1",
+          "type": "boolean::2.0",
+          "position": [
+            1.5,
+            -1
+          ],
+          "parms": {
+            "booleanop": "subtract",
+            "removeinlinepoints": true
+          }
+        },
+        {
+          "name": "polyextrude1",
+          "type": "polyextrude::2.0",
+          "position": [
+            1.5,
+            -2
+          ],
+          "parms": {
+            "extrusionmode": 1,
+            "group": "inside",
+            "dist": -0.02,
+            "inset": 0.0
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "box1",
+          "from_output": 0,
+          "to": "boolean1",
+          "to_input": 0
+        },
+        {
+          "from": "box2",
+          "from_output": 0,
+          "to": "boolean1",
+          "to_input": 1
+        },
+        {
+          "from": "boolean1",
+          "from_output": 0,
+          "to": "polyextrude1",
+          "to_input": 0
+        }
+      ],
+      "output_description": "A flat panel slab with a rectangular recess cut into its surface \u2014 a standard kitbash panel detail achieved via boolean subtract and a minor face inset."
+    },
+    {
+      "id": "sop_032",
+      "title": "Remesh and uniform topology cleanup",
+      "context": "SOP",
+      "goal": "Remesh an irregular imported mesh to produce uniform triangle density suitable for sculpting or simulation",
+      "tags": [
+        "modeling",
+        "remesh",
+        "cleanup",
+        "topology",
+        "intermediate"
+      ],
+      "nodes": [
+        {
+          "name": "file1",
+          "type": "file",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "file": "$HIP/geo/source_mesh.obj",
+            "loadtype": "full"
+          }
+        },
+        {
+          "name": "clean1",
+          "type": "clean",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {}
+        },
+        {
+          "name": "vdbfrompolygons1",
+          "type": "vdbfrompolygons",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {
+            "voxelsize": 0.02,
+            "builddistance": true,
+            "buildfog": false,
+            "exteriorband": 3,
+            "interiorband": 3
+          }
+        },
+        {
+          "name": "convertvdb1",
+          "type": "convertvdb",
+          "position": [
+            0,
+            -3
+          ],
+          "parms": {
+            "isovalue": 0,
+            "adaptivity": 0.05,
+            "conversion": "poly"
+          }
+        },
+        {
+          "name": "smooth1",
+          "type": "smooth::2.0",
+          "position": [
+            0,
+            -4
+          ],
+          "parms": {
+            "strength": 0.5,
+            "method": "laplacian"
+          }
+        },
+        {
+          "name": "normal1",
+          "type": "normal",
+          "position": [
+            0,
+            -5
+          ],
+          "parms": {
+            "type": "typepoint"
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "file1",
+          "from_output": 0,
+          "to": "clean1",
+          "to_input": 0
+        },
+        {
+          "from": "clean1",
+          "from_output": 0,
+          "to": "vdbfrompolygons1",
+          "to_input": 0
+        },
+        {
+          "from": "vdbfrompolygons1",
+          "from_output": 0,
+          "to": "convertvdb1",
+          "to_input": 0
+        },
+        {
+          "from": "convertvdb1",
+          "from_output": 0,
+          "to": "smooth1",
+          "to_input": 0
+        },
+        {
+          "from": "smooth1",
+          "from_output": 0,
+          "to": "normal1",
+          "to_input": 0
+        }
+      ],
+      "output_description": "An imported mesh resampled to nearly-uniform triangle density via a VDB round-trip, then Laplacian-smoothed \u2014 ideal as a base mesh for sculpting or cloth simulation."
+    },
+    {
+      "id": "sop_033",
+      "title": "Multi-res subdivision modelling with PolyReduce",
+      "context": "SOP",
+      "goal": "Build a high-res sculpt proxy from a low-poly cage and generate a game-res LOD",
+      "tags": [
+        "modeling",
+        "lod",
+        "polyreduce",
+        "subdivision",
+        "pipeline",
+        "intermediate"
+      ],
+      "nodes": [
+        {
+          "name": "file1",
+          "type": "file",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "file": "$HIP/geo/character_cage.bgeo.sc"
+          }
+        },
+        {
+          "name": "subdivide1",
+          "type": "subdivide",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "iterations": 2,
+            "algorithm": "houdini"
+          },
+          "note": "High-res version for sculpt/render"
+        },
+        {
+          "name": "polyreduce1",
+          "type": "polyreduce::2.0",
+          "position": [
+            2,
+            -1
+          ],
+          "parms": {
+            "percentage": 15.0,
+            "boundaryweight": true
+          }
+        },
+        {
+          "name": "switch1",
+          "type": "switch",
+          "position": [
+            1,
+            -2
+          ],
+          "parms": {
+            "input": 0
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "file1",
+          "from_output": 0,
+          "to": "subdivide1",
+          "to_input": 0
+        },
+        {
+          "from": "file1",
+          "from_output": 0,
+          "to": "polyreduce1",
+          "to_input": 0
+        },
+        {
+          "from": "subdivide1",
+          "from_output": 0,
+          "to": "switch1",
+          "to_input": 0
+        },
+        {
+          "from": "polyreduce1",
+          "from_output": 0,
+          "to": "switch1",
+          "to_input": 1
+        }
+      ],
+      "output_description": "A Switch node toggling between the full-subdivision high-res mesh and the PolyReduce game-LOD \u2014 a practical multi-res pipeline inside a single SOP network."
+    },
+    {
+      "id": "sop_034",
+      "title": "Point Cloud Lookup (pcopen/pcfilter)",
+      "context": "SOP",
+      "goal": "Use VEX to average point colors from nearby points in a point cloud lookup",
+      "tags": ["vex", "pointcloud", "analysis", "advanced"],
+      "nodes": [
+        {
+          "name": "sphere1",
+          "type": "sphere",
+          "position": [0, 0],
+          "parms": {"type": "poly", "rows": 40, "cols": 40}
+        },
+        {
+          "name": "attribwrangle1",
+          "type": "attribwrangle",
+          "position": [0, -1],
+          "parms": {
+            "class": "point",
+            "snippet": "@Cd = set(rand(@ptnum), rand(@ptnum+1), rand(@ptnum+2));"
+          }
+        },
+        {
+          "name": "attribwrangle2",
+          "type": "attribwrangle",
+          "position": [0, -2],
+          "parms": {
+            "class": "point",
+            "snippet": "int handle = pcopen(0, \"P\", @P, 0.5, 8);\n@Cd = pcfilter(handle, \"Cd\");\npcclose(handle);"
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {"from": "sphere1", "from_output": 0, "to": "attribwrangle1", "to_input": 0},
+        {"from": "attribwrangle1", "from_output": 0, "to": "attribwrangle2", "to_input": 0}
+      ],
+      "output_description": "A sphere with randomized point colors that are smoothly blurred by averaging colors from the nearest 8 neighbors using point cloud functions."
+    },
+    {
+      "id": "sop_035",
+      "title": "For-Each Loop (Block Modeling)",
+      "context": "SOP",
+      "goal": "Iterate over pieces of a fractured object and apply individual transformations",
+      "tags": ["procedural", "loops", "modeling", "intermediate"],
+      "nodes": [
+        {
+          "name": "box1",
+          "type": "box",
+          "position": [0, 0],
+          "parms": {}
+        },
+        {
+          "name": "scatter1",
+          "type": "scatter::2.0",
+          "position": [2, 0],
+          "parms": {"npts": 10}
+        },
+        {
+          "name": "voronoifracture1",
+          "type": "voronoifracture::2.0",
+          "position": [0, -1],
+          "parms": {}
+        },
+        {
+          "name": "foreach_begin1",
+          "type": "foreach_begin",
+          "position": [0, -2],
+          "parms": {"method": "piece", "attribname": "name"}
+        },
+        {
+          "name": "polyextrude1",
+          "type": "polyextrude::2.0",
+          "position": [0, -3],
+          "parms": {"inset": 0.05, "dist": 0.1}
+        },
+        {
+          "name": "foreach_end1",
+          "type": "foreach_end",
+          "position": [0, -4],
+          "parms": {"method": "feedback"}
+        }
+      ],
+      "connections": [
+        {"from": "box1", "from_output": 0, "to": "voronoifracture1", "to_input": 0},
+        {"from": "scatter1", "from_output": 0, "to": "voronoifracture1", "to_input": 1},
+        {"from": "voronoifracture1", "from_output": 0, "to": "foreach_begin1", "to_input": 0},
+        {"from": "foreach_begin1", "from_output": 0, "to": "polyextrude1", "to_input": 0},
+        {"from": "polyextrude1", "from_output": 0, "to": "foreach_end1", "to_input": 0}
+      ],
+      "output_description": "A box fractured into pieces, where each individual piece is extruded inward and outward independently within a loop."
+    },
+    {
+      "id": "sop_036",
+      "title": "KineFX Character Setup",
+      "context": "SOP",
+      "goal": "Load a character and apply a basic KineFX skeleton modification",
+      "tags": ["kinefx", "rigging", "animation", "intermediate"],
+      "nodes": [
+        {
+          "name": "fbxchar_import1",
+          "type": "fbxcharacterimport",
+          "position": [0, 0],
+          "parms": {"fbxfile": "$HIP/geo/char.fbx"}
+        },
+        {
+          "name": "rigpose1",
+          "type": "rigpose",
+          "position": [0, -1],
+          "parms": {},
+          "note": "Allows manual joint manipulation in the viewport"
+        },
+        {
+          "name": "jointdeform1",
+          "type": "jointdeform",
+          "position": [0, -2],
+          "parms": {}
+        }
+      ],
+      "connections": [
+        {"from": "fbxchar_import1", "from_output": 0, "to": "jointdeform1", "to_input": 0},
+        {"from": "fbxchar_import1", "from_output": 1, "to": "rigpose1", "to_input": 0},
+        {"from": "fbxchar_import1", "from_output": 2, "to": "jointdeform1", "to_input": 1},
+        {"from": "rigpose1", "from_output": 0, "to": "jointdeform1", "to_input": 2}
+      ],
+      "output_description": "A character mesh deformed by its skeleton using the KineFX Joint Deform node, with a Rig Pose node for posing."
+    },
+    {
+      "id": "agent_instructions",
+      "title": "Instructions for AI agent generating Houdini node chains",
+      "context": "META",
+      "goal": "Guide an AI agent to correctly author Houdini node chains from this dataset",
+      "rules": [
+        "Always specify the 'context' field (SOP, DOP, LOP, CHOP, ROP) \u2014 wrong context = wrong node palette.",
+        "Node 'type' must exactly match Houdini's internal operator type string (e.g. 'attribwrangle' not 'vex wrangle').",
+        "Connections are directional: from_output (usually 0) feeds into to_input (0-indexed). Multi-input nodes like merge, boolean, copytopoints use to_input 0,1,2.",
+        "Only one node should have display_flag=true. It defines what shows in the viewport.",
+        "VEX snippets in attribwrangle use @ to read/write point/prim/detail attributes. Class matters: 'point' for @ptnum access, 'detail' for @opinput0 and global ops.",
+        "Use $T or $F in parameter fields (HScript). In VEX snippets, use @Time and @Frame for time and frame values.",
+        "Always include a parms object even if empty {}. Missing parms cause cook errors.",
+        "node 'position' is [column, row] in network editor grid units \u2014 use [0,0], [0,-1], [0,-2] for vertical chains.",
+        "Null nodes named OUT_SOMETHING are best practice to mark network outputs.",
+        "For DOPs: the solver node (rbdsolver, flipsolver, pyrosolver, vellumsolver) is always last in the chain.",
+        "For LOPs: end chains with a karma or usdrender node when rendering is the goal.",
+        "VDB workflows: vdbfrompolygons \u2192 vdb ops \u2192 convertvdb back to mesh.",
+        "Scatter+CopyToPoints is the standard pattern for instancing geometry at points.",
+        "When referencing other nodes in parameters, use channel reference syntax: ch('../nodename/parmname') or opstyle paths."
+      ]
+    }
+  ]
+}
+
+
+
+
+

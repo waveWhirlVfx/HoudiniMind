@@ -1,0 +1,396 @@
+[
+    {
+        "workflow": "Copy to Points Pipeline",
+        "description": "Scatter and orient objects (rocks, trees, etc.) procedurally across a target surface.",
+        "prerequisites": [
+            "Target surface geometry",
+            "Instance geometry"
+        ],
+        "context": "The fundamental instancing workflow in Houdini. Relies heavily on point attributes (@pscale, @N, @up) to define how copied geometry behaves.",
+        "steps": [
+            "1. Append Scatter SOP to target surface. Adjust 'Force Total Count'.",
+            "2. Append Attribute Randomize SOP. Set 'Attribute Name' to 'pscale' (Dimensions: 1) for size variation.",
+            "3. Append another Attribute Randomize. Set 'Attribute Name' to 'N' (Dimensions: 3) for orientation.",
+            "4. Append Copy to Points SOP. Connect instance geometry to Input 1, scattered points to Input 2.",
+            "5. Enable 'Pack and Instance' on Copy to Points for memory efficiency."
+        ],
+        "tips": [
+            "If geometry flips randomly, define an '@up' vector (e.g., {0,1,0}) on your points to lock the rotation axis."
+        ]
+    },
+    {
+        "workflow": "Boolean subtract hole",
+        "description": "Subtract a clean hole from a wall or object.",
+        "prerequisites": [
+            "Base geometry (manifold)",
+            "Cutter geometry (manifold)"
+        ],
+        "context": "Used for hard surface modeling and architectural generation.",
+        "steps": [
+            "1. Create wall geometry (e.g., Box).",
+            "2. Create cutter geometry (e.g., Tube oriented on Z-axis).",
+            "3. Connect wall to Input 1 and cutter to Input 2 of a Boolean SOP.",
+            "4. Set Boolean Operation to 'Subtract'.",
+            "5. (Optional) Check 'Output abSeams group' and append PolyBevel to round the cut edge."
+        ],
+        "tips": [
+            "Ensure neither geometry has open holes. Use PolyFill before the boolean if necessary."
+        ]
+    },
+    {
+        "workflow": "Procedural Railing System",
+        "description": "Sweep a handrail and distribute balusters along a path.",
+        "prerequisites": [
+            "A base Curve SOP defining the path"
+        ],
+        "context": "Showcases how to extract path data and use it for both continuous mesh generation and discrete instancing.",
+        "steps": [
+            "1. Draw base path using Curve SOP.",
+            "2. Append Resample SOP. Set 'Length' to define baluster spacing. Check 'Curve U' attribute.",
+            "3. Append Sweep SOP to the resampled curve. Set Surface Type to 'Tube' for the handrail.",
+            "4. Branch off the Resample SOP into a Copy to Points SOP.",
+            "5. Connect a vertical Tube SOP to Input 1 of Copy to Points to generate the balusters."
+        ],
+        "tips": [
+            "Use an Attribute Wrangle after Resample to calculate proper @N and @up vectors so balusters align perfectly with slopes."
+        ]
+    },
+    {
+        "workflow": "UV Unwrap Pipeline",
+        "description": "Generate and pack clean UVs for a procedural model.",
+        "prerequisites": [
+            "Finished polygon model"
+        ],
+        "context": "Essential step before exporting procedural assets to game engines or texturing software.",
+        "steps": [
+            "1. Append AutoUV SOP (Houdini 18+) or UV Flatten SOP to automatically detect seams based on curvature.",
+            "2. Append UV Layout SOP to pack the generated UV islands efficiently into the 0-1 space.",
+            "3. Check 'Scale Islands to Match Area' in UV Layout to ensure consistent texel density.",
+            "4. View result in the UV viewport (Spacebar + 5)."
+        ],
+        "tips": [
+            "For cylindrical objects, group the seam edges first and feed that group into the UV Flatten node."
+        ]
+    },
+    {
+        "workflow": "LOD System (Levels of Detail)",
+        "description": "Create multiple resolution versions of an asset automatically.",
+        "prerequisites": [
+            "High-resolution polygon mesh"
+        ],
+        "context": "Crucial for game development pipelines to optimize rendering performance.",
+        "steps": [
+            "1. Append PolyReduce SOP to the high-res mesh. Set 'Percentage To Keep' to 50%. (This is LOD1).",
+            "2. Branch another PolyReduce SOP from the high-res mesh. Set to 10%. (This is LOD2).",
+            "3. Append a Switch SOP and wire High-Res, LOD1, and LOD2 into it.",
+            "4. Drive the Switch input using a distance expression or engine-specific LOD naming conventions."
+        ],
+        "tips": [
+            "Check 'Preserve UVs' and 'Preserve Hard Edges' in the PolyReduce to stop textures from breaking at lower resolutions."
+        ]
+    },
+    {
+        "workflow": "Geometry Cleanup Pipeline",
+        "description": "Sanitize messy imported geometry (e.g., CAD data or photogrammetry).",
+        "prerequisites": [
+            "Imported geometry stream"
+        ],
+        "context": "Messy topology will break Booleans, Bevels, and simulations. This pipeline fixes the most common errors.",
+        "steps": [
+            "1. Append Fuse SOP to weld microscopic gaps between disconnected polygons.",
+            "2. Append Clean SOP. Check 'Remove Degenerate Primitives', 'Fix Overlaps', and 'Orient Polygons'.",
+            "3. Append Divide SOP. Check 'Remove Shared Edges' and 'Triangulate Non-Planar' to fix broken faces.",
+            "4. Append Normal SOP to recalculate clean point/vertex normals based on the new topology."
+        ],
+        "tips": [
+            "If the mesh is completely shattered, bypass Fuse/Clean and use the VDB Meshing Pipeline instead."
+        ]
+    },
+    {
+        "workflow": "VDB Meshing Pipeline",
+        "description": "Convert complex, intersecting, or non-manifold polygons into a single seamless mesh.",
+        "prerequisites": [
+            "Any messy polygon soup"
+        ],
+        "context": "The 'nuclear option' for modeling. Guarantees a watertight mesh, though it destroys original topology and UVs.",
+        "steps": [
+            "1. Append VDB from Polygons SOP. Lower 'Voxel Size' until the volume captures your mesh's silhouette.",
+            "2. Append VDB Smooth SOP. Use Mean Value filtering to relax sharp or broken artifacts.",
+            "3. Append Convert VDB SOP. Set 'Convert To' to Polygons.",
+            "4. (Optional) Append PolyReduce SOP to lower the massive polygon count generated by the conversion."
+        ],
+        "tips": [
+            "Keep Voxel Size reasonable. Halving the voxel size increases memory usage by 8x. Start high and lower gradually."
+        ]
+    },
+    {
+        "workflow": "Tiling Geometry with For-Each Loop",
+        "description": "Process disconnected pieces of a fractured mesh individually.",
+        "prerequisites": [
+            "Geometry containing multiple disconnected elements"
+        ],
+        "context": "Standard workflow for applying a uniform operation (like shrinking or centering) to many separate objects simultaneously.",
+        "steps": [
+            "1. Append Connectivity SOP. Set 'Class Name' to 'piece'. This tags each disconnected island with a unique integer.",
+            "2. Append a For-Each Named Primitive loop block.",
+            "3. Set the For-Each Begin node's 'Piece Attribute' to 'piece'.",
+            "4. Insert your modifier nodes (e.g., Transform SOP to scale down 0.9) inside the loop.",
+            "5. The For-Each End will automatically compile the processed pieces back together."
+        ],
+        "tips": [
+            "Ensure the 'Piece Elements' on the For-Each Begin matches the attribute type (Points or Primitives) created by the Connectivity SOP."
+        ]
+    },
+    {
+        "workflow": "Scatter + Pack + Instance full pipeline",
+        "description": "The industry standard way to distribute millions of high-res assets efficiently.",
+        "prerequisites": [
+            "High-res asset to duplicate",
+            "Terrain/surface to scatter onto"
+        ],
+        "context": "Raw copying polygons crashes memory. Packing turns geometry into a single point reference. Instancing tells the renderer to load it dynamically.",
+        "steps": [
+            "1. Append a Pack SOP to your high-res asset. (It is now 1 packed primitive).",
+            "2. Append a Scatter SOP to your terrain. Set desired point count.",
+            "3. Append an Attribute Randomize SOP to the points. Randomize 'pscale' (Dimensions: 1) for size.",
+            "4. Append an Attribute Randomize SOP. Randomize 'orient' (Dimensions: 4, type Quaternion) for rotation.",
+            "5. Append a Copy To Points SOP. Connect packed asset to Input 1, scattered points to Input 2."
+        ],
+        "tips": [
+            "Packed primitives only show their bounding box in the viewport if you change the viewport display options, saving massive GPU resources."
+        ]
+    },
+    {
+        "workflow": "Curve to mesh (resample -> sweep / polywire)",
+        "description": "Convert mathematical curves into renderable, physical geometry with thickness.",
+        "prerequisites": [
+            "A drawn Curve SOP"
+        ],
+        "context": "Curves themselves do not render. They must be meshed.",
+        "steps": [
+            "1. Draw a curve.",
+            "2. Append a Resample SOP. This normalizes the distance between points, ensuring smooth deformation.",
+            "3. Enable 'Curve U' in the Resample SOP to generate a 0-1 gradient along the curve.",
+            "4. Append a Sweep SOP. Change 'Surface Shape' to 'Round Tube' (or 'Ribbon').",
+            "5. Adjust the Radius parameter. (Alternatively, use PolyWire SOP for simpler tubes)."
+        ],
+        "tips": [
+            "In the Sweep SOP, enable 'Compute UVs' to automatically get perfect unwrap along the tube length."
+        ]
+    },
+    {
+        "workflow": "For-Each per-piece processing",
+        "description": "Isolate and perform operations on individual fractured chunks or separate islands of geometry one by one.",
+        "prerequisites": [
+            "Geometry consisting of multiple disconnected pieces (e.g. fractured Voronoi chunks)"
+        ],
+        "context": "Essential when an operation (like finding the center, or scaling down) needs to happen locally to every piece, rather than globally to the whole object.",
+        "steps": [
+            "1. Append a Connectivity SOP. Set Class Attribute to 'piece' (creates a unique integer per island).",
+            "2. Append a For-Each Named Primitive block.",
+            "3. On the For-Each Begin node, set 'Piece Elements' to match the Connectivity SOP (e.g. Primitives), and 'Piece Attribute' to 'piece'.",
+            "4. Inside the loop, append a Transform SOP. Scale it to 0.9.",
+            "5. The For-Each End will re-assemble all pieces, but now every individual piece has shrunk towards its own local center."
+        ],
+        "tips": [
+            "Always check 'Single Pass' on the For-Each End node while building the logic inside the loop to make it cook faster. Turn it off when done."
+        ]
+    },
+    {
+        "workflow": "Pack/Unpack attribute transfer pipeline",
+        "description": "Move attributes between points, packed primitives, and unpacked geometry.",
+        "prerequisites": [
+            "Geometry with point attributes (e.g., @Cd color)"
+        ],
+        "context": "When you pack geometry, point attributes are hidden inside the package. You must explicitly transfer them if you want to use them outside, or unpack them later.",
+        "steps": [
+            "1. Assign a color (@Cd) to points on a mesh.",
+            "2. Append a Pack SOP. By default, the color disappears because the packed primitive has no color attribute.",
+            "3. In the Pack SOP, type 'Cd' into the 'Transfer Attributes' field. The packed point now inherits the color.",
+            "4. Scatter packed instances.",
+            "5. Later, append an Unpack SOP. Type 'Cd' into the 'Transfer Attributes' field of the Unpack SOP to push the instance color back down to the raw polygon points."
+        ],
+        "tips": [
+            "This is the key to having thousands of identical packed instances that each have a unique color or material override."
+        ]
+    },
+    {
+        "workflow": "Vellum Cloth Setup (Basic)",
+        "description": "Turn standard geometry into falling/colliding cloth.",
+        "prerequisites": [
+            "A high-res polygon mesh (e.g. a grid)"
+        ],
+        "context": "Vellum is Houdini's standard solver for cloth, hair, and soft bodies. It operates incredibly fast on the GPU.",
+        "steps": [
+            "1. Create your cloth geometry (e.g. a Grid, 100x100 rows).",
+            "2. Append a 'Vellum Configure Cloth' node. This generates the internal constraints (stretch, bend).",
+            "3. Append a 'Vellum Solver' node.",
+            "4. Press Play on the timeline. The cloth will fall to infinity.",
+            "5. Inside the Vellum Solver, double-click to dive inside, and add a 'Ground Plane' node to the DOPS network to give it something to hit."
+        ],
+        "tips": [
+            "If the cloth passes through itself, increase 'Substeps' on the Vellum Solver parameter interface."
+        ]
+    },
+    {
+        "workflow": "Vellum Softbody Setup (Basic)",
+        "description": "Create squishy, jello-like objects.",
+        "prerequisites": [
+            "A solid, watertight mesh (e.g. a rubber toy or sphere)"
+        ],
+        "context": "Unlike cloth, softbodies need to maintain their internal volume.",
+        "steps": [
+            "1. Append a 'Remesh' SOP to your geometry to ensure uniform triangle sizes.",
+            "2. Append a 'Vellum Configure Strut Softbody' node.",
+            "3. Adjust 'Strut Length' to determine how rigid the interior is.",
+            "4. Append a 'Vellum Solver' and press Play."
+        ],
+        "tips": [
+            "Tetrahedral softbodies are more accurate but slower. Strut softbodies are great for fast, squishy effects."
+        ]
+    },
+    {
+        "workflow": "Vellum Hair Setup (Basic)",
+        "description": "Simulate hair, strings, or ropes.",
+        "prerequisites": [
+            "Lines or curves (not polygon tubes)"
+        ],
+        "context": "Vellum hair only simulates points connected by lines. You add thickness *after* the simulation.",
+        "steps": [
+            "1. Generate multiple curves (e.g. using 'Hair Generate' or scattering lines on a scalp).",
+            "2. Append a 'Vellum Configure Hair' node.",
+            "3. To pin the roots to the head, enable 'Pin to Animation' and specify the root points (usually `@curveu==0`).",
+            "4. Append a 'Vellum Solver' and press Play.",
+            "5. After the solver, append a 'Sweep' SOP to give the simulated curves actual renderable thickness."
+        ],
+        "tips": [
+            "Always simulate raw curves first, mesh them second. Never simulate the meshed tubes."
+        ]
+    },
+    {
+        "workflow": "RBD Fracture and Simulate",
+        "description": "Break an object and make it collapse physically.",
+        "prerequisites": [
+            "A solid mesh"
+        ],
+        "context": "Rigid Body Dynamics (RBD) using Bullet is the core of destruction FX.",
+        "steps": [
+            "1. Append an 'RBD Material Fracture' node to your mesh. Set Material Type to Concrete or Glass.",
+            "2. The node will fracture the mesh into packed pieces and create proxy collision geometry.",
+            "3. Append an 'RBD Bullet Solver' node to the output of the fracture node.",
+            "4. Enable 'Ground Plane' on the solver's Collision tab.",
+            "5. Press Play. The pieces will fall and scatter."
+        ],
+        "tips": [
+            "Use 'RBD Exploded View' between the fracture and the solver to visualize how the pieces are cut before simulating."
+        ]
+    },
+    {
+        "workflow": "Pyro Smoke Setup (SOPs)",
+        "description": "Emit rising smoke from geometry.",
+        "prerequisites": [
+            "A source mesh (e.g. a torus or sphere)"
+        ],
+        "context": "Modern Houdini does most basic Pyro setups directly in SOPs using Sparse Solvers.",
+        "steps": [
+            "1. Append a 'Pyro Source' SOP to your mesh. Set 'Initialize' to 'Source Smoke'. This creates density and temperature points.",
+            "2. Append a 'Volume Rasterize Attributes' SOP. Select 'density' and 'temperature'. This converts the points into VDB volumes.",
+            "3. Append a 'Pyro Solver' SOP.",
+            "4. Press Play. The heat will cause the density to rise as smoke."
+        ],
+        "tips": [
+            "Lower the 'Voxel Size' in the Volume Rasterize and Pyro Solver nodes to increase resolution, but beware of slower sim times."
+        ]
+    },
+    {
+        "workflow": "Flip Fluid Setup (Basic SOPs)",
+        "description": "Create a splashing pool of water.",
+        "prerequisites": [
+            "A box or shape defining the initial water volume"
+        ],
+        "context": "FLIP (Fluid Implicit Particle) is Houdini's liquid solver.",
+        "steps": [
+            "1. Append a 'FLIP Fluid from Object' shelf tool, or manually create a 'FLIP Source' SOP.",
+            "2. In SOPs, use the 'FLIP Solver' node.",
+            "3. Connect your source particles to the first input.",
+            "4. Setup a collision object (like a bowl) and connect it to the fourth input (Collision Volume).",
+            "5. Press play. After simulation, use 'Particle Fluid Surface' to convert the fluid points into a renderable liquid mesh."
+        ],
+        "tips": [
+            "FLIP is heavily dependent on 'Particle Separation'. Smaller values mean vastly more particles and memory usage."
+        ]
+    },
+    {
+        "workflow": "Path Deform (Animating along a curve)",
+        "description": "Make a snake, train, or arrow slither along a complex path.",
+        "prerequisites": [
+            "A model (train/snake) pointing down the Z-axis",
+            "A drawn curve"
+        ],
+        "context": "Bends geometry to conform to a spline.",
+        "steps": [
+            "1. Ensure your model is aligned along the positive Z-axis.",
+            "2. Append a 'Path Deform' SOP to the model.",
+            "3. Connect the drawn curve into the second input of the Path Deform.",
+            "4. Animate the 'Position' parameter from 0 to 1 to move the object along the path."
+        ],
+        "tips": [
+            "If the object twists wildly, enable 'Compute Up Vector' on the curve, or use an Attribute Wrangle to define stable `@up` vectors along the curve points."
+        ]
+    },
+    {
+        "workflow": "Procedural Noise Displacement",
+        "description": "Create highly detailed, jagged rocks or terrain.",
+        "prerequisites": [
+            "A high-res base mesh"
+        ],
+        "context": "Standard mountain SOPs only push points. VDB displacement alters the actual volume for overhangs and complex boolean-like detail.",
+        "steps": [
+            "1. Convert the mesh using 'VDB from Polygons'.",
+            "2. Append a 'Volume VOP'. Dive inside.",
+            "3. Add an 'Anti-Aliased Noise' node. Connect global `P` to the noise position.",
+            "4. Multiply the noise output by a float parameter (Intensity).",
+            "5. Add the result to the global `density` or `surface` output.",
+            "6. Use 'Convert VDB' to turn it back to polygons."
+        ],
+        "tips": [
+            "This technique guarantees no intersecting polygons, unlike heavy Mountain SOP displacement."
+        ]
+    },
+    {
+        "workflow": "Instancing with Random Colors",
+        "description": "Scatter identical objects but give them unique colors at render time.",
+        "prerequisites": [
+            "Target points, Instance geometry"
+        ],
+        "context": "Essential for crowds, forests, or scattered debris.",
+        "steps": [
+            "1. On your scatter points, append an 'Attribute Randomize'. Set name to `Cd` (Color).",
+            "2. Pack your instance geometry using a 'Pack' SOP.",
+            "3. Append a 'Copy to Points' SOP. Connect the packed geo to Input 1, the colored points to Input 2.",
+            "4. In the Copy to Points, ensure 'Pack and Instance' is ON.",
+            "5. In the viewport, they may look grey. In Karma/Mantra, they will read the point `Cd` attribute and render multicolored."
+        ],
+        "tips": [
+            "If you need the color in the viewport, you must type 'Cd' in the 'Transfer Attributes' box of the Copy to Points node."
+        ]
+    },
+    {
+        "workflow": "Time Shifting / Freezing Simulation",
+        "description": "Take one perfect frame of a simulation and freeze it as a static model.",
+        "prerequisites": [
+            "A cached simulation or animated sequence"
+        ],
+        "context": "Used to extract a specific explosion shape, or a perfectly draped cloth, to use as a static prop.",
+        "steps": [
+            "1. Scrub the timeline until you find the exact frame you like (e.g. frame 45).",
+            "2. Append a 'TimeShift' SOP after the simulation.",
+            "3. Right-click the 'Frame' parameter and select 'Delete Channels' (this removes the `$F` expression).",
+            "4. Type '45' into the Frame parameter.",
+            "5. The geometry is now frozen at frame 45, regardless of where the timeline is."
+        ],
+        "tips": [
+            "You can also use expressions in TimeShift, like `$F * 0.5` to artificially slow down geometry caches (though it requires sub-frame data to look smooth)."
+        ]
+    }
+]

@@ -1,0 +1,704 @@
+{
+  "verified_examples": [
+    {
+      "id": 1,
+      "name": "Add to Y",
+      "category": "Point",
+      "code": "@P.y += 1.0;",
+      "explanation": "In this VEX example (Add to Y), the code displaces the point position."
+    },
+    {
+      "id": 2,
+      "name": "Set Normal",
+      "category": "Point",
+      "code": "@N = set(0, 1, 0);",
+      "explanation": "In this VEX example (Set Normal), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 3,
+      "name": "Velocity from Normal",
+      "category": "Point",
+      "code": "@v = @N * 2.0;",
+      "explanation": "In this VEX example (Velocity from Normal), the code calculates or updates velocity."
+    },
+    {
+      "id": 4,
+      "name": "Set Color Red",
+      "category": "Point",
+      "code": "@Cd = set(1, 0, 0);",
+      "explanation": "In this VEX example (Set Color Red), the code sets or modifies the color attribute."
+    },
+    {
+      "id": 5,
+      "name": "Set Pscale",
+      "category": "Point",
+      "code": "@pscale = 0.5;",
+      "explanation": "In this VEX example (Set Pscale), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 6,
+      "name": "Set Mass",
+      "category": "Point",
+      "code": "f@mass = 1.0;",
+      "explanation": "In this VEX example (Set Mass), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 7,
+      "name": "Offset by ptnum",
+      "category": "Point",
+      "code": "@P += @N * @ptnum * 0.01;",
+      "explanation": "In this VEX example (Offset by ptnum), the code displaces the point position."
+    },
+    {
+      "id": 8,
+      "name": "Normalize Position",
+      "category": "Point",
+      "code": "@P = normalize(@P);",
+      "explanation": "In this VEX example (Normalize Position), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 9,
+      "name": "Scale Position",
+      "category": "Point",
+      "code": "@P *= 2.0;",
+      "explanation": "In this VEX example (Scale Position), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 10,
+      "name": "Set Orient",
+      "category": "Point",
+      "code": "vector4 q = {0,0,0,1}; @orient = q;",
+      "explanation": "In this VEX example (Set Orient), the code sets the orientation attribute."
+    },
+    {
+      "id": 11,
+      "name": "Sine Wave",
+      "category": "Point",
+      "code": "@P.y = sin(@P.x);",
+      "explanation": "In this VEX example (Sine Wave), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 12,
+      "name": "Cosine Wave",
+      "category": "Point",
+      "code": "@P.z = cos(@P.x);",
+      "explanation": "In this VEX example (Cosine Wave), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 13,
+      "name": "Absolute Value",
+      "category": "Point",
+      "code": "@P.x = abs(@P.x);",
+      "explanation": "In this VEX example (Absolute Value), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 14,
+      "name": "Ceiling",
+      "category": "Point",
+      "code": "@P.y = ceil(@P.y);",
+      "explanation": "In this VEX example (Ceiling), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 15,
+      "name": "Floor",
+      "category": "Point",
+      "code": "@P.z = floor(@P.z);",
+      "explanation": "In this VEX example (Floor), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 16,
+      "name": "Clamp",
+      "category": "Point",
+      "code": "@P.y = clamp(@P.y, 0.0, 1.0);",
+      "explanation": "In this VEX example (Clamp), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 17,
+      "name": "Fit",
+      "category": "Point",
+      "code": "@P.x = fit(@P.x, -1.0, 1.0, 0.0, 10.0);",
+      "explanation": "In this VEX example (Fit), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 18,
+      "name": "Fit01",
+      "category": "Point",
+      "code": "@P.y = fit01(@P.y, -5.0, 5.0);",
+      "explanation": "In this VEX example (Fit01), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 19,
+      "name": "Power",
+      "category": "Point",
+      "code": "@P.z = pow(@P.z, 2.0);",
+      "explanation": "In this VEX example (Power), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 20,
+      "name": "Square Root",
+      "category": "Point",
+      "code": "@P.x = sqrt(abs(@P.x));",
+      "explanation": "In this VEX example (Square Root), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 21,
+      "name": "Distance",
+      "category": "Point",
+      "code": "float dist = distance(@P, set(0,0,0));",
+      "explanation": "In this VEX example (Distance), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 22,
+      "name": "Distance to Color",
+      "category": "Point",
+      "code": "float dist = distance(@P, set(0,0,0)); @Cd = set(dist, dist, dist);",
+      "explanation": "In this VEX example (Distance to Color), the code sets or modifies the color attribute."
+    },
+    {
+      "id": 23,
+      "name": "Length",
+      "category": "Point",
+      "code": "float l = length(@P);",
+      "explanation": "In this VEX example (Length), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 24,
+      "name": "Direction Vector",
+      "category": "Point",
+      "code": "vector dir = normalize(set(0,1,0) - @P);",
+      "explanation": "In this VEX example (Direction Vector), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 25,
+      "name": "Dot Product",
+      "category": "Point",
+      "code": "float d = dot(@N, set(0,1,0));",
+      "explanation": "In this VEX example (Dot Product), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 26,
+      "name": "Cross Product",
+      "category": "Point",
+      "code": "vector c = cross(@N, set(0,1,0));",
+      "explanation": "In this VEX example (Cross Product), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 27,
+      "name": "Linear Interpolation",
+      "category": "Point",
+      "code": "@P = lerp(@P, set(0,0,0), 0.5);",
+      "explanation": "In this VEX example (Linear Interpolation), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 28,
+      "name": "Spherical Lerp",
+      "category": "Point",
+      "code": "vector4 q1 = {0,0,0,1}; vector4 q2 = {0,1,0,0}; @orient = slerp(q1, q2, 0.5);",
+      "explanation": "In this VEX example (Spherical Lerp), the code performs quaternion math for rotations and sets the orientation attribute."
+    },
+    {
+      "id": 29,
+      "name": "Reflect",
+      "category": "Point",
+      "code": "vector ref = reflect(normalize(@P), set(0,1,0));",
+      "explanation": "In this VEX example (Reflect), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 30,
+      "name": "Refract",
+      "category": "Point",
+      "code": "vector refr = refract(normalize(@P), set(0,1,0), 1.5);",
+      "explanation": "In this VEX example (Refract), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 31,
+      "name": "1D Noise",
+      "category": "Point",
+      "code": "@P.y += noise(@P);",
+      "explanation": "In this VEX example (1D Noise), the code generates procedural noise and displaces the point position."
+    },
+    {
+      "id": 32,
+      "name": "Simplex Noise",
+      "category": "Point",
+      "code": "@P += snoise(@P);",
+      "explanation": "In this VEX example (Simplex Noise), the code generates procedural noise and displaces the point position."
+    },
+    {
+      "id": 33,
+      "name": "Curl Noise",
+      "category": "Point",
+      "code": "@P += curlnoise(@P);",
+      "explanation": "In this VEX example (Curl Noise), the code generates procedural noise and displaces the point position."
+    },
+    {
+      "id": 34,
+      "name": "Alligator Noise",
+      "category": "Point",
+      "code": "@P += anoise(@P);",
+      "explanation": "In this VEX example (Alligator Noise), the code generates procedural noise and displaces the point position."
+    },
+    {
+      "id": 35,
+      "name": "X-Noise",
+      "category": "Point",
+      "code": "@P += xnoise(@P);",
+      "explanation": "In this VEX example (X-Noise), the code generates procedural noise and displaces the point position."
+    },
+    {
+      "id": 36,
+      "name": "Random Float",
+      "category": "Point",
+      "code": "@Cd = set(random(@ptnum), random(@ptnum), random(@ptnum));",
+      "explanation": "In this VEX example (Random Float), the code sets or modifies the color attribute."
+    },
+    {
+      "id": 37,
+      "name": "Rand Vector",
+      "category": "Point",
+      "code": "@Cd = rand(@ptnum);",
+      "explanation": "In this VEX example (Rand Vector), the code sets or modifies the color attribute."
+    },
+    {
+      "id": 38,
+      "name": "Periodic Noise",
+      "category": "Point",
+      "code": "@P += pnoise(@P, set(2,2,2));",
+      "explanation": "In this VEX example (Periodic Noise), the code generates procedural noise and displaces the point position."
+    },
+    {
+      "id": 39,
+      "name": "Flow Noise",
+      "category": "Point",
+      "code": "@P += flownoise(@P, 0.5);",
+      "explanation": "In this VEX example (Flow Noise), the code generates procedural noise and displaces the point position."
+    },
+    {
+      "id": 40,
+      "name": "HSV to RGB",
+      "category": "Point",
+      "code": "@Cd = hsvtorgb(set(rand(@ptnum), 1.0, 1.0));",
+      "explanation": "In this VEX example (HSV to RGB), the code sets or modifies the color attribute."
+    },
+    {
+      "id": 41,
+      "name": "Concat String",
+      "category": "Point",
+      "code": "s@name = 'point_' + itoa(@ptnum);",
+      "explanation": "In this VEX example (Concat String), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 42,
+      "name": "Sprintf",
+      "category": "Point",
+      "code": "s@layer = sprintf('layer_%03d', @ptnum);",
+      "explanation": "In this VEX example (Sprintf), the code manipulates string data."
+    },
+    {
+      "id": 43,
+      "name": "Match String",
+      "category": "Point",
+      "code": "int is_match = match('point_*', s@name);",
+      "explanation": "In this VEX example (Match String), the code manipulates string data."
+    },
+    {
+      "id": 44,
+      "name": "Split String",
+      "category": "Point",
+      "code": "string parts[] = split(s@name, '_');",
+      "explanation": "In this VEX example (Split String), the code manipulates string data."
+    },
+    {
+      "id": 45,
+      "name": "String Replace",
+      "category": "Point",
+      "code": "s@name = replace(s@name, 'point', 'pt');",
+      "explanation": "In this VEX example (String Replace), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 46,
+      "name": "To Upper",
+      "category": "Point",
+      "code": "s@name = toupper(s@name);",
+      "explanation": "In this VEX example (To Upper), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 47,
+      "name": "To Lower",
+      "category": "Point",
+      "code": "s@name = tolower(s@name);",
+      "explanation": "In this VEX example (To Lower), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 48,
+      "name": "String Length",
+      "category": "Point",
+      "code": "int len = len(s@name);",
+      "explanation": "In this VEX example (String Length), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 50,
+      "name": "Join String",
+      "category": "Point",
+      "code": "string parts[] = array('a', 'b'); s@name = join(parts, '_');",
+      "explanation": "In this VEX example (Join String), the code manipulates string data and performs array operations and sorting."
+    },
+    {
+      "id": 51,
+      "name": "Create Array",
+      "category": "Point",
+      "code": "int arr[] = array(1, 2, 3);",
+      "explanation": "In this VEX example (Create Array), the code performs array operations and sorting."
+    },
+    {
+      "id": 52,
+      "name": "Push",
+      "category": "Point",
+      "code": "int arr[] = array(1); push(arr, 2);",
+      "explanation": "In this VEX example (Push), the code performs array operations and sorting."
+    },
+    {
+      "id": 53,
+      "name": "Pop",
+      "category": "Point",
+      "code": "int arr[] = array(1, 2); int val = pop(arr);",
+      "explanation": "In this VEX example (Pop), the code performs array operations and sorting."
+    },
+    {
+      "id": 54,
+      "name": "Array Length",
+      "category": "Point",
+      "code": "int arr[] = array(1, 2); int l = len(arr);",
+      "explanation": "In this VEX example (Array Length), the code performs array operations and sorting."
+    },
+    {
+      "id": 55,
+      "name": "Array Access",
+      "category": "Point",
+      "code": "int arr[] = array(1, 2); int first = arr[0];",
+      "explanation": "In this VEX example (Array Access), the code performs array operations and sorting."
+    },
+    {
+      "id": 56,
+      "name": "Reverse Array",
+      "category": "Point",
+      "code": "int arr[] = array(1, 2); arr = reverse(arr);",
+      "explanation": "In this VEX example (Reverse Array), the code performs array operations and sorting."
+    },
+    {
+      "id": 57,
+      "name": "Sort Array",
+      "category": "Point",
+      "code": "int arr[] = array(2, 1); arr = sort(arr);",
+      "explanation": "In this VEX example (Sort Array), the code performs array operations and sorting."
+    },
+    {
+      "id": 58,
+      "name": "Find in Array",
+      "category": "Point",
+      "code": "int arr[] = array(1, 2); int idx = find(arr, 2);",
+      "explanation": "In this VEX example (Find in Array), the code performs array operations and sorting."
+    },
+    {
+      "id": 59,
+      "name": "Remove Index",
+      "category": "Point",
+      "code": "int arr[] = array(1, 2); removeindex(arr, 0);",
+      "explanation": "In this VEX example (Remove Index), the code performs array operations and sorting."
+    },
+    {
+      "id": 60,
+      "name": "Remove Value",
+      "category": "Point",
+      "code": "int arr[] = array(1, 2); removevalue(arr, 2);",
+      "explanation": "In this VEX example (Remove Value), the code performs array operations and sorting."
+    },
+    {
+      "id": 61,
+      "name": "Nearpoint",
+      "category": "Point",
+      "code": "int np = nearpoint(0, @P);",
+      "explanation": "In this VEX example (Nearpoint), the code finds neighboring points within a radius."
+    },
+    {
+      "id": 62,
+      "name": "Nearpoints Array",
+      "category": "Point",
+      "code": "int nps[] = nearpoints(0, @P, 1.0);",
+      "explanation": "In this VEX example (Nearpoints Array), the code finds neighboring points within a radius."
+    },
+    {
+      "id": 63,
+      "name": "XYZ Dist",
+      "category": "Point",
+      "code": "int prim; vector uv; float dist = xyzdist(0, @P, prim, uv);",
+      "explanation": "In this VEX example (XYZ Dist), the code calculates the closest distance to a surface."
+    },
+    {
+      "id": 64,
+      "name": "Minpos",
+      "category": "Point",
+      "code": "vector min_p = minpos(0, @P);",
+      "explanation": "In this VEX example (Minpos), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 65,
+      "name": "PrimUV",
+      "category": "Point",
+      "code": "int prim; vector uv; xyzdist(0, @P, prim, uv); vector n = primuv(0, 'N', prim, uv);",
+      "explanation": "In this VEX example (PrimUV), the code calculates the closest distance to a surface."
+    },
+    {
+      "id": 66,
+      "name": "Point Function",
+      "category": "Point",
+      "code": "int np = nearpoint(0, @P); vector col = point(0, 'Cd', np);",
+      "explanation": "In this VEX example (Point Function), the code finds neighboring points within a radius."
+    },
+    {
+      "id": 67,
+      "name": "PCOpen",
+      "category": "Point",
+      "code": "int pc = pcopen(0, 'P', @P, 1.0, 10); pcclose(pc);",
+      "explanation": "In this VEX example (PCOpen), the code opens a point cloud to query nearby points."
+    },
+    {
+      "id": 69,
+      "name": "PCNumFound",
+      "category": "Point",
+      "code": "int pc = pcopen(0, 'P', @P, 1.0, 10); int count = pcnumfound(pc); pcclose(pc);",
+      "explanation": "In this VEX example (PCNumFound), the code opens a point cloud to query nearby points."
+    },
+    {
+      "id": 70,
+      "name": "PCOpen Iterate",
+      "category": "Point",
+      "code": "int pc = pcopen(0, 'P', @P, 1.0, 10); while(pciterate(pc)) { vector p; pcimport(pc, 'P', p); } pcclose(pc);",
+      "explanation": "In this VEX example (PCOpen Iterate), the code opens a point cloud to query nearby points and uses a loop to iterate over elements."
+    },
+    {
+      "id": 71,
+      "name": "Set Group",
+      "category": "Point",
+      "code": "@group_top = @P.y > 0;",
+      "explanation": "In this VEX example (Set Group), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 72,
+      "name": "In Point Group",
+      "category": "Point",
+      "code": "if(inpointgroup(0, 'top', @ptnum)) { @Cd = set(1,0,0); }",
+      "explanation": "In this VEX example (In Point Group), the code sets or modifies the color attribute."
+    },
+    {
+      "id": 73,
+      "name": "Set Point Group",
+      "category": "Point",
+      "code": "setpointgroup(0, 'active', @ptnum, 1, 'set');",
+      "explanation": "In this VEX example (Set Point Group), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 74,
+      "name": "Has Point Attrib",
+      "category": "Point",
+      "code": "int has_cd = haspointattrib(0, 'Cd');",
+      "explanation": "In this VEX example (Has Point Attrib), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 75,
+      "name": "Set Detail Attrib",
+      "category": "Point",
+      "code": "setdetailattrib(0, 'max_y', @P.y, 'max');",
+      "explanation": "In this VEX example (Set Detail Attrib), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 76,
+      "name": "Read Detail Attrib",
+      "category": "Point",
+      "code": "float val = detail(0, 'max_y');",
+      "explanation": "In this VEX example (Read Detail Attrib), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 77,
+      "name": "Expand Point Group",
+      "category": "Point",
+      "code": "int pts[] = expandpointgroup(0, '*');",
+      "explanation": "In this VEX example (Expand Point Group), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 78,
+      "name": "Expand Prim Group",
+      "category": "Point",
+      "code": "int prims[] = expandprimgroup(0, '*');",
+      "explanation": "In this VEX example (Expand Prim Group), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 79,
+      "name": "Prim Intrinsic",
+      "category": "Primitive",
+      "code": "float area = primintrinsic(0, 'measuredarea', @primnum);",
+      "explanation": "In this VEX example (Prim Intrinsic), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 80,
+      "name": "Set Prim Attrib",
+      "category": "Primitive",
+      "code": "setprimattrib(0, 'test', @primnum, 1.0, 'set');",
+      "explanation": "In this VEX example (Set Prim Attrib), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 81,
+      "name": "If Statement",
+      "category": "Point",
+      "code": "if(@P.y > 0) @P.y = 0;",
+      "explanation": "In this VEX example (If Statement), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 82,
+      "name": "If Else",
+      "category": "Point",
+      "code": "if(@P.y > 0) { @Cd=set(1,0,0); } else { @Cd=set(0,0,1); }",
+      "explanation": "In this VEX example (If Else), the code sets or modifies the color attribute."
+    },
+    {
+      "id": 83,
+      "name": "For Loop",
+      "category": "Point",
+      "code": "for(int i=0; i<10; i++) { @P.y += 0.1; }",
+      "explanation": "In this VEX example (For Loop), the code uses a loop to iterate over elements and displaces the point position."
+    },
+    {
+      "id": 84,
+      "name": "While Loop",
+      "category": "Point",
+      "code": "int i=0; while(i<10) { @P.x += 0.1; i++; }",
+      "explanation": "In this VEX example (While Loop), the code uses a loop to iterate over elements and displaces the point position."
+    },
+    {
+      "id": 87,
+      "name": "Modulo condition",
+      "category": "Point",
+      "code": "if(@ptnum % 2 == 0) @group_even = 1;",
+      "explanation": "In this VEX example (Modulo condition), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 88,
+      "name": "Ternary Operator",
+      "category": "Point",
+      "code": "@P.y = (@ptnum % 3 == 0) ? 1.0 : 0.0;",
+      "explanation": "In this VEX example (Ternary Operator), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 90,
+      "name": "Do While Loop",
+      "category": "Point",
+      "code": "float temp = @P.y; do { temp += 0.1; } while(temp < 1.0);",
+      "explanation": "In this VEX example (Do While Loop), the code uses a loop to iterate over elements and displaces the point position."
+    },
+    {
+      "id": 91,
+      "name": "Identity Matrix3",
+      "category": "Point",
+      "code": "matrix3 m3 = ident();",
+      "explanation": "In this VEX example (Identity Matrix3), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 92,
+      "name": "Identity Matrix4",
+      "category": "Point",
+      "code": "matrix m4 = ident();",
+      "explanation": "In this VEX example (Identity Matrix4), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 93,
+      "name": "Rotate Matrix",
+      "category": "Point",
+      "code": "matrix m4 = ident(); rotate(m4, radians(45), set(0,1,0));",
+      "explanation": "In this VEX example (Rotate Matrix), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 94,
+      "name": "Translate Matrix",
+      "category": "Point",
+      "code": "matrix m4 = ident(); translate(m4, set(0,1,0));",
+      "explanation": "In this VEX example (Translate Matrix), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 95,
+      "name": "Scale Matrix",
+      "category": "Point",
+      "code": "matrix m4 = ident(); scale(m4, set(2,2,2));",
+      "explanation": "In this VEX example (Scale Matrix), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 96,
+      "name": "Apply Matrix",
+      "category": "Point",
+      "code": "matrix m4 = ident(); translate(m4, set(0,1,0)); @P *= m4;",
+      "explanation": "In this VEX example (Apply Matrix), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 97,
+      "name": "Crack Transform",
+      "category": "Point",
+      "code": "matrix m4 = ident(); vector t = cracktransform(0, 0, 0, {0,0,0}, m4);",
+      "explanation": "In this VEX example (Crack Transform), the code manipulates transformation matrices."
+    },
+    {
+      "id": 98,
+      "name": "Make Transform",
+      "category": "Point",
+      "code": "matrix3 rot = maketransform(set(0,1,0), set(0,0,1));",
+      "explanation": "In this VEX example (Make Transform), the code manipulates transformation matrices."
+    },
+    {
+      "id": 99,
+      "name": "Apply Rotate Matrix",
+      "category": "Point",
+      "code": "matrix3 rot = maketransform(set(0,1,0), set(0,0,1)); @P *= rot;",
+      "explanation": "In this VEX example (Apply Rotate Matrix), the code manipulates transformation matrices."
+    },
+    {
+      "id": 100,
+      "name": "Quaternion Convert",
+      "category": "Point",
+      "code": "matrix3 m3 = ident(); vector4 q = quaternion(m3); matrix3 m3_from_q = qconvert(q);",
+      "explanation": "In this VEX example (Quaternion Convert), the code performs quaternion math for rotations."
+    },
+    {
+      "id": 96,
+      "name": "String Slice",
+      "category": "Point",
+      "code": "string s = 'hello'; s@sub = s[0:3];",
+      "explanation": "In this VEX example (String Slice), the code performs mathematical and attribute operations on the geometry."
+    },
+    {
+      "id": 97,
+      "name": "PCFilter",
+      "category": "Point",
+      "code": "int pc = pcopen(0, 'P', @P, 1.0, 10); @Cd = pcfilter(pc, 'Cd'); pcclose(pc);",
+      "explanation": "In this VEX example (PCFilter), the code opens a point cloud to query nearby points, filters point cloud data and sets or modifies the color attribute."
+    },
+    {
+      "id": 98,
+      "name": "Foreach Loop",
+      "category": "Point",
+      "code": "int arr[] = array(1,2,3); foreach(int x; arr) { @P.z += x; }",
+      "explanation": "In this VEX example (Foreach Loop), the code performs array operations and sorting, uses a loop to iterate over elements and displaces the point position."
+    },
+    {
+      "id": 99,
+      "name": "Foreach Index",
+      "category": "Point",
+      "code": "int arr[] = array(1,2,3); foreach(int index; int x; arr) { @P.y += index * x; }",
+      "explanation": "In this VEX example (Foreach Index), the code performs array operations and sorting, uses a loop to iterate over elements and displaces the point position."
+    },
+    {
+      "id": 100,
+      "name": "Sign Function",
+      "category": "Point",
+      "code": "@P.x = sign(@P.x);",
+      "explanation": "In this VEX example (Sign Function), the code performs mathematical and attribute operations on the geometry."
+    }
+  ]
+}

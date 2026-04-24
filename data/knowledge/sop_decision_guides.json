@@ -1,0 +1,124 @@
+[
+    {
+        "topic": "Boolean SOP vs VDB Boolean",
+        "scenario": "You need to cut a complex shape out of another complex shape.",
+        "comparison": {
+            "Boolean SOP": "Uses pure polygon math. Pros: Preserves original topology, precise sharp edges, keeps UVs intact. Cons: Will fail completely if inputs have non-manifold geometry, holes, or perfectly overlapping coplanar faces.",
+            "VDB Boolean": "Converts meshes to volumes, does volumetric math, and converts back. Pros: 100% robust, never fails on messy/intersecting geometry. Cons: Destroys original topology, loses UVs, can soften sharp edges."
+        },
+        "recommendation": "Use Boolean SOP for hard-surface mechanical modeling where precise edges and UVs are required. Use VDB Boolean for organic shapes, 3D printing preparation, or when dealing with incredibly messy proxy geometry."
+    },
+    {
+        "topic": "CopyToPoints vs Pack vs Instance",
+        "scenario": "You need to scatter 50,000 trees on a terrain.",
+        "comparison": {
+            "Copy To Points (Raw)": "Duplicates the actual polygons 50,000 times. Will freeze Houdini and crash your RAM.",
+            "Copy To Points (Packed)": "Creates 50,000 pointers to a single mesh. Highly efficient in the viewport, uses minimal RAM.",
+            "Instancing (Render Time)": "Points exist in the viewport, geometry is only generated during rendering (Mantra/Karma/Redshift)."
+        },
+        "recommendation": "Always use 'Pack and Instance' on the Copy To Points SOP for asset generation. Use pure point instancing for environments exceeding millions of elements."
+    },
+    {
+        "topic": "Attribute Wrangle vs Attribute Create",
+        "scenario": "You need to set a 'pscale' attribute and initialize velocity '@v'.",
+        "comparison": {
+            "Attribute Create": "UI-based. Good for setting a single constant value. Cumbersome for math or multiple attributes.",
+            "Attribute Wrangle": "VEX-based. Runs multithreaded. You can type `f@pscale = 1.0; v@v = set(0,1,0);` in one line."
+        },
+        "recommendation": "Learn basic VEX and use Attribute Wrangle. It is vastly faster, cleaner to read, and infinitely more flexible than Attribute Create."
+    },
+    {
+        "topic": "Subdivide vs Remesh vs PolyReduce",
+        "scenario": "You need to alter the polygon density of a mesh.",
+        "comparison": {
+            "Subdivide": "Smooths the mesh and quadruples the polygon count using Catmull-Clark math. Preserves edge loops.",
+            "Remesh": "Destroys topology to create a perfectly uniform web of equilateral triangles. Ideal for simulations (Cloth/RBD).",
+            "PolyReduce": "Intelligently collapses edges to lower polygon count while trying to preserve the silhouette. Destroys loops."
+        },
+        "recommendation": "Use Subdivide for high-end rendering. Use Remesh to prep geometry for physics simulations. Use PolyReduce for game engine LODs."
+    },
+    {
+        "topic": "Group Bounding Box vs Group Create (Topology)",
+        "scenario": "You need to select the top half of an object to apply a material.",
+        "comparison": {
+            "Group Bounding Box": "Selects anything inside a 3D volume. If the object deforms or moves, the selection changes dynamically.",
+            "Group Create (Normals/Edges)": "Selects based on geometric rules (e.g., 'faces pointing UP'). Moves with the object."
+        },
+        "recommendation": "Use Bounding Box for spatial effects (like cutting off the bottom of a generated building). Use Topology rules for procedural shading (like putting snow only on upward-facing polygons)."
+    },
+    {
+        "topic": "When to use VEX Wrangle vs VOP network",
+        "scenario": "You need to write custom logic to modify point positions or attributes.",
+        "comparison": {
+            "VEX Wrangle (Code)": "Requires typing code. Pros: Extremely fast to write, highly compact, easy to copy/paste between nodes or forums. Cons: Requires knowing VEX syntax and functions.",
+            "VOP Network (Nodes)": "Visual programming. Pros: Easy to discover functions by hitting TAB, great for complex noise blending, no syntax errors. Cons: Sprawling networks become unreadable spaghetti quickly; slower to build."
+        },
+        "recommendation": "Use VEX Wrangles for math, conditionals (if/else), and simple attribute assignments. Use VOPs strictly for building complex layered Noise, as visual blending of noise outputs is much more intuitive."
+    },
+    {
+        "topic": "Merge vs Switch vs Blend",
+        "scenario": "You have multiple streams of geometry and need to combine or select them.",
+        "comparison": {
+            "Merge": "Takes all inputs and puts them in the same space simultaneously. Point/primitive numbers are concatenated.",
+            "Switch": "Only outputs ONE of the inputs at a time, based on an integer parameter. Often driven by expressions or UI toggles.",
+            "Blend": "Takes two inputs with EXACTLY the same point count/topology, and interpolates point positions between them (morphing)."
+        },
+        "recommendation": "Use Merge to build composite assets. Use Switch for logic/variations (e.g. LODs, or choosing between a square or round table). Use Blend for shape-key style animation/morphing."
+    },
+    {
+        "topic": "Resample vs Carve vs Ends",
+        "scenario": "You are manipulating a Curve and need to alter its structure.",
+        "comparison": {
+            "Resample": "Rebuilds the curve with evenly spaced points based on a length parameter. Essential for smooth deformation.",
+            "Carve": "Slices the curve based on a 0-1 percentage. Acts like animating a line drawing on or off. Does not change point spacing.",
+            "Ends": "Used specifically to close an open curve (make it a loop) or open a closed curve. Can also unroll polygons into curves."
+        },
+        "recommendation": "Use Resample immediately after drawing any curve to ensure stable topology. Use Carve to animate paths growing. Use Ends to close loops before sweeping/extruding."
+    },
+    {
+        "topic": "Vellum vs RBD vs FEM",
+        "scenario": "You need to simulate physics.",
+        "comparison": {
+            "Vellum": "Position-based dynamics. Best for cloth, hair, strings, grains, and squishy soft bodies. Fast on GPU.",
+            "RBD (Bullet)": "Rigid body dynamics. Best for breaking glass, crumbling concrete, rigid metal collisions. Does not bend.",
+            "FEM": "Finite Element Method. Extremely slow, highly accurate. Used for hyper-realistic muscle/tissue simulations in creature FX."
+        },
+        "recommendation": "Use RBD for destruction. Use Vellum for almost everything else (cloth, squishy things). Ignore FEM unless doing advanced character FX."
+    },
+    {
+        "topic": "VDB vs Polygon Modeling",
+        "scenario": "You are building a complex procedural asset (like a cavern or a spaceship hull).",
+        "comparison": {
+            "VDB (Volumes)": "Pros: Never fails booleans, smooths intersections beautifully, completely procedural. Cons: High memory, loses sharp edges, destroys UVs.",
+            "Polygon (Standard)": "Pros: Fast for simple shapes, keeps UVs, perfect sharp edges. Cons: Booleans fail easily, topology gets messy."
+        },
+        "recommendation": "Use Polygons for hard surface/mechanical assets where sharp edges and UVs matter. Use VDB for organic assets (rocks, terrain, fluid meshes) where topology just needs to be contiguous."
+    },
+    {
+        "topic": "Pack vs Pack and Instance",
+        "scenario": "You are duplicating an object thousands of times using Copy to Points.",
+        "comparison": {
+            "Pack": "Creates a packed primitive in memory. You still 'copy' that packed pointer. Good for standard scenes.",
+            "Pack and Instance": "Tells the renderer (Mantra/Karma) to only load the geometry once and draw it X times dynamically. Viewport only shows points or bounding boxes."
+        },
+        "recommendation": "Always enable 'Pack and Instance' on the CopyToPoints SOP if you have more than 10,000 copies, or if the source geometry is extremely dense."
+    },
+    {
+        "topic": "Point vs Primitive attributes for Shading",
+        "scenario": "You want to assign a color (@Cd) to your geometry.",
+        "comparison": {
+            "Point Attributes": "Stored on the vertices. Creates a smooth gradient between points. (e.g. Red point next to Blue point creates a purple gradient face).",
+            "Primitive Attributes": "Stored on the face. Gives the entire polygon one solid, flat color. No gradients."
+        },
+        "recommendation": "Use Point attributes for organic, smooth color blending. Use Primitive attributes for hard, low-poly, or distinct material assignments."
+    },
+    {
+        "topic": "Heightfield vs Polygon Grid for Terrain",
+        "scenario": "You need to build a mountain range.",
+        "comparison": {
+            "Heightfield (2D Volume)": "Incredibly fast. Includes dedicated erosion, terracing, and noise nodes. Used by game engines directly.",
+            "Polygon Grid + Mountain": "Slow. Real 3D geometry. Can have overhangs and caves (Heightfields cannot)."
+        },
+        "recommendation": "Always use Heightfields for large-scale landscapes and terrain generation. Only convert to Polygons at the very end if needed for rendering or specific collisions."
+    }
+]

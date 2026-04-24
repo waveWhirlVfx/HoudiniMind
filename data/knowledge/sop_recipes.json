@@ -1,0 +1,1208 @@
+[
+    {
+        "asset": "Procedural Chair",
+        "description": "A basic parameterized chair with adjustable leg height and backrest angle.",
+        "nodes": [
+            "box",
+            "transform",
+            "polyextrude",
+            "mirror",
+            "merge"
+        ],
+        "node_settings": [
+            {
+                "node": "box (Seat)",
+                "action": "Scale to 0.5, 0.05, 0.5."
+            },
+            {
+                "node": "box (Leg)",
+                "action": "Scale to 0.05, 0.4, 0.05. Transform X and Z to position at the corner of the seat."
+            },
+            {
+                "node": "mirror",
+                "action": "Mirror the leg across X, then append another mirror across Z to get 4 legs."
+            },
+            {
+                "node": "polyextrude (Backrest)",
+                "action": "Select the rear primitive of the seat box, extrude upwards."
+            }
+        ],
+        "expected_outcome": "A blocky chair asset that automatically updates all four legs if the base seat dimensions are altered."
+    },
+    {
+        "asset": "Procedural Brick Wall",
+        "description": "A staggered brick pattern with mortar gaps that can curve along a path.",
+        "nodes": [
+            "grid",
+            "divide",
+            "polyextrude",
+            "polybevel",
+            "path_deform"
+        ],
+        "node_settings": [
+            {
+                "node": "grid",
+                "action": "Set rows/cols to define the number of bricks. Size defines the wall length/height."
+            },
+            {
+                "node": "divide",
+                "action": "Check 'Compute Dual' to turn the square grid into a staggered/hex pattern (brick layout)."
+            },
+            {
+                "node": "polyextrude",
+                "action": "Extrude 'Individual Elements', use 'Inset' to create the mortar gaps."
+            },
+            {
+                "node": "polybevel",
+                "action": "Bevel the extruded edges to catch highlights."
+            },
+            {
+                "node": "path_deform",
+                "action": "Deform the generated flat wall along a user-drawn curve."
+            }
+        ],
+        "expected_outcome": "A highly realistic, continuous brick wall asset that dynamically offsets seams."
+    },
+    {
+        "asset": "Pipe / Tube Connector",
+        "description": "A procedural pipe network that generates smooth joints automatically.",
+        "nodes": [
+            "curve",
+            "resample",
+            "polywire",
+            "vdbfrompolygons",
+            "vdbsmooth",
+            "convertvdb"
+        ],
+        "node_settings": [
+            {
+                "node": "curve",
+                "action": "Draw a jagged, multi-directional path in 3D space."
+            },
+            {
+                "node": "resample",
+                "action": "Resample to ensure enough points for corners."
+            },
+            {
+                "node": "polywire",
+                "action": "Convert the lines into physical tubes. Intersections will be messy."
+            },
+            {
+                "node": "vdbfrompolygons",
+                "action": "Convert the messy tubes into a single contiguous volume."
+            },
+            {
+                "node": "vdbsmooth",
+                "action": "Apply smoothing to automatically fillet/weld the pipe intersections."
+            },
+            {
+                "node": "convertvdb",
+                "action": "Convert back to polygons for rendering."
+            }
+        ],
+        "expected_outcome": "A watertight manifold pipe system with organic, cast-metal style joints at every corner."
+    },
+    {
+        "asset": "Procedural Tree Trunk",
+        "description": "An organic trunk with tapering thickness and bark displacement.",
+        "nodes": [
+            "line",
+            "resample",
+            "attribwrangle",
+            "sweep",
+            "mountain"
+        ],
+        "node_settings": [
+            {
+                "node": "line",
+                "action": "Draw straight up Y axis (length = tree height)."
+            },
+            {
+                "node": "resample",
+                "action": "Enable 'Curve U' to get a 0-1 gradient from bottom to top."
+            },
+            {
+                "node": "attribwrangle",
+                "action": "Type `@pscale = chramp('taper', @curveu);` and adjust the ramp curve to be thick at the bottom and thin at the top."
+            },
+            {
+                "node": "sweep",
+                "action": "Set surface type to 'Round Tube'. It will automatically read @pscale to taper the geometry."
+            },
+            {
+                "node": "mountain",
+                "action": "Add high-frequency noise along the normals to simulate rough bark."
+            }
+        ],
+        "expected_outcome": "A realistic, tapered cylinder with organic surface bumps, ready to have branches scattered onto it."
+    },
+    {
+        "asset": "Procedural Gear / Cog",
+        "description": "A mechanical gear with mathematically perfect teeth.",
+        "nodes": [
+            "tube",
+            "group",
+            "polyextrude",
+            "polybevel"
+        ],
+        "node_settings": [
+            {
+                "node": "tube",
+                "action": "Set Type to 'Polygon'. Columns = number of teeth * 2. Rows = 2. Uncheck End Caps."
+            },
+            {
+                "node": "group (by range)",
+                "action": "Group every alternate primitive face on the outer ring (e.g., select 1 of 2)."
+            },
+            {
+                "node": "polyextrude",
+                "action": "Extrude the grouped faces outward to form the gear teeth. Use 'Inset' to taper them."
+            },
+            {
+                "node": "polybevel",
+                "action": "Bevel all hard edges to ensure it catches light correctly."
+            }
+        ],
+        "expected_outcome": "A customizable mechanical gear. Altering the Tube columns immediately updates the teeth count perfectly."
+    },
+    {
+        "asset": "Table",
+        "description": "Procedural table with adjustable dimensions and 4 automatically placed legs.",
+        "nodes": [
+            "box",
+            "transform",
+            "copytopoints",
+            "merge"
+        ],
+        "node_settings": [
+            {
+                "node": "box (Tabletop)",
+                "action": "Define width, depth, and thickness (e.g. 1.0, 0.05, 1.0)."
+            },
+            {
+                "node": "box (Leg)",
+                "action": "Define leg height and thickness. Transform Y up by half height."
+            },
+            {
+                "node": "box (Points)",
+                "action": "Create a box the size of the tabletop minus inset margin. Set to 'Points' mode."
+            },
+            {
+                "node": "copytopoints",
+                "action": "Copy leg box to the 4 corner points of the points box."
+            },
+            {
+                "node": "merge",
+                "action": "Merge tabletop and copied legs."
+            }
+        ],
+        "expected_outcome": "A table where modifying the tabletop dimensions automatically spaces the legs correctly."
+    },
+    {
+        "asset": "Shelf unit",
+        "description": "Parametric bookshelf with adjustable number of shelves.",
+        "nodes": [
+            "line",
+            "resample",
+            "box",
+            "copytopoints",
+            "merge"
+        ],
+        "node_settings": [
+            {
+                "node": "line",
+                "action": "Draw a vertical line for the height of the unit."
+            },
+            {
+                "node": "resample",
+                "action": "Set segment length to control shelf spacing, outputting points."
+            },
+            {
+                "node": "box (Shelf)",
+                "action": "Create a wide flat box for the shelf plank."
+            },
+            {
+                "node": "copytopoints",
+                "action": "Copy shelves onto the resampled vertical line points."
+            },
+            {
+                "node": "box (Side Panel)",
+                "action": "Create a tall vertical box for the side panels, mirror it, and merge."
+            }
+        ],
+        "expected_outcome": "A bookshelf that automatically generates more shelves as it gets taller."
+    },
+    {
+        "asset": "Floor Lamp",
+        "description": "Standing floor lamp with a base, pole, and lampshade.",
+        "nodes": [
+            "cylinder",
+            "line",
+            "sweep",
+            "tube",
+            "merge"
+        ],
+        "node_settings": [
+            {
+                "node": "cylinder (Base)",
+                "action": "Flat, wide cylinder for the weighted base."
+            },
+            {
+                "node": "line",
+                "action": "Vertical line for the lamp pole."
+            },
+            {
+                "node": "sweep",
+                "action": "Sweep a small circle along the line to make it a tube."
+            },
+            {
+                "node": "tube (Shade)",
+                "action": "Open tube, tapered by making the top radius smaller than the bottom radius."
+            },
+            {
+                "node": "transform",
+                "action": "Move the shade to the top of the pole and merge everything."
+            }
+        ],
+        "expected_outcome": "A classic floor lamp structure."
+    },
+    {
+        "asset": "Door (with frame)",
+        "description": "Door frame and swinging door panel.",
+        "nodes": [
+            "grid",
+            "polyextrude",
+            "boolean",
+            "box",
+            "transform"
+        ],
+        "node_settings": [
+            {
+                "node": "grid (Wall)",
+                "action": "Vertical grid for the wall section."
+            },
+            {
+                "node": "box (Cutter)",
+                "action": "Box representing the door opening."
+            },
+            {
+                "node": "boolean",
+                "action": "Subtract cutter from wall. Extract the inside faces to create the frame."
+            },
+            {
+                "node": "box (Door)",
+                "action": "Box sized to fit the hole. Move its pivot to the left edge."
+            },
+            {
+                "node": "transform",
+                "action": "Rotate the door on Y axis to swing it open."
+            }
+        ],
+        "expected_outcome": "A hinged door set inside a precise hole in a wall."
+    },
+    {
+        "asset": "Window (with glass pane)",
+        "description": "Window frame with inner muntins and glass panes.",
+        "nodes": [
+            "grid",
+            "polyextrude",
+            "polyfill",
+            "group"
+        ],
+        "node_settings": [
+            {
+                "node": "grid",
+                "action": "Set rows/cols to define the number of window panes (e.g. 2x3)."
+            },
+            {
+                "node": "polyextrude (Frame)",
+                "action": "Extrude all primitives with an inset to create frames. Output side faces only."
+            },
+            {
+                "node": "polyextrude (Depth)",
+                "action": "Extrude the resulting frame backward for thickness."
+            },
+            {
+                "node": "polyfill",
+                "action": "Fill the remaining holes and assign a 'glass' material group."
+            }
+        ],
+        "expected_outcome": "A divided window frame with distinct glass geometry."
+    },
+    {
+        "asset": "Staircase (straight)",
+        "description": "Linear staircase with adjustable step count and rise/run.",
+        "nodes": [
+            "box",
+            "copy",
+            "transform",
+            "math"
+        ],
+        "node_settings": [
+            {
+                "node": "box",
+                "action": "Create a single step (tread and riser combined)."
+            },
+            {
+                "node": "copy",
+                "action": "Use a Copy and Transform node."
+            },
+            {
+                "node": "transform",
+                "action": "In the Copy node, translate Y (rise) and Z (run) by specific amounts."
+            },
+            {
+                "node": "parameter",
+                "action": "Adjust the 'Number of Copies' to make the stairs taller."
+            }
+        ],
+        "expected_outcome": "A perfectly spaced set of stairs."
+    },
+    {
+        "asset": "Fence segment",
+        "description": "Picket fence segment that can repeat.",
+        "nodes": [
+            "line",
+            "copytopoints",
+            "box"
+        ],
+        "node_settings": [
+            {
+                "node": "line",
+                "action": "Horizontal line defining the segment length. Resample to define picket spacing."
+            },
+            {
+                "node": "box (Picket)",
+                "action": "Tall thin box. Polybevel the top points to make it pointed."
+            },
+            {
+                "node": "copytopoints",
+                "action": "Copy pickets along the line points."
+            },
+            {
+                "node": "box (Rail)",
+                "action": "Create two horizontal boxes to hold the pickets together."
+            }
+        ],
+        "expected_outcome": "A modular fence segment."
+    },
+    {
+        "asset": "Railing section",
+        "description": "Handrail with vertical balusters.",
+        "nodes": [
+            "curve",
+            "sweep",
+            "resample",
+            "copytopoints"
+        ],
+        "node_settings": [
+            {
+                "node": "curve",
+                "action": "Draw a path. Sweep a profile along it for the top handrail."
+            },
+            {
+                "node": "resample",
+                "action": "Resample the curve to get baluster points."
+            },
+            {
+                "node": "tube",
+                "action": "Vertical tube for the baluster."
+            },
+            {
+                "node": "copytopoints",
+                "action": "Copy balusters to the resampled points."
+            }
+        ],
+        "expected_outcome": "A continuous rail over evenly spaced vertical supports."
+    },
+    {
+        "asset": "Bottle/vase",
+        "description": "Glass bottle defined by a profile curve.",
+        "nodes": [
+            "curve",
+            "revolve",
+            "polyextrude"
+        ],
+        "node_settings": [
+            {
+                "node": "curve",
+                "action": "Draw half the silhouette of a vase on the XY plane."
+            },
+            {
+                "node": "revolve",
+                "action": "Revolve the curve 360 degrees around the Y axis."
+            },
+            {
+                "node": "polyextrude",
+                "action": "Add a tiny amount of thickness so it renders as glass properly."
+            }
+        ],
+        "expected_outcome": "A perfectly symmetrical, smooth vase or bottle."
+    },
+    {
+        "asset": "Wheel (spoked)",
+        "description": "Wheel with outer rim and inner radial spokes.",
+        "nodes": [
+            "tube",
+            "copy",
+            "transform",
+            "boolean"
+        ],
+        "node_settings": [
+            {
+                "node": "tube (Rim)",
+                "action": "Large thin tube for the outer tire/rim."
+            },
+            {
+                "node": "cylinder (Spoke)",
+                "action": "Long thin cylinder stretching from center to rim."
+            },
+            {
+                "node": "copy",
+                "action": "Copy and rotate the spoke 360/N degrees N times."
+            },
+            {
+                "node": "tube (Hub)",
+                "action": "Small thick tube at the center to hold the spokes."
+            }
+        ],
+        "expected_outcome": "A cart or bicycle wheel."
+    },
+    {
+        "asset": "Column/Pillar",
+        "description": "Classical architectural column with base and capital.",
+        "nodes": [
+            "tube",
+            "polybevel",
+            "sweep",
+            "copy"
+        ],
+        "node_settings": [
+            {
+                "node": "tube (Shaft)",
+                "action": "Tall tube. Add fluting by selecting alternating vertical edge loops and moving them inward."
+            },
+            {
+                "node": "box (Base)",
+                "action": "Stack a few beveled boxes for the base."
+            },
+            {
+                "node": "box (Capital)",
+                "action": "Stack and taper boxes for the top capital."
+            },
+            {
+                "node": "merge",
+                "action": "Combine base, shaft, and capital."
+            }
+        ],
+        "expected_outcome": "A Greek/Roman style architectural column."
+    },
+    {
+        "asset": "Brick/stone wall tile",
+        "description": "A modular, tilable section of a brick or stone wall.",
+        "nodes": [
+            "grid",
+            "scatter",
+            "voronoifracture",
+            "polyextrude",
+            "polybevel"
+        ],
+        "node_settings": [
+            {
+                "node": "grid",
+                "action": "Flat square grid."
+            },
+            {
+                "node": "scatter",
+                "action": "Scatter points for stone centers."
+            },
+            {
+                "node": "voronoifracture",
+                "action": "Fracture the grid into stone shapes."
+            },
+            {
+                "node": "polyextrude",
+                "action": "Extrude individual pieces outward, with a slight inset for grout lines."
+            },
+            {
+                "node": "polybevel",
+                "action": "Bevel the hard edges to make them look like worn stone."
+            }
+        ],
+        "expected_outcome": "An organic, irregular stone wall surface."
+    },
+    {
+        "asset": "Road segment",
+        "description": "Asphalt road with painted lines.",
+        "nodes": [
+            "grid",
+            "curve",
+            "sweep",
+            "uvproject"
+        ],
+        "node_settings": [
+            {
+                "node": "curve",
+                "action": "Draw the path of the road."
+            },
+            {
+                "node": "line (Profile)",
+                "action": "Horizontal line for the width of the road."
+            },
+            {
+                "node": "sweep",
+                "action": "Sweep the line along the curve. Generate UVs along the length."
+            },
+            {
+                "node": "uvproject",
+                "action": "Ensure UVs are laid out from 0 to 1 so a painted line texture repeats perfectly."
+            }
+        ],
+        "expected_outcome": "A curved ribbon of geometry with proper UVs for a road texture."
+    },
+    {
+        "asset": "Building facade (modular)",
+        "description": "Building front generated from a 2D grid.",
+        "nodes": [
+            "grid",
+            "divide",
+            "polyextrude"
+        ],
+        "node_settings": [
+            {
+                "node": "grid",
+                "action": "Vertical grid. Rows are floors, columns are rooms."
+            },
+            {
+                "node": "polyextrude (Windows)",
+                "action": "Inset all faces, outputting the borders as walls."
+            },
+            {
+                "node": "polyextrude (Depth)",
+                "action": "Extrude the borders outward to give the building depth."
+            },
+            {
+                "node": "transform",
+                "action": "Push the original inset faces backward to form the glass windows."
+            }
+        ],
+        "expected_outcome": "A quick skyscraper exterior."
+    },
+    {
+        "asset": "Spring/coil",
+        "description": "Coiled spring using twist deformation.",
+        "nodes": [
+            "line",
+            "resample",
+            "twist",
+            "sweep"
+        ],
+        "node_settings": [
+            {
+                "node": "line",
+                "action": "Draw a vertical line. Offset it slightly on the X axis from the origin."
+            },
+            {
+                "node": "resample",
+                "action": "Add lots of points so it can deform smoothly."
+            },
+            {
+                "node": "twist",
+                "action": "Apply a huge twist amount (e.g. 3600 degrees) along the Y axis. The line will spiral around the origin."
+            },
+            {
+                "node": "sweep",
+                "action": "Sweep a tiny circle along the resulting spiral to give it thickness."
+            }
+        ],
+        "expected_outcome": "A 3D coiled spring geometry."
+    },
+    {
+        "asset": "Suspension Bridge",
+        "description": "Procedural suspension bridge with adjustable length, pillars, and cables.",
+        "nodes": [
+            "line",
+            "resample",
+            "box",
+            "sweep",
+            "curve",
+            "merge"
+        ],
+        "node_settings": [
+            {
+                "node": "line (Deck)",
+                "action": "Horizontal line for the bridge length. Sweep a flat box profile for the deck."
+            },
+            {
+                "node": "resample",
+                "action": "Resample the line to define pillar spacing."
+            },
+            {
+                "node": "box (Pillar)",
+                "action": "Tall box copied to the pillar points."
+            },
+            {
+                "node": "curve (Main Cable)",
+                "action": "Draw a drooping parabolic curve between pillars."
+            },
+            {
+                "node": "line (Suspenders)",
+                "action": "Vertical lines connecting the main cable to the deck."
+            }
+        ],
+        "expected_outcome": "A complete suspension bridge that scales proportionally."
+    },
+    {
+        "asset": "Chain (interlocking)",
+        "description": "Interlocking metal chain links following a path.",
+        "nodes": [
+            "torus",
+            "transform",
+            "curve",
+            "path_deform",
+            "copy"
+        ],
+        "node_settings": [
+            {
+                "node": "torus",
+                "action": "Create a single chain link. Scale Z to make it oval."
+            },
+            {
+                "node": "transform",
+                "action": "Duplicate the link and rotate it 90 degrees, translating it forward to interlock."
+            },
+            {
+                "node": "copy",
+                "action": "Copy this pair of links multiple times along the Z axis."
+            },
+            {
+                "node": "curve",
+                "action": "Draw the path the chain should follow."
+            },
+            {
+                "node": "path_deform",
+                "action": "Deform the straight chain along the drawn curve."
+            }
+        ],
+        "expected_outcome": "A flexible, continuous chain."
+    },
+    {
+        "asset": "Rope",
+        "description": "Twisted multi-strand rope.",
+        "nodes": [
+            "line",
+            "resample",
+            "sweep",
+            "twist",
+            "copy"
+        ],
+        "node_settings": [
+            {
+                "node": "line",
+                "action": "Draw a straight line for the core."
+            },
+            {
+                "node": "circle",
+                "action": "Create a small circle profile."
+            },
+            {
+                "node": "copy",
+                "action": "Copy the circle 3 times, rotated 120 degrees around the center."
+            },
+            {
+                "node": "sweep",
+                "action": "Sweep the 3 circles along the line to create 3 parallel strands."
+            },
+            {
+                "node": "twist",
+                "action": "Apply a high twist value along the length of the strands to braid them together."
+            }
+        ],
+        "expected_outcome": "A braided, twisted rope."
+    },
+    {
+        "asset": "Book",
+        "description": "A closed book with a hard cover and pages.",
+        "nodes": [
+            "box",
+            "polybevel",
+            "boolean",
+            "color"
+        ],
+        "node_settings": [
+            {
+                "node": "box (Pages)",
+                "action": "Create a box for the paper block. Color it white."
+            },
+            {
+                "node": "box (Cover)",
+                "action": "Create a slightly larger box for the cover. Color it brown."
+            },
+            {
+                "node": "polybevel",
+                "action": "Bevel the spine edge of the cover for a rounded back."
+            },
+            {
+                "node": "boolean",
+                "action": "Subtract a tiny sliver to create the gap between the cover and the pages."
+            }
+        ],
+        "expected_outcome": "A simple prop book."
+    },
+    {
+        "asset": "Barrel",
+        "description": "Wooden barrel with metal bands.",
+        "nodes": [
+            "tube",
+            "mountain",
+            "polyextrude",
+            "sweep"
+        ],
+        "node_settings": [
+            {
+                "node": "tube",
+                "action": "Create a barrel shape by tapering the top and bottom of a tube."
+            },
+            {
+                "node": "polyextrude (Planks)",
+                "action": "Select vertical faces and extrude them individually slightly to create wooden planks."
+            },
+            {
+                "node": "circle (Bands)",
+                "action": "Create circles at specific heights for the metal bands."
+            },
+            {
+                "node": "sweep",
+                "action": "Sweep a flat profile along the circles to create the metal rings."
+            }
+        ],
+        "expected_outcome": "A classic wooden barrel."
+    },
+    {
+        "asset": "Potion Bottle",
+        "description": "A classic fantasy potion bottle with a cork.",
+        "nodes": [
+            "curve",
+            "revolve",
+            "polyextrude",
+            "tube"
+        ],
+        "node_settings": [
+            {
+                "node": "curve",
+                "action": "Draw the half-profile of a bulbous bottle and thin neck."
+            },
+            {
+                "node": "revolve",
+                "action": "Revolve 360 degrees to create the glass shell."
+            },
+            {
+                "node": "polyextrude",
+                "action": "Add thickness to the glass."
+            },
+            {
+                "node": "tube (Cork)",
+                "action": "Create a slightly tapered tube and place it in the neck opening."
+            }
+        ],
+        "expected_outcome": "A glass potion flask."
+    },
+    {
+        "asset": "Mug / Cup",
+        "description": "A coffee mug with a handle.",
+        "nodes": [
+            "tube",
+            "polyextrude",
+            "curve",
+            "sweep",
+            "boolean"
+        ],
+        "node_settings": [
+            {
+                "node": "tube",
+                "action": "Create a cylinder for the main cup body."
+            },
+            {
+                "node": "polyextrude",
+                "action": "Extrude the top face inward, then down to hollow out the cup."
+            },
+            {
+                "node": "curve",
+                "action": "Draw a 'C' shaped curve on the side for the handle."
+            },
+            {
+                "node": "sweep",
+                "action": "Sweep a circle along the curve to give the handle thickness."
+            },
+            {
+                "node": "boolean",
+                "action": "Union the handle to the cup body."
+            }
+        ],
+        "expected_outcome": "A standard coffee mug."
+    },
+    {
+        "asset": "Sword",
+        "description": "A basic medieval sword.",
+        "nodes": [
+            "box",
+            "polyedit",
+            "mirror",
+            "merge"
+        ],
+        "node_settings": [
+            {
+                "node": "box (Blade)",
+                "action": "Long, flat box. Scale the top points together to form a tip."
+            },
+            {
+                "node": "box (Crossguard)",
+                "action": "Horizontal box placed below the blade."
+            },
+            {
+                "node": "cylinder (Grip)",
+                "action": "Vertical cylinder below the crossguard."
+            },
+            {
+                "node": "sphere (Pommel)",
+                "action": "Place at the bottom of the grip."
+            }
+        ],
+        "expected_outcome": "A low-poly sword prop."
+    },
+    {
+        "asset": "Shield",
+        "description": "A round wooden shield with a metal rim.",
+        "nodes": [
+            "tube",
+            "polybevel",
+            "sphere",
+            "boolean"
+        ],
+        "node_settings": [
+            {
+                "node": "tube (Wood)",
+                "action": "Flat, wide tube. Add a slight dome shape by moving the center points up."
+            },
+            {
+                "node": "tube (Rim)",
+                "action": "A slightly larger tube with a hole in the middle to act as the metal binding."
+            },
+            {
+                "node": "sphere (Boss)",
+                "action": "A flattened half-sphere placed in the exact center of the shield."
+            }
+        ],
+        "expected_outcome": "A Viking-style round shield."
+    },
+    {
+        "asset": "Bow",
+        "description": "A wooden longbow with a string.",
+        "nodes": [
+            "curve",
+            "sweep",
+            "line",
+            "merge"
+        ],
+        "node_settings": [
+            {
+                "node": "curve (Wood)",
+                "action": "Draw the bent shape of the bow limbs."
+            },
+            {
+                "node": "sweep",
+                "action": "Sweep a circular profile along the curve, tapering the ends."
+            },
+            {
+                "node": "line (String)",
+                "action": "Draw a straight line connecting the two extreme ends of the bow curve."
+            }
+        ],
+        "expected_outcome": "A basic archery bow."
+    },
+    {
+        "asset": "Arrow",
+        "description": "An arrow with a shaft, arrowhead, and fletching.",
+        "nodes": [
+            "tube",
+            "cone",
+            "grid",
+            "copy",
+            "merge"
+        ],
+        "node_settings": [
+            {
+                "node": "tube (Shaft)",
+                "action": "Long, very thin cylinder."
+            },
+            {
+                "node": "cone (Head)",
+                "action": "Place at the front of the shaft."
+            },
+            {
+                "node": "grid (Fletching)",
+                "action": "Cut a grid into a feather shape."
+            },
+            {
+                "node": "copy",
+                "action": "Copy the fletching 3 times radially around the back of the shaft."
+            }
+        ],
+        "expected_outcome": "A standard arrow."
+    },
+    {
+        "asset": "Crown",
+        "description": "A royal gold crown.",
+        "nodes": [
+            "tube",
+            "polyextrude",
+            "bend",
+            "polybevel"
+        ],
+        "node_settings": [
+            {
+                "node": "tube",
+                "action": "Create a flat grid, subdivide it, and delete top alternating faces to make spikes."
+            },
+            {
+                "node": "polyextrude",
+                "action": "Add thickness to the flat spike pattern."
+            },
+            {
+                "node": "bend",
+                "action": "Bend the flat strip 360 degrees into a perfect circle."
+            },
+            {
+                "node": "fuse",
+                "action": "Fuse the seam where the ends meet."
+            }
+        ],
+        "expected_outcome": "A spiked king's crown."
+    },
+    {
+        "asset": "Procedural Ivy / Vine",
+        "description": "Vines growing and wrapping around an object.",
+        "nodes": [
+            "scatter",
+            "findshortestpath",
+            "sweep",
+            "copytopoints"
+        ],
+        "node_settings": [
+            {
+                "node": "scatter",
+                "action": "Scatter start and end points on a target mesh."
+            },
+            {
+                "node": "findshortestpath",
+                "action": "Generate wandering curves connecting the points across the mesh surface."
+            },
+            {
+                "node": "sweep",
+                "action": "Give the curves a small thickness for the main vine stems."
+            },
+            {
+                "node": "copytopoints (Leaves)",
+                "action": "Scatter new points on the stems and copy leaf geometry (a bent grid) onto them."
+            }
+        ],
+        "expected_outcome": "Organic ivy wrapping around any input shape."
+    },
+    {
+        "asset": "Procedural Clouds (VDB)",
+        "description": "Fluffy, volumetric clouds generated from spheres.",
+        "nodes": [
+            "scatter",
+            "copytopoints",
+            "vdbfrompolygons",
+            "vdbcombine",
+            "vdbreshapesdf"
+        ],
+        "node_settings": [
+            {
+                "node": "scatter",
+                "action": "Scatter points inside a bounding box."
+            },
+            {
+                "node": "copytopoints",
+                "action": "Copy overlapping spheres of varying sizes onto the points."
+            },
+            {
+                "node": "vdbfrompolygons",
+                "action": "Convert the spheres into a single SDF volume."
+            },
+            {
+                "node": "vdbreshapesdf",
+                "action": "Use volume noise to distort the SDF, making the edges fluffy and organic."
+            },
+            {
+                "node": "convertvdb",
+                "action": "Convert from SDF to a Density/Fog VDB for rendering."
+            }
+        ],
+        "expected_outcome": "A realistic volumetric cloud."
+    },
+    {
+        "asset": "Procedural Crater",
+        "description": "A moon-like impact crater on a terrain.",
+        "nodes": [
+            "heightfield",
+            "heightfield_pattern",
+            "heightfield_noise",
+            "heightfield_maskbyfeature"
+        ],
+        "node_settings": [
+            {
+                "node": "heightfield",
+                "action": "Create a base flat terrain."
+            },
+            {
+                "node": "heightfield_pattern",
+                "action": "Use a radial ramp pattern. Map it to dig a bowl shape and raise a lip around the edge."
+            },
+            {
+                "node": "heightfield_noise",
+                "action": "Add high-frequency noise inside the bowl to simulate rough ground."
+            },
+            {
+                "node": "heightfield_maskbyfeature",
+                "action": "Mask the steep inner slopes to apply a different texture or rock scatter."
+            }
+        ],
+        "expected_outcome": "A realistic asteroid/moon crater."
+    },
+    {
+        "asset": "Procedural Asteroid",
+        "description": "A pockmarked, irregular space rock.",
+        "nodes": [
+            "sphere",
+            "mountain",
+            "scatter",
+            "boolean"
+        ],
+        "node_settings": [
+            {
+                "node": "sphere",
+                "action": "Start with a high-res polygon sphere."
+            },
+            {
+                "node": "mountain",
+                "action": "Apply massive, low-frequency noise to distort the overall shape into a potato."
+            },
+            {
+                "node": "scatter & copy",
+                "action": "Scatter points and copy small spheres to them."
+            },
+            {
+                "node": "boolean",
+                "action": "Subtract the small spheres from the main body to create craters."
+            }
+        ],
+        "expected_outcome": "A highly detailed asteroid."
+    },
+    {
+        "asset": "Procedural Planet",
+        "description": "A planetary body with continents and oceans.",
+        "nodes": [
+            "sphere",
+            "vopnet",
+            "polyreduce",
+            "color"
+        ],
+        "node_settings": [
+            {
+                "node": "sphere",
+                "action": "Create a very high-res sphere."
+            },
+            {
+                "node": "vopnet (Displacement)",
+                "action": "Use multiple layers of Curl Noise to push points out (continents) and leave others flat (oceans)."
+            },
+            {
+                "node": "color",
+                "action": "Map height to color: blue for low areas, green/brown for mid, white for peaks."
+            }
+        ],
+        "expected_outcome": "A stylized planetary globe."
+    },
+    {
+        "asset": "Stalagmite / Stalactite",
+        "description": "Cave formations.",
+        "nodes": [
+            "cone",
+            "mountain",
+            "vdbfrompolygons",
+            "vdbsmooth",
+            "convertvdb"
+        ],
+        "node_settings": [
+            {
+                "node": "cone",
+                "action": "Tall, thin cone shape."
+            },
+            {
+                "node": "mountain",
+                "action": "Add heavy vertical noise to make it lumpy and uneven."
+            },
+            {
+                "node": "vdb",
+                "action": "Convert to VDB, smooth it heavily to get that melted wax/drip look, and convert back to polygons."
+            }
+        ],
+        "expected_outcome": "Organic cave spikes."
+    },
+    {
+        "asset": "Tire (Tread)",
+        "description": "A car tire with complex tread patterns.",
+        "nodes": [
+            "grid",
+            "polyextrude",
+            "bend",
+            "mirror"
+        ],
+        "node_settings": [
+            {
+                "node": "grid",
+                "action": "Create a small, flat square representing one tread block."
+            },
+            {
+                "node": "polyextrude",
+                "action": "Extrude it upward to give it depth."
+            },
+            {
+                "node": "copy",
+                "action": "Copy it in a line to form a long strip."
+            },
+            {
+                "node": "bend",
+                "action": "Bend the strip 360 degrees to form the circular tire."
+            }
+        ],
+        "expected_outcome": "A detailed vehicle tire."
+    },
+    {
+        "asset": "Traffic Cone",
+        "description": "Orange street cone with a base.",
+        "nodes": [
+            "tube",
+            "box",
+            "color",
+            "merge"
+        ],
+        "node_settings": [
+            {
+                "node": "tube",
+                "action": "Taper heavily into a cone shape. Color it orange."
+            },
+            {
+                "node": "box",
+                "action": "Flat square base. Color it orange."
+            },
+            {
+                "node": "group",
+                "action": "Select the middle faces of the cone and color them white for the reflective stripe."
+            }
+        ],
+        "expected_outcome": "A standard traffic safety cone."
+    }
+]

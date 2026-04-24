@@ -1,0 +1,766 @@
+{
+  "Definitions": {
+    "measuredarea": "The surface area of the primitive in square units.",
+    "measuredvolume": "The volume of the primitive in cubic units (for closed manifolds).",
+    "measuredlength": "The length of the curve or perimeter in units.",
+    "transform": "A 4x4 or 3x3 matrix representing the local transformation of a packed primitive.",
+    "packedfullpath": "The full system path to the source file for a packed disk primitive.",
+    "vdb_res": "The voxel resolution (x, y, z) of a VDB primitive.",
+    "vdb_class": "The type of VDB (Fog, SDF, etc.).",
+    "bounds": "The local bounding box of the primitive.",
+    "typename": "The internal Houdini name for the primitive type.",
+    "viewportlod": "The level of detail used for viewport display (box, centroid, full, etc.).",
+    "pointcount": "The number of points making up this specific primitive.",
+    "closed": "Boolean indicating if a curve or surface is closed."
+  },
+  "Primitive_Types": {
+    "Polygon": {
+      "primitivetokens": {
+        "value": "('primitivetokens', 'memoryusage', 'vertexcount', 'indexorder', 'typename', 'typeid', 'bounds', 'measuredvolume', 'measuredarea', 'measuredperimeter', 'closed')",
+        "type": "tuple"
+      },
+      "memoryusage": {
+        "value": "40",
+        "type": "int"
+      },
+      "vertexcount": {
+        "value": "4",
+        "type": "int"
+      },
+      "indexorder": {
+        "value": "0",
+        "type": "int"
+      },
+      "typename": {
+        "value": "Poly",
+        "type": "str"
+      },
+      "typeid": {
+        "value": "1",
+        "type": "int"
+      },
+      "bounds": {
+        "value": "(-0.5, 0.5, -0.5, 0.5, -0.5, -0.5)",
+        "type": "tuple"
+      },
+      "measuredvolume": {
+        "value": "0.16666666666666666",
+        "type": "float"
+      },
+      "measuredarea": {
+        "value": "1.0",
+        "type": "float"
+      },
+      "measuredperimeter": {
+        "value": "4.0",
+        "type": "float"
+      },
+      "closed": {
+        "value": "1",
+        "type": "int"
+      }
+    },
+    "VDB": {
+      "primitivetokens": {
+        "value": "('primitivetokens', 'memoryusage', 'vertexcount', 'indexorder', 'typename', 'typeid', 'bounds', 'measuredvolume', 'measuredarea', 'measuredperimeter', 'background', 'voxelsize', 'activevoxeldimensions', 'activevoxelcount', 'transform', 'taper', 'volumevisualmode', 'volumevisualdensity', 'volumevisualiso', 'volumevisuallod', 'volumetypeinfo', 'volumeminvalue', 'volumemaxvalue', 'volumeavgvalue', 'vdb_class', 'vdb_creator', 'vdb_is_local_space', 'vdb_is_saved_as_half_float', 'vdb_value_type', 'vdb_vector_type')",
+        "type": "tuple"
+      },
+      "memoryusage": {
+        "value": "2451784",
+        "type": "int"
+      },
+      "vertexcount": {
+        "value": "1",
+        "type": "int"
+      },
+      "indexorder": {
+        "value": "0",
+        "type": "int"
+      },
+      "typename": {
+        "value": "VDB",
+        "type": "str"
+      },
+      "typeid": {
+        "value": "23",
+        "type": "int"
+      },
+      "bounds": {
+        "value": "(-0.75, 0.75, -0.75, 0.75, -0.75, 0.75)",
+        "type": "tuple"
+      },
+      "measuredvolume": {
+        "value": "1.0189736406938985",
+        "type": "float"
+      },
+      "measuredarea": {
+        "value": "5.621378815331447",
+        "type": "float"
+      },
+      "measuredperimeter": {
+        "value": "0.0",
+        "type": "float"
+      },
+      "background": {
+        "value": "0.30000001192092896",
+        "type": "float"
+      },
+      "voxelsize": {
+        "value": "(0.10000000149011612, 0.10000000149011612, 0.10000000149011612)",
+        "type": "tuple"
+      },
+      "activevoxeldimensions": {
+        "value": "(15, 15, 15)",
+        "type": "tuple"
+      },
+      "activevoxelcount": {
+        "value": "3086",
+        "type": "int"
+      },
+      "transform": {
+        "value": "(0.10000000149011612, 0.0, 0.0, 0.0, 0.0, 0.10000000149011612, 0.0, 0.0, 0.0, 0.0, 0.10000000149011612, 0.0, 0.0, 0.0, 0.0, 1.0)",
+        "type": "tuple"
+      },
+      "taper": {
+        "value": "1.0",
+        "type": "float"
+      },
+      "volumevisualmode": {
+        "value": "iso",
+        "type": "str"
+      },
+      "volumevisualdensity": {
+        "value": "1.0",
+        "type": "float"
+      },
+      "volumevisualiso": {
+        "value": "0.0",
+        "type": "float"
+      },
+      "volumevisuallod": {
+        "value": "full",
+        "type": "str"
+      },
+      "volumetypeinfo": {
+        "value": "none",
+        "type": "str"
+      },
+      "volumeminvalue": {
+        "value": "-0.2000001072883606",
+        "type": "float"
+      },
+      "volumemaxvalue": {
+        "value": "0.24494889378547668",
+        "type": "float"
+      },
+      "volumeavgvalue": {
+        "value": "0.07147243176662374",
+        "type": "float"
+      },
+      "vdb_class": {
+        "value": "level set",
+        "type": "str"
+      },
+      "vdb_creator": {
+        "value": "",
+        "type": "str"
+      },
+      "vdb_is_local_space": {
+        "value": "0",
+        "type": "int"
+      },
+      "vdb_is_saved_as_half_float": {
+        "value": "0",
+        "type": "int"
+      },
+      "vdb_value_type": {
+        "value": "float",
+        "type": "str"
+      },
+      "vdb_vector_type": {
+        "value": "invariant",
+        "type": "str"
+      }
+    },
+    "Volume": {
+      "primitivetokens": {
+        "value": "('primitivetokens', 'memoryusage', 'vertexcount', 'indexorder', 'typename', 'typeid', 'bounds', 'measuredvolume', 'measuredarea', 'measuredperimeter', 'transform', 'volumebordertype', 'volumebordervalue', 'volumecompressiontol', 'volumecomponents', 'volumetypeid', 'volumeminvalue', 'volumemaxvalue', 'volumeavgvalue', 'volumevisualmode', 'volumevisualdensity', 'volumevisualiso', 'volumevisualtiles', 'volumetypeinfo', 'voxelresolution', 'voxeldata', 'voxelsize', 'taperx', 'tapery')",
+        "type": "tuple"
+      },
+      "memoryusage": {
+        "value": "4608",
+        "type": "int"
+      },
+      "vertexcount": {
+        "value": "1",
+        "type": "int"
+      },
+      "indexorder": {
+        "value": "0",
+        "type": "int"
+      },
+      "typename": {
+        "value": "Volume",
+        "type": "str"
+      },
+      "typeid": {
+        "value": "20",
+        "type": "int"
+      },
+      "bounds": {
+        "value": "(-0.699999988079071, 0.699999988079071, -0.699999988079071, 0.699999988079071, -0.699999988079071, 0.699999988079071)",
+        "type": "tuple"
+      },
+      "measuredvolume": {
+        "value": "2.74399995803833",
+        "type": "float"
+      },
+      "measuredarea": {
+        "value": "11.75999927520752",
+        "type": "float"
+      },
+      "measuredperimeter": {
+        "value": "0.0",
+        "type": "float"
+      },
+      "transform": {
+        "value": "(0.699999988079071, 0.0, 0.0, 0.0, 0.699999988079071, 0.0, 0.0, 0.0, 0.699999988079071)",
+        "type": "tuple"
+      },
+      "volumebordertype": {
+        "value": "constant",
+        "type": "str"
+      },
+      "volumebordervalue": {
+        "value": "0.0",
+        "type": "float"
+      },
+      "volumecompressiontol": {
+        "value": "0.0",
+        "type": "float"
+      },
+      "volumecomponents": {
+        "value": "1",
+        "type": "int"
+      },
+      "volumetypeid": {
+        "value": "1",
+        "type": "int"
+      },
+      "volumeminvalue": {
+        "value": "0.0",
+        "type": "float"
+      },
+      "volumemaxvalue": {
+        "value": "1.0",
+        "type": "float"
+      },
+      "volumeavgvalue": {
+        "value": "0.3851426236629486",
+        "type": "float"
+      },
+      "volumevisualmode": {
+        "value": "smoke",
+        "type": "str"
+      },
+      "volumevisualdensity": {
+        "value": "1.0",
+        "type": "float"
+      },
+      "volumevisualiso": {
+        "value": "0.0",
+        "type": "float"
+      },
+      "volumevisualtiles": {
+        "value": "1.0",
+        "type": "float"
+      },
+      "volumetypeinfo": {
+        "value": "none",
+        "type": "str"
+      },
+      "voxelresolution": {
+        "value": "(10, 10, 10)",
+        "type": "tuple"
+      },
+      "voxeldata": {
+        "value": "(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714273452758789, 0.0, 0.0, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714263916015625, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5714273452758789, 0.0, 0.0, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714263916015625, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5714273452758789, 0.0, 0.0, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714263916015625, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5714273452758789, 0.0, 0.0, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714263916015625, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5714273452758789, 0.0, 0.0, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714263916015625, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5714273452758789, 0.0, 0.0, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714263916015625, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714285373687744, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5714273452758789, 0.0, 0.0, 0.5714285373687744, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5714273452758789, 0.0, 0.0, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714263916015625, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714263916015625, 0.0, 0.0, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714263916015625, 0.0, 0.0, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714263916015625, 0.0, 0.0, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714263916015625, 0.0, 0.0, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714263916015625, 0.0, 0.0, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714263916015625, 0.0, 0.0, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714273452758789, 0.5714263916015625, 0.0, 0.0, 0.5714263916015625, 0.5714263916015625, 0.5714263916015625, 0.5714263916015625, 0.5714263916015625, 0.5714263916015625, 0.5714263916015625, 0.5714254379272461, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)",
+        "type": "tuple"
+      },
+      "voxelsize": {
+        "value": "(0.14000001549720764, 0.14000001549720764, 0.14000001549720764)",
+        "type": "tuple"
+      },
+      "taperx": {
+        "value": "1.0",
+        "type": "float"
+      },
+      "tapery": {
+        "value": "1.0",
+        "type": "float"
+      }
+    },
+    "Packed_Geometry": {
+      "primitivetokens": {
+        "value": "('primitivetokens', 'memoryusage', 'vertexcount', 'indexorder', 'typename', 'typeid', 'bounds', 'measuredvolume', 'measuredarea', 'measuredperimeter', 'packedprimitivename', 'packedtypename', 'packedtypelabel', 'viewportlod', 'packedbounds', 'packedrenderbounds', 'pivot', 'transform', 'packedlocaltransform', 'packedfulltransform', 'pointinstancetransform', 'geometryid', 'treatasfolder')",
+        "type": "tuple"
+      },
+      "memoryusage": {
+        "value": "472",
+        "type": "int"
+      },
+      "vertexcount": {
+        "value": "1",
+        "type": "int"
+      },
+      "indexorder": {
+        "value": "0",
+        "type": "int"
+      },
+      "typename": {
+        "value": "PackedGeometry",
+        "type": "str"
+      },
+      "typeid": {
+        "value": "26",
+        "type": "int"
+      },
+      "bounds": {
+        "value": "(-0.5, 0.5, -0.5, 0.5, -0.5, 0.5)",
+        "type": "tuple"
+      },
+      "measuredvolume": {
+        "value": "0.0",
+        "type": "float"
+      },
+      "measuredarea": {
+        "value": "0.0",
+        "type": "float"
+      },
+      "measuredperimeter": {
+        "value": "0.0",
+        "type": "float"
+      },
+      "packedprimitivename": {
+        "value": "PackedGeometry.0",
+        "type": "str"
+      },
+      "packedtypename": {
+        "value": "PackedGeometry",
+        "type": "str"
+      },
+      "packedtypelabel": {
+        "value": "Packed Geometry",
+        "type": "str"
+      },
+      "viewportlod": {
+        "value": "full",
+        "type": "str"
+      },
+      "packedbounds": {
+        "value": "(-0.5, 0.5, -0.5, 0.5, -0.5, 0.5)",
+        "type": "tuple"
+      },
+      "packedrenderbounds": {
+        "value": "(-0.5, 0.5, -0.5, 0.5, -0.5, 0.5)",
+        "type": "tuple"
+      },
+      "pivot": {
+        "value": "(0.0, 0.0, 0.0)",
+        "type": "tuple"
+      },
+      "transform": {
+        "value": "(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0)",
+        "type": "tuple"
+      },
+      "packedlocaltransform": {
+        "value": "(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0)",
+        "type": "tuple"
+      },
+      "packedfulltransform": {
+        "value": "(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0)",
+        "type": "tuple"
+      },
+      "pointinstancetransform": {
+        "value": "0",
+        "type": "int"
+      },
+      "geometryid": {
+        "value": "263361",
+        "type": "int"
+      },
+      "treatasfolder": {
+        "value": "0",
+        "type": "int"
+      }
+    },
+    "NURBS_Curve": {
+      "primitivetokens": {
+        "value": "('primitivetokens', 'memoryusage', 'vertexcount', 'indexorder', 'typename', 'typeid', 'bounds', 'measuredvolume', 'measuredarea', 'measuredperimeter', 'closed', 'basis', 'order', 'knots', 'rational', 'arclength')",
+        "type": "tuple"
+      },
+      "memoryusage": {
+        "value": "192",
+        "type": "int"
+      },
+      "vertexcount": {
+        "value": "36",
+        "type": "int"
+      },
+      "indexorder": {
+        "value": "0",
+        "type": "int"
+      },
+      "typename": {
+        "value": "BezierCurve",
+        "type": "str"
+      },
+      "typeid": {
+        "value": "3",
+        "type": "int"
+      },
+      "bounds": {
+        "value": "(-1.0000001192092896, 1.0000001192092896, -1.0, 1.0, 0.0, 0.0)",
+        "type": "tuple"
+      },
+      "measuredvolume": {
+        "value": "0.0",
+        "type": "float"
+      },
+      "measuredarea": {
+        "value": "3.189168691635132",
+        "type": "float"
+      },
+      "measuredperimeter": {
+        "value": "6.281876564025879",
+        "type": "float"
+      },
+      "closed": {
+        "value": "1",
+        "type": "int"
+      },
+      "basis": {
+        "value": "Bezier",
+        "type": "str"
+      },
+      "order": {
+        "value": "4",
+        "type": "int"
+      },
+      "knots": {
+        "value": "(0.0, 0.0833333325336991, 0.1666666746630091, 0.25000000719670823, 0.33333333973040735, 0.4166666530728846, 0.5000000047978055, 0.5833333565227264, 0.6666666698652037, 0.7499999928032919, 0.83333331574138, 0.9166667058487447, 1.0000000959561093)",
+        "type": "tuple"
+      },
+      "rational": {
+        "value": "0",
+        "type": "int"
+      },
+      "arclength": {
+        "value": "6.281876673242021",
+        "type": "float"
+      }
+    },
+    "NURBS_Surface": {
+      "primitivetokens": {
+        "value": "('primitivetokens', 'memoryusage', 'vertexcount', 'indexorder', 'typename', 'typeid', 'bounds', 'measuredvolume', 'measuredarea', 'measuredperimeter', 'rowcol', 'nu', 'nv', 'closed', 'uwrap', 'vwrap', 'connectivity')",
+        "type": "tuple"
+      },
+      "memoryusage": {
+        "value": "2568",
+        "type": "int"
+      },
+      "vertexcount": {
+        "value": "312",
+        "type": "int"
+      },
+      "indexorder": {
+        "value": "0",
+        "type": "int"
+      },
+      "typename": {
+        "value": "Mesh",
+        "type": "str"
+      },
+      "typeid": {
+        "value": "4",
+        "type": "int"
+      },
+      "bounds": {
+        "value": "(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0)",
+        "type": "tuple"
+      },
+      "measuredvolume": {
+        "value": "4.070552239815394",
+        "type": "float"
+      },
+      "measuredarea": {
+        "value": "12.38774098455906",
+        "type": "float"
+      },
+      "measuredperimeter": {
+        "value": "0.0",
+        "type": "float"
+      },
+      "rowcol": {
+        "value": "(13, 24)",
+        "type": "tuple"
+      },
+      "nu": {
+        "value": "24",
+        "type": "int"
+      },
+      "nv": {
+        "value": "13",
+        "type": "int"
+      },
+      "closed": {
+        "value": "(1, 0)",
+        "type": "tuple"
+      },
+      "uwrap": {
+        "value": "1",
+        "type": "int"
+      },
+      "vwrap": {
+        "value": "0",
+        "type": "int"
+      },
+      "connectivity": {
+        "value": "quads",
+        "type": "str"
+      }
+    },
+    "Alembic": {
+      "primitivetokens": {
+        "value": "('primitivetokens', 'memoryusage', 'vertexcount', 'indexorder', 'typename', 'typeid', 'bounds', 'measuredvolume', 'measuredarea', 'measuredperimeter', 'packedprimitivename', 'packedtypename', 'packedtypelabel', 'viewportlod', 'packedbounds', 'packedrenderbounds', 'pivot', 'transform', 'packedlocaltransform', 'packedfulltransform', 'pointinstancetransform', 'abctypename', 'abcfilename', 'abcfilenames', 'abcobjectpath', 'abcsourcepath', 'abcpointcount', 'abcframe', 'abcanimation', 'abcusevisibility', 'abcvisibility', 'abcfullvisibility', 'abcusetransform', 'abcpoint', 'abcvertex', 'abcprimitive', 'abcdetail', 'abcfaceset')",
+        "type": "tuple"
+      },
+      "memoryusage": {
+        "value": "9699",
+        "type": "int"
+      },
+      "vertexcount": {
+        "value": "1",
+        "type": "int"
+      },
+      "indexorder": {
+        "value": "0",
+        "type": "int"
+      },
+      "typename": {
+        "value": "AlembicRef",
+        "type": "str"
+      },
+      "typeid": {
+        "value": "32",
+        "type": "int"
+      },
+      "bounds": {
+        "value": "(-0.5, 0.5205897688865662, -0.5, 0.5205897688865662, -0.5, 0.5205897688865662)",
+        "type": "tuple"
+      },
+      "measuredvolume": {
+        "value": "0.0",
+        "type": "float"
+      },
+      "measuredarea": {
+        "value": "0.0",
+        "type": "float"
+      },
+      "measuredperimeter": {
+        "value": "0.0",
+        "type": "float"
+      },
+      "packedprimitivename": {
+        "value": "/gabc/gabc",
+        "type": "str"
+      },
+      "packedtypename": {
+        "value": "AlembicRef",
+        "type": "str"
+      },
+      "packedtypelabel": {
+        "value": "Packed Alembic",
+        "type": "str"
+      },
+      "viewportlod": {
+        "value": "full",
+        "type": "str"
+      },
+      "packedbounds": {
+        "value": "(-0.5, 0.5205897688865662, -0.5, 0.5205897688865662, -0.5, 0.5205897688865662)",
+        "type": "tuple"
+      },
+      "packedrenderbounds": {
+        "value": "(-0.5, 0.5205897688865662, -0.5, 0.5205897688865662, -0.5, 0.5205897688865662)",
+        "type": "tuple"
+      },
+      "pivot": {
+        "value": "(0.010294884443283081, 0.010294884443283081, 0.010294884443283081)",
+        "type": "tuple"
+      },
+      "transform": {
+        "value": "(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0)",
+        "type": "tuple"
+      },
+      "packedlocaltransform": {
+        "value": "(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0)",
+        "type": "tuple"
+      },
+      "packedfulltransform": {
+        "value": "(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0)",
+        "type": "tuple"
+      },
+      "pointinstancetransform": {
+        "value": "0",
+        "type": "int"
+      },
+      "abctypename": {
+        "value": "PolyMesh",
+        "type": "str"
+      },
+      "abcfilename": {
+        "value": "/Applications/Houdini/Houdini21.0.559/Frameworks/Houdini.framework/Versions/21.0/Resources/houdini/geo/default.abc",
+        "type": "str"
+      },
+      "abcfilenames": {
+        "value": "[\"/Applications/Houdini/Houdini21.0.559/Frameworks/Houdini.framework/Versions/21.0/Resources/houdini/geo/default.abc\"]",
+        "type": "str"
+      },
+      "abcobjectpath": {
+        "value": "/gabc/gabc",
+        "type": "str"
+      },
+      "abcsourcepath": {
+        "value": "/gabc/gabc",
+        "type": "str"
+      },
+      "abcpointcount": {
+        "value": "593",
+        "type": "int"
+      },
+      "abcframe": {
+        "value": "0.0",
+        "type": "float"
+      },
+      "abcanimation": {
+        "value": "constant",
+        "type": "str"
+      },
+      "abcusevisibility": {
+        "value": "1",
+        "type": "int"
+      },
+      "abcvisibility": {
+        "value": "-1",
+        "type": "int"
+      },
+      "abcfullvisibility": {
+        "value": "1",
+        "type": "int"
+      },
+      "abcusetransform": {
+        "value": "1",
+        "type": "int"
+      },
+      "abcpoint": {
+        "value": "Cd P",
+        "type": "str"
+      },
+      "abcvertex": {
+        "value": "N",
+        "type": "str"
+      },
+      "abcprimitive": {
+        "value": "",
+        "type": "str"
+      },
+      "abcdetail": {
+        "value": "",
+        "type": "str"
+      },
+      "abcfaceset": {
+        "value": "",
+        "type": "str"
+      }
+    }
+  },
+  "Detail_Intrinsics": {
+    "globaltokens": {
+      "value": "('bounds', 'detailattributes', 'edgegroups', 'globalattributes', 'globaltokens', 'memoryusage', 'metaexpr_code', 'metaexpr_string', 'pointattributes', 'pointcount', 'pointgroups', 'precision', 'primitiveattributes', 'primitivecount', 'primitivegroups', 'primitivetokens', 'vertexattributes', 'vertexcount', 'vertexgroups')",
+      "type": "tuple"
+    },
+    "primitivetokens": {
+      "value": "('abcanimation', 'abcdetail', 'abcfaceset', 'abcfilename', 'abcfilenames', 'abcframe', 'abcfullvisibility', 'abcobjectpath', 'abcpoint', 'abcpointcount', 'abcprimitive', 'abcsourcepath', 'abctypename', 'abcusetransform', 'abcusevisibility', 'abcvertex', 'abcvisibility', 'activevoxelcount', 'activevoxeldimensions', 'agentchannelnames', 'agentchannelvalues', 'agentclipcatalog', 'agentclipcatalogfilenames', 'agentcliplayerids', 'agentcliplayermodes', 'agentcliplayerparents', 'agentcliplayerweights', 'agentclipnames', 'agentcliptimes', 'agentcliptransformgroups', 'agentclipweights', 'agentcollisionlayer', 'agentcollisionlayers', 'agentcurrentlayer', 'agentcurrentlayers', 'agenthascustomchannelvalues', 'agenthascustomtransforms', 'agentlayers', 'agentlocaltransforms', 'agentmetadata', 'agentrigparents', 'agentshapelibrary', 'agenttransformgroups', 'agenttransformnames', 'agentworldtransforms', 'arclength', 'background', 'basis', 'bounds', 'closed', 'connectivity', 'dataid', 'expandedvertexmap', 'expandfilename', 'expandframe', 'facecounts', 'filename', 'filenames', 'fragmentattribute', 'fragmentname', 'geometryid', 'index', 'indexorder', 'knots', 'measuredarea', 'measuredperimeter', 'measuredvolume', 'memoryusage', 'metakernel', 'metaweight', 'nu', 'nv', 'order', 'packedbounds', 'packedfulltransform', 'packedlocaltransform', 'packedprimitivename', 'packedrenderbounds', 'packedtypelabel', 'packedtypename', 'part_blurtime', 'part_motionblur', 'part_size', 'part_type', 'part_virtual', 'pivot', 'pointinstancetransform', 'primitivetokens', 'rational', 'rowcol', 'sequencelen', 'squad_xyexp', 'squad_zexp', 'taper', 'taperx', 'tapery', 'transform', 'treatasfolder', 'tubetaper', 'typeid', 'typename', 'uknots', 'unexpandedfilename', 'uorder', 'usdAltFileName', 'usdFileName', 'usdFrame', 'usdIndex', 'usdLocalToWorldTransform', 'usdPrimPath', 'usdPurpose', 'usdSrcPrimPath', 'usdType', 'usdViewportPurpose', 'uwrap', 'vdb_class', 'vdb_creator', 'vdb_is_local_space', 'vdb_is_saved_as_half_float', 'vdb_value_type', 'vdb_vector_type', 'vertexcount', 'viewportlod', 'vknots', 'volumeavgvalue', 'volumebordertype', 'volumebordervalue', 'volumecomponents', 'volumecompressiontol', 'volumemaxvalue', 'volumeminvalue', 'volumetypeid', 'volumetypeinfo', 'volumevisualdensity', 'volumevisualiso', 'volumevisuallod', 'volumevisualmode', 'volumevisualtiles', 'vorder', 'voxeldata', 'voxelresolution', 'voxelsize', 'vwrap', 'wrap')",
+      "type": "tuple"
+    },
+    "memoryusage": {
+      "value": "3428",
+      "type": "int"
+    },
+    "vertexcount": {
+      "value": "24",
+      "type": "int"
+    },
+    "pointcount": {
+      "value": "8",
+      "type": "int"
+    },
+    "primitivecount": {
+      "value": "6",
+      "type": "int"
+    },
+    "vertexattributes": {
+      "value": "()",
+      "type": "tuple"
+    },
+    "pointattributes": {
+      "value": "('P',)",
+      "type": "tuple"
+    },
+    "primitiveattributes": {
+      "value": "()",
+      "type": "tuple"
+    },
+    "globalattributes": {
+      "value": "()",
+      "type": "tuple"
+    },
+    "detailattributes": {
+      "value": "()",
+      "type": "tuple"
+    },
+    "vertexgroups": {
+      "value": "()",
+      "type": "tuple"
+    },
+    "pointgroups": {
+      "value": "()",
+      "type": "tuple"
+    },
+    "primitivegroups": {
+      "value": "()",
+      "type": "tuple"
+    },
+    "edgegroups": {
+      "value": "()",
+      "type": "tuple"
+    },
+    "precision": {
+      "value": "32",
+      "type": "int"
+    },
+    "bounds": {
+      "value": "(-0.5, 0.5, -0.5, 0.5, -0.5, 0.5)",
+      "type": "tuple"
+    },
+    "metaexpr_code": {
+      "value": "(99,)",
+      "type": "tuple"
+    },
+    "metaexpr_string": {
+      "value": "",
+      "type": "str"
+    }
+  }
+}

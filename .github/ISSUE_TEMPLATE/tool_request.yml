@@ -1,0 +1,49 @@
+name: New tool request
+description: Request a new agent tool that wraps a Houdini API.
+title: "[tool]: "
+labels: ["tool", "enhancement"]
+body:
+  - type: input
+    id: tool-name
+    attributes:
+      label: Proposed tool name
+      placeholder: "create_vellum_cloth"
+    validations:
+      required: true
+
+  - type: textarea
+    id: hou-api
+    attributes:
+      label: Underlying hou.* API
+      description: Which `hou.*` calls does this tool need to wrap?
+    validations:
+      required: true
+
+  - type: textarea
+    id: args
+    attributes:
+      label: Arguments & schema
+      description: List argument names, types, units, and sensible ranges.
+      placeholder: |
+        - parent_path: str (absolute hou path)
+        - density: float [0.1, 10.0], default 1.0
+        - solver: enum {"xpbd", "gauss-seidel"}, default "xpbd"
+    validations:
+      required: true
+
+  - type: textarea
+    id: example-prompt
+    attributes:
+      label: Example prompt that would trigger it
+      placeholder: "Make the cloth 2x stiffer and add self-collisions."
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety review
+      options:
+        - label: Tool does not execute arbitrary Python / VEX strings.
+        - label: Tool does not write outside `$HIP` / `$HOUDINIMIND_OUTPUT`.
+        - label: All numeric args have bounded ranges.

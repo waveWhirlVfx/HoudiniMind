@@ -1,0 +1,6 @@
+{"event": "turn_start", "turn_index": 1, "user_message": "Create a chair"}
+{"event": "llm_call", "turn_index": 1, "elapsed_ms": 1200}
+{"event": "tool", "turn_index": 1, "tool": "create_node", "status": "ok", "duration_ms": 40}
+{"event": "system_note", "turn_index": 1, "content": "[VERIFICATION] PASS\nOutputs checked: /obj/chair_geo/OUT"}
+{"event": "system_note", "turn_index": 1, "content": "[SEMANTIC SCORE] PASS\nOverall: 0.84 / Threshold: 0.72"}
+{"event": "response", "turn_index": 1, "content": "Build completed successfully."}

@@ -1,0 +1,55 @@
+{
+  "_comment": "Copy the 'mcpServers' block into your Gemini CLI settings.json, Claude Desktop config, or Cursor MCP settings.",
+  "_instructions": [
+    "1. Start the MCP server inside Houdini: Toggle MCP Server in the Houdini Agent panel",
+    "2. Configure your AI client with the settings below",
+    "3. Optional: set HOUDINIMIND_MCP_TOKEN to the same value before launching Houdini and in this bridge config",
+    "4. Dangerous/confirmation tools are blocked over MCP unless Houdini is launched with HOUDINIMIND_MCP_ALLOW_DANGEROUS=1",
+    "5. The bridge connects via TCP to Houdini's internal server"
+  ],
+  "gemini_cli_settings": {
+    "_note": "Add this to your Gemini CLI settings.json (usually ~/.gemini/settings.json)",
+    "mcpServers": {
+      "houdinimind": {
+        "command": "python",
+        "args": [
+          "/path/to/HoudiniMind/src/houdinimind/agent/mcp_bridge.py"
+        ],
+        "env": {
+          "HOUDINI_HOST": "127.0.0.1",
+          "HOUDINI_PORT": "9876",
+          "HOUDINIMIND_MCP_TOKEN": "change-me"
+        }
+      }
+    }
+  },
+  "claude_desktop_config": {
+    "_note": "Add this to claude_desktop_config.json",
+    "mcpServers": {
+      "houdinimind": {
+        "command": "python",
+        "args": [
+          "/path/to/HoudiniMind/src/houdinimind/agent/mcp_bridge.py"
+        ],
+        "env": {
+          "HOUDINI_HOST": "127.0.0.1",
+          "HOUDINI_PORT": "9876",
+          "HOUDINIMIND_MCP_TOKEN": "change-me"
+        }
+      }
+    }
+  },
+  "cursor_config": {
+    "_note": "Add to Cursor Settings > MCP Servers",
+    "name": "houdinimind",
+    "command": "python",
+    "args": [
+      "/path/to/HoudiniMind/src/houdinimind/agent/mcp_bridge.py"
+    ],
+    "env": {
+      "HOUDINI_HOST": "127.0.0.1",
+      "HOUDINI_PORT": "9876",
+      "HOUDINIMIND_MCP_TOKEN": "change-me"
+    }
+  }
+}

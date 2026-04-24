@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pythonPanelDocument>
+  <interface name="HoudiniMind" label="Houdini Agent" icon="MISC_python" help_url="">
+    <script><![CDATA[
+import os
+import sys
+import importlib
+
+# Ensure root is in sys.path
+HOUDINIMIND_ROOT = os.environ.get("HOUDINIMIND_ROOT")
+if not HOUDINIMIND_ROOT:
+    # Fallback to current file parent
+    HOUDINIMIND_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+if HOUDINIMIND_ROOT and HOUDINIMIND_ROOT not in sys.path:
+    sys.path.insert(0, HOUDINIMIND_ROOT)
+
+_SRC_ROOT = os.path.join(HOUDINIMIND_ROOT, "src") if HOUDINIMIND_ROOT else None
+if _SRC_ROOT and _SRC_ROOT not in sys.path:
+    sys.path.insert(0, _SRC_ROOT)
+
+# Force fresh import - clear cached HoudiniMind modules only
+for mod_name in list(sys.modules.keys()):
+    if mod_name == "hm_ui" or mod_name.startswith("hm_ui.") or mod_name == "houdinimind" or mod_name.startswith("houdinimind."):
+        del sys.modules[mod_name]
+
+import hm_ui.panel
+# Reload to ensure latest version
+importlib.reload(hm_ui.panel)
+
+def onCreateInterface():
+    return hm_ui.panel.createInterface()
+]]></script>
+    <includeInPaneTabMenu menu_position="0" create_separator="false"/>
+    <help><![CDATA[]]></help>
+  </interface>
+</pythonPanelDocument>

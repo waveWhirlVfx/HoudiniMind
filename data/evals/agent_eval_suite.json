@@ -1,0 +1,90 @@
+{
+  "name": "houdinimind_agent_eval_v1",
+  "description": "End-to-end agent evaluation suite for HoudiniMind. Tests tool selection, scene mutation, and quality.",
+  "cases": [
+    {
+      "id": "build_box",
+      "prompt": "Create a box at the origin",
+      "expected_tools": ["create_node"],
+      "expected_node_types": ["box"],
+      "success_criteria": "scene contains a box node"
+    },
+    {
+      "id": "build_table",
+      "prompt": "Build a simple table",
+      "expected_tools": ["create_node", "safe_set_parameter", "connect_nodes"],
+      "expected_node_types": ["box", "xform", "merge"],
+      "success_criteria": "audit_spatial_layout returns no at_origin_issues"
+    },
+    {
+      "id": "fix_error",
+      "prompt": "Fix all errors in my scene",
+      "expected_tools": ["get_all_errors", "get_node_parameters"],
+      "expected_mode": "debug",
+      "success_criteria": "get_all_errors returns empty after fix"
+    },
+    {
+      "id": "vex_wrangle",
+      "prompt": "Add a VEX wrangle that randomizes pscale between 0.1 and 0.5",
+      "expected_tools": ["create_node", "write_vex_code"],
+      "expected_node_types": ["attribwrangle"],
+      "success_criteria": "node contains valid VEX snippet with @pscale"
+    },
+    {
+      "id": "setup_flip",
+      "prompt": "Set up a FLIP fluid simulation",
+      "expected_tools": ["setup_flip_fluid"],
+      "expected_mode": "build",
+      "success_criteria": "DOP network contains flipsolver"
+    },
+    {
+      "id": "node_info",
+      "prompt": "Tell me about the selected node",
+      "expected_tools": ["get_current_node_path", "get_node_parameters"],
+      "expected_mode": "advice",
+      "success_criteria": "response contains node type and parameter info"
+    },
+    {
+      "id": "scene_summary",
+      "prompt": "What's in my scene?",
+      "expected_tools": ["get_scene_summary"],
+      "expected_mode": "advice",
+      "success_criteria": "response describes scene contents"
+    },
+    {
+      "id": "connect_nodes",
+      "prompt": "Connect the box to the transform node",
+      "expected_tools": ["find_nodes", "connect_nodes"],
+      "expected_mode": "build",
+      "success_criteria": "get_node_inputs shows connection established"
+    },
+    {
+      "id": "material_assign",
+      "prompt": "Create a red principled shader and assign it to the box",
+      "expected_tools": ["create_material", "assign_material"],
+      "expected_mode": "build",
+      "success_criteria": "list_materials shows new material"
+    },
+    {
+      "id": "performance_check",
+      "prompt": "Why is my scene cooking so slowly?",
+      "expected_tools": ["profile_network", "measure_cook_time"],
+      "expected_mode": "debug",
+      "success_criteria": "response identifies slowest node"
+    },
+    {
+      "id": "research_query",
+      "prompt": "What's the best way to set up realistic ocean waves in Houdini?",
+      "expected_tools": ["search_knowledge"],
+      "expected_mode": "research",
+      "success_criteria": "response mentions ocean spectrum or wave tank"
+    },
+    {
+      "id": "usd_hierarchy",
+      "prompt": "Show me the USD stage hierarchy",
+      "expected_tools": ["get_usd_hierarchy"],
+      "expected_mode": "advice",
+      "success_criteria": "response shows prim paths"
+    }
+  ]
+}
