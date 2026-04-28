@@ -823,6 +823,60 @@ class HybridRetriever:
             intents.add("contexts")
         return intents
 
+    def _infer_metadata_preferences(self, query: str, query_terms: list[str]) -> dict:
+        """Infer metadata preferences (difficulty, performance) from query."""
+        query_lower = query.lower()
+        prefs = {
+            "preferred_difficulty": None,
+            "prefer_performant": False,
+            "prefer_simple": False,
+            "avoid_severity": None,
+        }
+
+        # Detect difficulty preferences
+        if any(x in query_lower for x in ["beginner", "simple", "basic", "easy", "tutorial"]):
+            prefs["preferred_difficulty"] = "beginner"
+            prefs["prefer_simple"] = True
+        elif any(x in query_lower for x in ["advanced", "complex", "expert", "pro"]):
+            prefs["preferred_difficulty"] = "advanced"
+        elif any(x in query_lower for x in ["how do i", "how to", "example", "snippet"]):
+            prefs["preferred_difficulty"] = "beginner"
+            prefs["prefer_simple"] = True
+
+        # Detect performance concerns
+        if any(x in query_lower for x in ["slow", "fast", "performance", "optimize", "speed", "lag"]):
+            prefs["prefer_performant"] = True
+
+        # Detect severity preferences for errors
+        if any(x in query_lower for x in ["crash", "fatal", "broken", "critical"]):
+            prefs["avoid_severity"] = "low"
+
+        return prefs
+
+    def _metadata_boost(self, entry: dict, prefs: dict) -> float:
+        """Calculate boost based on metadata alignment with preferences."""
+        boost = 0.0
+
+        difficulty = entry.get("difficulty", "").lower()
+        if prefs.get("preferred_difficulty") and difficulty == prefs["preferred_difficulty"]:
+            boost += 0.25
+
+        if prefs.get("prefer_simple") and difficulty in ("beginner", "reference"):
+            boost += 0.15
+
+        if prefs.get("prefer_performant"):
+            perf = entry.get("performance_impact", "").lower()
+            if perf in ("low", "optimal"):
+                boost += 0.18
+            elif perf == "medium":
+                boost += 0.06
+
+        severity = entry.get("severity", "").lower()
+        if prefs.get("avoid_severity") and severity != prefs["avoid_severity"]:
+            boost += 0.08
+
+        return boost
+
     def _looks_exact_lookup(self, query: str, query_terms: list[str], intents: set) -> bool:
         if intents.intersection({"node", "function", "expression", "intrinsic", "troubleshooting"}):
             return True
@@ -985,6 +1039,9 @@ class HybridRetriever:
         include_categories: list[str] | None = None,
         exclude_categories: list[str] | None = None,
         include_memory: bool = True,
+        difficulty_filter: str | None = None,
+        max_performance_impact: str | None = None,
+        prefer_performant: bool = False,
         **kwargs,
     ) -> list[dict]:
         if not self._entries or not self._bm25:
@@ -998,6 +1055,13 @@ class HybridRetriever:
             query, query_terms, self._detect_query_intents(query, query_terms)
         )
         intents = self._detect_query_intents(query, query_terms)
+
+        # ── Infer & apply metadata preferences ─────────────────────────
+        inferred_prefs = self._infer_metadata_preferences(query, query_terms)
+        if prefer_performant:
+            inferred_prefs["prefer_performant"] = True
+        if difficulty_filter:
+            inferred_prefs["preferred_difficulty"] = difficulty_filter
 
         # ── BM25 scores ──────────────────────────────────────────────
         bm25_scores = self._safe_bm25_scores(query)
@@ -1079,6 +1143,19 @@ class HybridRetriever:
             if exclude_categories and category in exclude_categories:
                 continue
 
+            # ── Metadata filtering ──────────────────────────────────────
+            if difficulty_filter:
+                entry_difficulty = entry.get("difficulty", "").lower()
+                if entry_difficulty != difficulty_filter.lower():
+                    continue
+
+            if max_performance_impact:
+                impact = entry.get("performance_impact", "").lower()
+                impact_order = {"low": 0, "medium": 1, "high": 2}
+                max_order = impact_order.get(max_performance_impact.lower(), 999)
+                if impact_order.get(impact, 999) > max_order:
+                    continue
+
             base_score = primary_lexical_weight * bm25_norm[i]
             if expanded_query_text != query:
                 base_score += expanded_lexical_weight * expanded_bm25_norm[i]
@@ -1096,6 +1173,7 @@ class HybridRetriever:
                 base_score
                 + self._intent_boost(features, intents, query_terms)
                 + self._exact_match_boost(i, features, query_terms, expanded_terms)
+                + self._metadata_boost(entry, inferred_prefs)
             )
 
             if score >= min_score:
@@ -1461,6 +1539,9 @@ class QueryAwareShardRetriever:
         include_categories: list[str] | None = None,
         exclude_categories: list[str] | None = None,
         include_memory: bool = True,
+        difficulty_filter: str | None = None,
+        max_performance_impact: str | None = None,
+        prefer_performant: bool = False,
         **kwargs,
     ) -> list[dict]:
         if not self._entries:
@@ -1511,6 +1592,9 @@ class QueryAwareShardRetriever:
                 include_categories=include_categories,
                 exclude_categories=exclude_categories,
                 include_memory=include_memory,
+                difficulty_filter=difficulty_filter,
+                max_performance_impact=max_performance_impact,
+                prefer_performant=prefer_performant,
                 **kwargs,
             )
             if results:
@@ -1539,6 +1623,9 @@ class QueryAwareShardRetriever:
                     include_categories=include_categories,
                     exclude_categories=exclude_categories,
                     include_memory=include_memory,
+                    difficulty_filter=difficulty_filter,
+                    max_performance_impact=max_performance_impact,
+                    prefer_performant=prefer_performant,
                     **kwargs,
                 )
                 if results:
