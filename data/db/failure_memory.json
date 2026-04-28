@@ -1,0 +1,1 @@
+{"_version": 1, "entries": [{"tool": "create_node_chain", "error": "Chain produced 0 nodes in /obj/table_geo. Errors: Step 1: node type is required and must be a non-empty string; Step 2: ", "request_tokens": ["a", "create", "table"], "turn": 0}]}

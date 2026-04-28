@@ -1,0 +1,84 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+pip-wheel-metadata/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+.python-version
+
+# Tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+.tox/
+.hypothesis/
+
+# Editors / IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Houdini / project-specific runtime artefacts
+data/debug/sessions/
+sessions/
+tmp/
+*.log
+*.jsonlines
+data/knowledge/*.generated.json
+data/knowledge/*.vectors.json
+data/knowledge/processed/
+data/db/*.db
+reports/
+
+# Scratch test artefacts (auto-regenerated, timestamp changes every run)
+tests/scratch/
+tests/scratch/**/*.vectors.json
+
+# Houdini scene backups
+*.hip.autosave
+backup/
+
+# Local config & secrets
+mcp_config.json
+.env
+.env.*
+!.env.example
+
+# Docs build output
+site/
+
+# Claude / agent scratch
+.claude/
+.code-review-graph/
+CLAUDE.md
+claude.md
+AGENTS.md
+
+*.jsonl
+src/data/

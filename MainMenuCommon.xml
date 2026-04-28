@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mainMenu>
+  <menuBar>
+    <subMenu id="houdini_agent_menu">
+      <label>Houdini Agent</label>
+      <scriptItem id="open_agent_panel">
+        <label>Open Agent Panel</label>
+        <scriptCode><![CDATA[
+import hou
+panel = None
+# Try to find an existing panel with the HoudiniMind interface active
+for t in hou.ui.curDesktop().paneTabs():
+    if t.type() == hou.paneTabType.PythonPanel:
+        itf = t.activeInterface()
+        if itf and itf.name() == "HoudiniMind":
+            panel = t
+            panel.setIsCurrentTab()
+            break
+
+if not panel:
+    # Try to find any available Python Panel and set its interface to HoudiniMind
+    mind_itf = hou.pypanel.interfaceByName("HoudiniMind")
+    if mind_itf:
+        for t in hou.ui.curDesktop().paneTabs():
+            if t.type() == hou.paneTabType.PythonPanel:
+                t.setActiveInterface(mind_itf)
+                panel = t
+                panel.setIsCurrentTab()
+                break
+
+if not panel:
+    hou.ui.displayMessage("Please open the 'Houdini Agent' Python Panel first from the 'Panes' menu.")
+]]></scriptCode>
+      </scriptItem>
+      
+      <separatorItem/>
+      
+      <scriptItem id="agent_fix_errors">
+        <label>⚡ Fix Errors in Scene</label>
+        <scriptCode><![CDATA[
+import hou
+panel = None
+for t in hou.ui.curDesktop().paneTabs():
+    if t.type() == hou.paneTabType.PythonPanel:
+        itf = t.activeInterface()
+        if itf and itf.name() == "HoudiniMind":
+            panel = t
+            break
+
+if panel:
+    widget = panel.activeInterfaceRootWidget()
+    if widget and hasattr(widget, "_dispatch_research"):
+        widget._dispatch_research("Find and fix all errors in my current scene.")
+else:
+    hou.ui.displayMessage("Open the Houdini Agent panel to use this feature.")
+]]></scriptCode>
+      </scriptItem>
+
+      <scriptItem id="agent_analyze_sel">
+        <label>🔍 Analyze Selection</label>
+        <scriptCode><![CDATA[
+import hou
+panel = None
+for t in hou.ui.curDesktop().paneTabs():
+    if t.type() == hou.paneTabType.PythonPanel:
+        itf = t.activeInterface()
+        if itf and itf.name() == "HoudiniMind":
+            panel = t
+            break
+
+if panel:
+    widget = panel.activeInterfaceRootWidget()
+    if widget and hasattr(widget, "_dispatch_chat"):
+        widget._dispatch_chat("Analyze my current selection and suggest improvements.")
+else:
+    hou.ui.displayMessage("Open the Houdini Agent panel to use this feature.")
+]]></scriptCode>
+      </scriptItem>
+
+      <separatorItem/>
+
+      <scriptItem id="agent_cleanup">
+        <label>🧹 Cleanup Network</label>
+        <scriptCode><![CDATA[
+import hou
+panel = None
+for t in hou.ui.curDesktop().paneTabs():
+    if t.type() == hou.paneTabType.PythonPanel:
+        itf = t.activeInterface()
+        if itf and itf.name() == "HoudiniMind":
+            panel = t
+            break
+
+if panel:
+    widget = panel.activeInterfaceRootWidget()
+    if widget and hasattr(widget, "_dispatch_research"):
+        widget._dispatch_research("Organize and layout my current node network. Align nodes and color-code them.")
+else:
+    hou.ui.displayMessage("Open the Houdini Agent panel to use this feature.")
+]]></scriptCode>
+      </scriptItem>
+
+      <separatorItem/>
+
+      <scriptItem id="agent_mcp_toggle">
+        <label>🌐 Toggle MCP Server</label>
+        <scriptCode><![CDATA[
+import hou
+from houdinimind.agent import mcp_houdini_server
+msg = mcp_houdini_server.toggle_server()
+hou.ui.displayMessage(msg)
+]]></scriptCode>
+      </scriptItem>
+
+    </subMenu>
+  </menuBar>
+</mainMenu>

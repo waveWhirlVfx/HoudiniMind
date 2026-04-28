@@ -1,0 +1,31 @@
+# Normalise line endings
+* text=auto eol=lf
+*.bat       text eol=crlf
+*.ps1       text eol=crlf
+*.command   text eol=lf
+
+# Git LFS — binary / large assets
+*.db           filter=lfs diff=lfs merge=lfs -text
+*.sqlite       filter=lfs diff=lfs merge=lfs -text
+*.sqlite3      filter=lfs diff=lfs merge=lfs -text
+*.hip          filter=lfs diff=lfs merge=lfs -text
+*.hipnc        filter=lfs diff=lfs merge=lfs -text
+*.hiplc        filter=lfs diff=lfs merge=lfs -text
+*.bgeo         filter=lfs diff=lfs merge=lfs -text
+*.bgeo.sc      filter=lfs diff=lfs merge=lfs -text
+*.exr          filter=lfs diff=lfs merge=lfs -text
+*.vdb          filter=lfs diff=lfs merge=lfs -text
+*.abc          filter=lfs diff=lfs merge=lfs -text
+*.usd          filter=lfs diff=lfs merge=lfs -text
+*.usdc         filter=lfs diff=lfs merge=lfs -text
+
+# Demo media
+docs/images/*.gif  filter=lfs diff=lfs merge=lfs -text
+docs/images/*.mp4  filter=lfs diff=lfs merge=lfs -text
+docs/images/*.mov  filter=lfs diff=lfs merge=lfs -text
+
+# Never diff these as text
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary

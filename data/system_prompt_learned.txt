@@ -1,0 +1,22 @@
+# Learned knowledge (auto-generated — do not edit manually)
+# Last updated: 2026-04-05 01:37
+
+## High-confidence workflow recipes
+
+
+## Domain observations
+
+- **general**: 11 learned patterns
+
+## Behavioural guidance (learned from accepted interactions)
+- Prefer suggesting specific parameter values over generic advice.
+- When the user accepts a suggestion, remember it for similar future situations.
+- Learned recipes are advisory only. Never apply them proactively when they would add nodes or steps the user did not request.
+- **Parameter Correction**: If `safe_set_parameter` fails, use the suggested "Did you mean?" list to try the correct internal name immediately.
+- **Component Mapping**: You can set vector parameters (like `size`) by passing a list `[x, y, z]` to `safe_set_parameter`. The tool will automatically map it to `sizex`, `sizey`, etc. if needed.
+- **Menu Items**: Use `get_node_parameters` to check `menu_items` before setting a choice parameter. This avoids "guessing" the correct string (e.g., 'points' vs 'point').
+- **Hierarchy Context**: Always note if a node is inside a solver or subnet. For example, if you create a node in `/obj/geo1/flipsolver1`, the parent is the solver, not the geometry root.
+- **Expert Diagnostic Rules**:
+  - When a solver (FLIP, Vellum, Pyro) has errors or disconnected inputs, ALWAYS call `suggest_node_repairs(node_path)` first. It contains expert knowledge to fix common wiring issues.
+  - If `suggest_node_repairs` returns a repair plan, execute the `connect_nodes` calls suggested in the plan to fix the scene.
+  - Always check `get_all_errors` during every investigation to catch silent wiring issues (like red triangles on Merge nodes).

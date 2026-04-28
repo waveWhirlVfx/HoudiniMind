@@ -1,0 +1,3004 @@
+{
+  "troubleshooting_database": [
+    {
+      "id": 1,
+      "context": "VEX",
+      "error": "No matching function for fit(vector, float, float)",
+      "fix": "Check the signature of 'fit'. You are likely passing the wrong number of arguments or incorrect types (e.g., float instead of vector)."
+    },
+    {
+      "id": 2,
+      "context": "VEX",
+      "error": "Call to undefined function 'fit'",
+      "fix": "The function 'fit' does not exist or is not available in the current context (e.g., a SOP function used in a CVEX context)."
+    },
+    {
+      "id": 3,
+      "context": "VEX",
+      "error": "Ambiguous call to function 'fit'",
+      "fix": "VEX cannot decide which overload of 'fit' to use. Cast your arguments explicitly, e.g., float(val)."
+    },
+    {
+      "id": 4,
+      "context": "VEX",
+      "error": "Invalid attribute specification '@myAttr'",
+      "fix": "The attribute 'myAttr' does not exist on the geometry. Ensure it is created before this wrangle or use a default value: @myAttr = 0;"
+    },
+    {
+      "id": 5,
+      "context": "VEX",
+      "error": "Syntax error, unexpected 'if'",
+      "fix": "Check for missing semicolons, unmatched parentheses, or typos around the word 'if'."
+    },
+    {
+      "id": 6,
+      "context": "VEX",
+      "error": "Division by zero in '1.0/x'",
+      "fix": "Add a small epsilon value to the divisor to prevent mathematical errors: 1.0/x / (val + 1e-6)."
+    },
+    {
+      "id": 7,
+      "context": "VEX",
+      "error": "Array index 6 out of bounds",
+      "fix": "The array only has 5 elements. Use the len() function to check bounds before accessing index 6."
+    },
+    {
+      "id": 8,
+      "context": "VEX",
+      "error": "Inconsistent types for attribute '@myAttr'",
+      "fix": "The attribute 'myAttr' was previously defined as a different type (e.g., float vs vector). Use a different name or force the type with a prefix like v@myAttr."
+    },
+    {
+      "id": 9,
+      "context": "VEX",
+      "error": "No matching function for fit(vector, float, float)",
+      "fix": "Check the signature of 'fit'. You are likely passing the wrong number of arguments or incorrect types (e.g., float instead of vector)."
+    },
+    {
+      "id": 10,
+      "context": "VEX",
+      "error": "Call to undefined function 'fit'",
+      "fix": "The function 'fit' does not exist or is not available in the current context (e.g., a SOP function used in a CVEX context)."
+    },
+    {
+      "id": 11,
+      "context": "VEX",
+      "error": "Ambiguous call to function 'fit'",
+      "fix": "VEX cannot decide which overload of 'fit' to use. Cast your arguments explicitly, e.g., float(val)."
+    },
+    {
+      "id": 12,
+      "context": "VEX",
+      "error": "Invalid attribute specification '@myAttr'",
+      "fix": "The attribute 'myAttr' does not exist on the geometry. Ensure it is created before this wrangle or use a default value: @myAttr = 0;"
+    },
+    {
+      "id": 13,
+      "context": "VEX",
+      "error": "Syntax error, unexpected 'if'",
+      "fix": "Check for missing semicolons, unmatched parentheses, or typos around the word 'if'."
+    },
+    {
+      "id": 14,
+      "context": "VEX",
+      "error": "Division by zero in '1.0/x'",
+      "fix": "Add a small epsilon value to the divisor to prevent mathematical errors: 1.0/x / (val + 1e-6)."
+    },
+    {
+      "id": 15,
+      "context": "VEX",
+      "error": "Array index 14 out of bounds",
+      "fix": "The array only has 13 elements. Use the len() function to check bounds before accessing index 14."
+    },
+    {
+      "id": 16,
+      "context": "VEX",
+      "error": "Inconsistent types for attribute '@myAttr'",
+      "fix": "The attribute 'myAttr' was previously defined as a different type (e.g., float vs vector). Use a different name or force the type with a prefix like v@myAttr."
+    },
+    {
+      "id": 17,
+      "context": "VEX",
+      "error": "No matching function for fit(vector, float, float)",
+      "fix": "Check the signature of 'fit'. You are likely passing the wrong number of arguments or incorrect types (e.g., float instead of vector)."
+    },
+    {
+      "id": 18,
+      "context": "VEX",
+      "error": "Call to undefined function 'fit'",
+      "fix": "The function 'fit' does not exist or is not available in the current context (e.g., a SOP function used in a CVEX context)."
+    },
+    {
+      "id": 19,
+      "context": "VEX",
+      "error": "Ambiguous call to function 'fit'",
+      "fix": "VEX cannot decide which overload of 'fit' to use. Cast your arguments explicitly, e.g., float(val)."
+    },
+    {
+      "id": 20,
+      "context": "VEX",
+      "error": "Invalid attribute specification '@myAttr'",
+      "fix": "The attribute 'myAttr' does not exist on the geometry. Ensure it is created before this wrangle or use a default value: @myAttr = 0;"
+    },
+    {
+      "id": 21,
+      "context": "VEX",
+      "error": "Syntax error, unexpected 'if'",
+      "fix": "Check for missing semicolons, unmatched parentheses, or typos around the word 'if'."
+    },
+    {
+      "id": 22,
+      "context": "VEX",
+      "error": "Division by zero in '1.0/x'",
+      "fix": "Add a small epsilon value to the divisor to prevent mathematical errors: 1.0/x / (val + 1e-6)."
+    },
+    {
+      "id": 23,
+      "context": "VEX",
+      "error": "Array index 22 out of bounds",
+      "fix": "The array only has 21 elements. Use the len() function to check bounds before accessing index 22."
+    },
+    {
+      "id": 24,
+      "context": "VEX",
+      "error": "Inconsistent types for attribute '@myAttr'",
+      "fix": "The attribute 'myAttr' was previously defined as a different type (e.g., float vs vector). Use a different name or force the type with a prefix like v@myAttr."
+    },
+    {
+      "id": 25,
+      "context": "VEX",
+      "error": "No matching function for fit(vector, float, float)",
+      "fix": "Check the signature of 'fit'. You are likely passing the wrong number of arguments or incorrect types (e.g., float instead of vector)."
+    },
+    {
+      "id": 26,
+      "context": "VEX",
+      "error": "Call to undefined function 'fit'",
+      "fix": "The function 'fit' does not exist or is not available in the current context (e.g., a SOP function used in a CVEX context)."
+    },
+    {
+      "id": 27,
+      "context": "VEX",
+      "error": "Ambiguous call to function 'fit'",
+      "fix": "VEX cannot decide which overload of 'fit' to use. Cast your arguments explicitly, e.g., float(val)."
+    },
+    {
+      "id": 28,
+      "context": "VEX",
+      "error": "Invalid attribute specification '@myAttr'",
+      "fix": "The attribute 'myAttr' does not exist on the geometry. Ensure it is created before this wrangle or use a default value: @myAttr = 0;"
+    },
+    {
+      "id": 29,
+      "context": "VEX",
+      "error": "Syntax error, unexpected 'if'",
+      "fix": "Check for missing semicolons, unmatched parentheses, or typos around the word 'if'."
+    },
+    {
+      "id": 30,
+      "context": "VEX",
+      "error": "Division by zero in '1.0/x'",
+      "fix": "Add a small epsilon value to the divisor to prevent mathematical errors: 1.0/x / (val + 1e-6)."
+    },
+    {
+      "id": 31,
+      "context": "VEX",
+      "error": "Array index 30 out of bounds",
+      "fix": "The array only has 29 elements. Use the len() function to check bounds before accessing index 30."
+    },
+    {
+      "id": 32,
+      "context": "VEX",
+      "error": "Inconsistent types for attribute '@myAttr'",
+      "fix": "The attribute 'myAttr' was previously defined as a different type (e.g., float vs vector). Use a different name or force the type with a prefix like v@myAttr."
+    },
+    {
+      "id": 33,
+      "context": "VEX",
+      "error": "No matching function for fit(vector, float, float)",
+      "fix": "Check the signature of 'fit'. You are likely passing the wrong number of arguments or incorrect types (e.g., float instead of vector)."
+    },
+    {
+      "id": 34,
+      "context": "VEX",
+      "error": "Call to undefined function 'fit'",
+      "fix": "The function 'fit' does not exist or is not available in the current context (e.g., a SOP function used in a CVEX context)."
+    },
+    {
+      "id": 35,
+      "context": "VEX",
+      "error": "Ambiguous call to function 'fit'",
+      "fix": "VEX cannot decide which overload of 'fit' to use. Cast your arguments explicitly, e.g., float(val)."
+    },
+    {
+      "id": 36,
+      "context": "VEX",
+      "error": "Invalid attribute specification '@myAttr'",
+      "fix": "The attribute 'myAttr' does not exist on the geometry. Ensure it is created before this wrangle or use a default value: @myAttr = 0;"
+    },
+    {
+      "id": 37,
+      "context": "VEX",
+      "error": "Syntax error, unexpected 'if'",
+      "fix": "Check for missing semicolons, unmatched parentheses, or typos around the word 'if'."
+    },
+    {
+      "id": 38,
+      "context": "VEX",
+      "error": "Division by zero in '1.0/x'",
+      "fix": "Add a small epsilon value to the divisor to prevent mathematical errors: 1.0/x / (val + 1e-6)."
+    },
+    {
+      "id": 39,
+      "context": "VEX",
+      "error": "Array index 38 out of bounds",
+      "fix": "The array only has 37 elements. Use the len() function to check bounds before accessing index 38."
+    },
+    {
+      "id": 40,
+      "context": "VEX",
+      "error": "Inconsistent types for attribute '@myAttr'",
+      "fix": "The attribute 'myAttr' was previously defined as a different type (e.g., float vs vector). Use a different name or force the type with a prefix like v@myAttr."
+    },
+    {
+      "id": 41,
+      "context": "VEX",
+      "error": "No matching function for fit(vector, float, float)",
+      "fix": "Check the signature of 'fit'. You are likely passing the wrong number of arguments or incorrect types (e.g., float instead of vector)."
+    },
+    {
+      "id": 42,
+      "context": "VEX",
+      "error": "Call to undefined function 'fit'",
+      "fix": "The function 'fit' does not exist or is not available in the current context (e.g., a SOP function used in a CVEX context)."
+    },
+    {
+      "id": 43,
+      "context": "VEX",
+      "error": "Ambiguous call to function 'fit'",
+      "fix": "VEX cannot decide which overload of 'fit' to use. Cast your arguments explicitly, e.g., float(val)."
+    },
+    {
+      "id": 44,
+      "context": "VEX",
+      "error": "Invalid attribute specification '@myAttr'",
+      "fix": "The attribute 'myAttr' does not exist on the geometry. Ensure it is created before this wrangle or use a default value: @myAttr = 0;"
+    },
+    {
+      "id": 45,
+      "context": "VEX",
+      "error": "Syntax error, unexpected 'if'",
+      "fix": "Check for missing semicolons, unmatched parentheses, or typos around the word 'if'."
+    },
+    {
+      "id": 46,
+      "context": "VEX",
+      "error": "Division by zero in '1.0/x'",
+      "fix": "Add a small epsilon value to the divisor to prevent mathematical errors: 1.0/x / (val + 1e-6)."
+    },
+    {
+      "id": 47,
+      "context": "VEX",
+      "error": "Array index 46 out of bounds",
+      "fix": "The array only has 45 elements. Use the len() function to check bounds before accessing index 46."
+    },
+    {
+      "id": 48,
+      "context": "VEX",
+      "error": "Inconsistent types for attribute '@myAttr'",
+      "fix": "The attribute 'myAttr' was previously defined as a different type (e.g., float vs vector). Use a different name or force the type with a prefix like v@myAttr."
+    },
+    {
+      "id": 49,
+      "context": "VEX",
+      "error": "No matching function for fit(vector, float, float)",
+      "fix": "Check the signature of 'fit'. You are likely passing the wrong number of arguments or incorrect types (e.g., float instead of vector)."
+    },
+    {
+      "id": 50,
+      "context": "VEX",
+      "error": "Call to undefined function 'fit'",
+      "fix": "The function 'fit' does not exist or is not available in the current context (e.g., a SOP function used in a CVEX context)."
+    },
+    {
+      "id": 51,
+      "context": "VEX",
+      "error": "Ambiguous call to function 'fit'",
+      "fix": "VEX cannot decide which overload of 'fit' to use. Cast your arguments explicitly, e.g., float(val)."
+    },
+    {
+      "id": 52,
+      "context": "VEX",
+      "error": "Invalid attribute specification '@myAttr'",
+      "fix": "The attribute 'myAttr' does not exist on the geometry. Ensure it is created before this wrangle or use a default value: @myAttr = 0;"
+    },
+    {
+      "id": 53,
+      "context": "VEX",
+      "error": "Syntax error, unexpected 'if'",
+      "fix": "Check for missing semicolons, unmatched parentheses, or typos around the word 'if'."
+    },
+    {
+      "id": 54,
+      "context": "VEX",
+      "error": "Division by zero in '1.0/x'",
+      "fix": "Add a small epsilon value to the divisor to prevent mathematical errors: 1.0/x / (val + 1e-6)."
+    },
+    {
+      "id": 55,
+      "context": "VEX",
+      "error": "Array index 54 out of bounds",
+      "fix": "The array only has 53 elements. Use the len() function to check bounds before accessing index 54."
+    },
+    {
+      "id": 56,
+      "context": "VEX",
+      "error": "Inconsistent types for attribute '@myAttr'",
+      "fix": "The attribute 'myAttr' was previously defined as a different type (e.g., float vs vector). Use a different name or force the type with a prefix like v@myAttr."
+    },
+    {
+      "id": 57,
+      "context": "VEX",
+      "error": "No matching function for fit(vector, float, float)",
+      "fix": "Check the signature of 'fit'. You are likely passing the wrong number of arguments or incorrect types (e.g., float instead of vector)."
+    },
+    {
+      "id": 58,
+      "context": "VEX",
+      "error": "Call to undefined function 'fit'",
+      "fix": "The function 'fit' does not exist or is not available in the current context (e.g., a SOP function used in a CVEX context)."
+    },
+    {
+      "id": 59,
+      "context": "VEX",
+      "error": "Ambiguous call to function 'fit'",
+      "fix": "VEX cannot decide which overload of 'fit' to use. Cast your arguments explicitly, e.g., float(val)."
+    },
+    {
+      "id": 60,
+      "context": "VEX",
+      "error": "Invalid attribute specification '@myAttr'",
+      "fix": "The attribute 'myAttr' does not exist on the geometry. Ensure it is created before this wrangle or use a default value: @myAttr = 0;"
+    },
+    {
+      "id": 61,
+      "context": "VEX",
+      "error": "Syntax error, unexpected 'if'",
+      "fix": "Check for missing semicolons, unmatched parentheses, or typos around the word 'if'."
+    },
+    {
+      "id": 62,
+      "context": "VEX",
+      "error": "Division by zero in '1.0/x'",
+      "fix": "Add a small epsilon value to the divisor to prevent mathematical errors: 1.0/x / (val + 1e-6)."
+    },
+    {
+      "id": 63,
+      "context": "VEX",
+      "error": "Array index 62 out of bounds",
+      "fix": "The array only has 61 elements. Use the len() function to check bounds before accessing index 62."
+    },
+    {
+      "id": 64,
+      "context": "VEX",
+      "error": "Inconsistent types for attribute '@myAttr'",
+      "fix": "The attribute 'myAttr' was previously defined as a different type (e.g., float vs vector). Use a different name or force the type with a prefix like v@myAttr."
+    },
+    {
+      "id": 65,
+      "context": "VEX",
+      "error": "No matching function for fit(vector, float, float)",
+      "fix": "Check the signature of 'fit'. You are likely passing the wrong number of arguments or incorrect types (e.g., float instead of vector)."
+    },
+    {
+      "id": 66,
+      "context": "VEX",
+      "error": "Call to undefined function 'fit'",
+      "fix": "The function 'fit' does not exist or is not available in the current context (e.g., a SOP function used in a CVEX context)."
+    },
+    {
+      "id": 67,
+      "context": "VEX",
+      "error": "Ambiguous call to function 'fit'",
+      "fix": "VEX cannot decide which overload of 'fit' to use. Cast your arguments explicitly, e.g., float(val)."
+    },
+    {
+      "id": 68,
+      "context": "VEX",
+      "error": "Invalid attribute specification '@myAttr'",
+      "fix": "The attribute 'myAttr' does not exist on the geometry. Ensure it is created before this wrangle or use a default value: @myAttr = 0;"
+    },
+    {
+      "id": 69,
+      "context": "VEX",
+      "error": "Syntax error, unexpected 'if'",
+      "fix": "Check for missing semicolons, unmatched parentheses, or typos around the word 'if'."
+    },
+    {
+      "id": 70,
+      "context": "VEX",
+      "error": "Division by zero in '1.0/x'",
+      "fix": "Add a small epsilon value to the divisor to prevent mathematical errors: 1.0/x / (val + 1e-6)."
+    },
+    {
+      "id": 71,
+      "context": "VEX",
+      "error": "Array index 70 out of bounds",
+      "fix": "The array only has 69 elements. Use the len() function to check bounds before accessing index 70."
+    },
+    {
+      "id": 72,
+      "context": "VEX",
+      "error": "Inconsistent types for attribute '@myAttr'",
+      "fix": "The attribute 'myAttr' was previously defined as a different type (e.g., float vs vector). Use a different name or force the type with a prefix like v@myAttr."
+    },
+    {
+      "id": 73,
+      "context": "VEX",
+      "error": "No matching function for fit(vector, float, float)",
+      "fix": "Check the signature of 'fit'. You are likely passing the wrong number of arguments or incorrect types (e.g., float instead of vector)."
+    },
+    {
+      "id": 74,
+      "context": "VEX",
+      "error": "Call to undefined function 'fit'",
+      "fix": "The function 'fit' does not exist or is not available in the current context (e.g., a SOP function used in a CVEX context)."
+    },
+    {
+      "id": 75,
+      "context": "VEX",
+      "error": "Ambiguous call to function 'fit'",
+      "fix": "VEX cannot decide which overload of 'fit' to use. Cast your arguments explicitly, e.g., float(val)."
+    },
+    {
+      "id": 76,
+      "context": "VEX",
+      "error": "Invalid attribute specification '@myAttr'",
+      "fix": "The attribute 'myAttr' does not exist on the geometry. Ensure it is created before this wrangle or use a default value: @myAttr = 0;"
+    },
+    {
+      "id": 77,
+      "context": "VEX",
+      "error": "Syntax error, unexpected 'if'",
+      "fix": "Check for missing semicolons, unmatched parentheses, or typos around the word 'if'."
+    },
+    {
+      "id": 78,
+      "context": "VEX",
+      "error": "Division by zero in '1.0/x'",
+      "fix": "Add a small epsilon value to the divisor to prevent mathematical errors: 1.0/x / (val + 1e-6)."
+    },
+    {
+      "id": 79,
+      "context": "VEX",
+      "error": "Array index 78 out of bounds",
+      "fix": "The array only has 77 elements. Use the len() function to check bounds before accessing index 78."
+    },
+    {
+      "id": 80,
+      "context": "VEX",
+      "error": "Inconsistent types for attribute '@myAttr'",
+      "fix": "The attribute 'myAttr' was previously defined as a different type (e.g., float vs vector). Use a different name or force the type with a prefix like v@myAttr."
+    },
+    {
+      "id": 81,
+      "context": "VEX",
+      "error": "No matching function for fit(vector, float, float)",
+      "fix": "Check the signature of 'fit'. You are likely passing the wrong number of arguments or incorrect types (e.g., float instead of vector)."
+    },
+    {
+      "id": 82,
+      "context": "VEX",
+      "error": "Call to undefined function 'fit'",
+      "fix": "The function 'fit' does not exist or is not available in the current context (e.g., a SOP function used in a CVEX context)."
+    },
+    {
+      "id": 83,
+      "context": "VEX",
+      "error": "Ambiguous call to function 'fit'",
+      "fix": "VEX cannot decide which overload of 'fit' to use. Cast your arguments explicitly, e.g., float(val)."
+    },
+    {
+      "id": 84,
+      "context": "VEX",
+      "error": "Invalid attribute specification '@myAttr'",
+      "fix": "The attribute 'myAttr' does not exist on the geometry. Ensure it is created before this wrangle or use a default value: @myAttr = 0;"
+    },
+    {
+      "id": 85,
+      "context": "VEX",
+      "error": "Syntax error, unexpected 'if'",
+      "fix": "Check for missing semicolons, unmatched parentheses, or typos around the word 'if'."
+    },
+    {
+      "id": 86,
+      "context": "VEX",
+      "error": "Division by zero in '1.0/x'",
+      "fix": "Add a small epsilon value to the divisor to prevent mathematical errors: 1.0/x / (val + 1e-6)."
+    },
+    {
+      "id": 87,
+      "context": "VEX",
+      "error": "Array index 86 out of bounds",
+      "fix": "The array only has 85 elements. Use the len() function to check bounds before accessing index 86."
+    },
+    {
+      "id": 88,
+      "context": "VEX",
+      "error": "Inconsistent types for attribute '@myAttr'",
+      "fix": "The attribute 'myAttr' was previously defined as a different type (e.g., float vs vector). Use a different name or force the type with a prefix like v@myAttr."
+    },
+    {
+      "id": 89,
+      "context": "VEX",
+      "error": "No matching function for fit(vector, float, float)",
+      "fix": "Check the signature of 'fit'. You are likely passing the wrong number of arguments or incorrect types (e.g., float instead of vector)."
+    },
+    {
+      "id": 90,
+      "context": "VEX",
+      "error": "Call to undefined function 'fit'",
+      "fix": "The function 'fit' does not exist or is not available in the current context (e.g., a SOP function used in a CVEX context)."
+    },
+    {
+      "id": 91,
+      "context": "VEX",
+      "error": "Ambiguous call to function 'fit'",
+      "fix": "VEX cannot decide which overload of 'fit' to use. Cast your arguments explicitly, e.g., float(val)."
+    },
+    {
+      "id": 92,
+      "context": "VEX",
+      "error": "Invalid attribute specification '@myAttr'",
+      "fix": "The attribute 'myAttr' does not exist on the geometry. Ensure it is created before this wrangle or use a default value: @myAttr = 0;"
+    },
+    {
+      "id": 93,
+      "context": "VEX",
+      "error": "Syntax error, unexpected 'if'",
+      "fix": "Check for missing semicolons, unmatched parentheses, or typos around the word 'if'."
+    },
+    {
+      "id": 94,
+      "context": "VEX",
+      "error": "Division by zero in '1.0/x'",
+      "fix": "Add a small epsilon value to the divisor to prevent mathematical errors: 1.0/x / (val + 1e-6)."
+    },
+    {
+      "id": 95,
+      "context": "VEX",
+      "error": "Array index 94 out of bounds",
+      "fix": "The array only has 93 elements. Use the len() function to check bounds before accessing index 94."
+    },
+    {
+      "id": 96,
+      "context": "VEX",
+      "error": "Inconsistent types for attribute '@myAttr'",
+      "fix": "The attribute 'myAttr' was previously defined as a different type (e.g., float vs vector). Use a different name or force the type with a prefix like v@myAttr."
+    },
+    {
+      "id": 97,
+      "context": "VEX",
+      "error": "No matching function for fit(vector, float, float)",
+      "fix": "Check the signature of 'fit'. You are likely passing the wrong number of arguments or incorrect types (e.g., float instead of vector)."
+    },
+    {
+      "id": 98,
+      "context": "VEX",
+      "error": "Call to undefined function 'fit'",
+      "fix": "The function 'fit' does not exist or is not available in the current context (e.g., a SOP function used in a CVEX context)."
+    },
+    {
+      "id": 99,
+      "context": "VEX",
+      "error": "Ambiguous call to function 'fit'",
+      "fix": "VEX cannot decide which overload of 'fit' to use. Cast your arguments explicitly, e.g., float(val)."
+    },
+    {
+      "id": 100,
+      "context": "VEX",
+      "error": "Invalid attribute specification '@myAttr'",
+      "fix": "The attribute 'myAttr' does not exist on the geometry. Ensure it is created before this wrangle or use a default value: @myAttr = 0;"
+    },
+    {
+      "id": 101,
+      "context": "Python",
+      "error": "hou.ObjectWasDeleted: Attempt to access a deleted Node",
+      "fix": "The Node reference is stale. Re-fetch the object using hou.node() or hou.item() before calling methods on it."
+    },
+    {
+      "id": 102,
+      "context": "Python",
+      "error": "AttributeError: 'NoneType' object has no attribute 'set'",
+      "fix": "The preceding hou.node() or hou.parm() call returned None. Verify that the path string is correct and the node exists."
+    },
+    {
+      "id": 103,
+      "context": "Python",
+      "error": "hou.PermissionError: Cannot modify Node",
+      "fix": "The node is likely inside a locked HDA or is a managed node. Allow editing on the HDA instance or unlock the node."
+    },
+    {
+      "id": 104,
+      "context": "Python",
+      "error": "TypeError: createNode() takes exactly 2 arguments (1 given)",
+      "fix": "Check the Houdini Python documentation for 'createNode'. You are passing an incorrect number of parameters."
+    },
+    {
+      "id": 105,
+      "context": "Python",
+      "error": "hou.OperationFailed: The attempted operation failed on /obj/geo1",
+      "fix": "Check the Houdini console for more details. This often happens when creating a node of an invalid type or in the wrong context."
+    },
+    {
+      "id": 106,
+      "context": "Python",
+      "error": "IndexError: list index out of range",
+      "fix": "You are trying to access an element in a list (like points or nodes) that doesn't exist. Check the length of the list first."
+    },
+    {
+      "id": 107,
+      "context": "Python",
+      "error": "hou.LoadError: Unable to load asset.hda",
+      "fix": "Verify the file path exists and is accessible. Use hou.expandString('$HIP') to debug path variables."
+    },
+    {
+      "id": 108,
+      "context": "Python",
+      "error": "hou.ObjectWasDeleted: Attempt to access a deleted Node",
+      "fix": "The Node reference is stale. Re-fetch the object using hou.node() or hou.item() before calling methods on it."
+    },
+    {
+      "id": 109,
+      "context": "Python",
+      "error": "AttributeError: 'NoneType' object has no attribute 'set'",
+      "fix": "The preceding hou.node() or hou.parm() call returned None. Verify that the path string is correct and the node exists."
+    },
+    {
+      "id": 110,
+      "context": "Python",
+      "error": "hou.PermissionError: Cannot modify Node",
+      "fix": "The node is likely inside a locked HDA or is a managed node. Allow editing on the HDA instance or unlock the node."
+    },
+    {
+      "id": 111,
+      "context": "Python",
+      "error": "TypeError: createNode() takes exactly 2 arguments (1 given)",
+      "fix": "Check the Houdini Python documentation for 'createNode'. You are passing an incorrect number of parameters."
+    },
+    {
+      "id": 112,
+      "context": "Python",
+      "error": "hou.OperationFailed: The attempted operation failed on /obj/geo1",
+      "fix": "Check the Houdini console for more details. This often happens when creating a node of an invalid type or in the wrong context."
+    },
+    {
+      "id": 113,
+      "context": "Python",
+      "error": "IndexError: list index out of range",
+      "fix": "You are trying to access an element in a list (like points or nodes) that doesn't exist. Check the length of the list first."
+    },
+    {
+      "id": 114,
+      "context": "Python",
+      "error": "hou.LoadError: Unable to load asset.hda",
+      "fix": "Verify the file path exists and is accessible. Use hou.expandString('$HIP') to debug path variables."
+    },
+    {
+      "id": 115,
+      "context": "Python",
+      "error": "hou.ObjectWasDeleted: Attempt to access a deleted Node",
+      "fix": "The Node reference is stale. Re-fetch the object using hou.node() or hou.item() before calling methods on it."
+    },
+    {
+      "id": 116,
+      "context": "Python",
+      "error": "AttributeError: 'NoneType' object has no attribute 'set'",
+      "fix": "The preceding hou.node() or hou.parm() call returned None. Verify that the path string is correct and the node exists."
+    },
+    {
+      "id": 117,
+      "context": "Python",
+      "error": "hou.PermissionError: Cannot modify Node",
+      "fix": "The node is likely inside a locked HDA or is a managed node. Allow editing on the HDA instance or unlock the node."
+    },
+    {
+      "id": 118,
+      "context": "Python",
+      "error": "TypeError: createNode() takes exactly 2 arguments (1 given)",
+      "fix": "Check the Houdini Python documentation for 'createNode'. You are passing an incorrect number of parameters."
+    },
+    {
+      "id": 119,
+      "context": "Python",
+      "error": "hou.OperationFailed: The attempted operation failed on /obj/geo1",
+      "fix": "Check the Houdini console for more details. This often happens when creating a node of an invalid type or in the wrong context."
+    },
+    {
+      "id": 120,
+      "context": "Python",
+      "error": "IndexError: list index out of range",
+      "fix": "You are trying to access an element in a list (like points or nodes) that doesn't exist. Check the length of the list first."
+    },
+    {
+      "id": 121,
+      "context": "Python",
+      "error": "hou.LoadError: Unable to load asset.hda",
+      "fix": "Verify the file path exists and is accessible. Use hou.expandString('$HIP') to debug path variables."
+    },
+    {
+      "id": 122,
+      "context": "Python",
+      "error": "hou.ObjectWasDeleted: Attempt to access a deleted Node",
+      "fix": "The Node reference is stale. Re-fetch the object using hou.node() or hou.item() before calling methods on it."
+    },
+    {
+      "id": 123,
+      "context": "Python",
+      "error": "AttributeError: 'NoneType' object has no attribute 'set'",
+      "fix": "The preceding hou.node() or hou.parm() call returned None. Verify that the path string is correct and the node exists."
+    },
+    {
+      "id": 124,
+      "context": "Python",
+      "error": "hou.PermissionError: Cannot modify Node",
+      "fix": "The node is likely inside a locked HDA or is a managed node. Allow editing on the HDA instance or unlock the node."
+    },
+    {
+      "id": 125,
+      "context": "Python",
+      "error": "TypeError: createNode() takes exactly 2 arguments (1 given)",
+      "fix": "Check the Houdini Python documentation for 'createNode'. You are passing an incorrect number of parameters."
+    },
+    {
+      "id": 126,
+      "context": "Python",
+      "error": "hou.OperationFailed: The attempted operation failed on /obj/geo1",
+      "fix": "Check the Houdini console for more details. This often happens when creating a node of an invalid type or in the wrong context."
+    },
+    {
+      "id": 127,
+      "context": "Python",
+      "error": "IndexError: list index out of range",
+      "fix": "You are trying to access an element in a list (like points or nodes) that doesn't exist. Check the length of the list first."
+    },
+    {
+      "id": 128,
+      "context": "Python",
+      "error": "hou.LoadError: Unable to load asset.hda",
+      "fix": "Verify the file path exists and is accessible. Use hou.expandString('$HIP') to debug path variables."
+    },
+    {
+      "id": 129,
+      "context": "Python",
+      "error": "hou.ObjectWasDeleted: Attempt to access a deleted Node",
+      "fix": "The Node reference is stale. Re-fetch the object using hou.node() or hou.item() before calling methods on it."
+    },
+    {
+      "id": 130,
+      "context": "Python",
+      "error": "AttributeError: 'NoneType' object has no attribute 'set'",
+      "fix": "The preceding hou.node() or hou.parm() call returned None. Verify that the path string is correct and the node exists."
+    },
+    {
+      "id": 131,
+      "context": "Python",
+      "error": "hou.PermissionError: Cannot modify Node",
+      "fix": "The node is likely inside a locked HDA or is a managed node. Allow editing on the HDA instance or unlock the node."
+    },
+    {
+      "id": 132,
+      "context": "Python",
+      "error": "TypeError: createNode() takes exactly 2 arguments (1 given)",
+      "fix": "Check the Houdini Python documentation for 'createNode'. You are passing an incorrect number of parameters."
+    },
+    {
+      "id": 133,
+      "context": "Python",
+      "error": "hou.OperationFailed: The attempted operation failed on /obj/geo1",
+      "fix": "Check the Houdini console for more details. This often happens when creating a node of an invalid type or in the wrong context."
+    },
+    {
+      "id": 134,
+      "context": "Python",
+      "error": "IndexError: list index out of range",
+      "fix": "You are trying to access an element in a list (like points or nodes) that doesn't exist. Check the length of the list first."
+    },
+    {
+      "id": 135,
+      "context": "Python",
+      "error": "hou.LoadError: Unable to load asset.hda",
+      "fix": "Verify the file path exists and is accessible. Use hou.expandString('$HIP') to debug path variables."
+    },
+    {
+      "id": 136,
+      "context": "Python",
+      "error": "hou.ObjectWasDeleted: Attempt to access a deleted Node",
+      "fix": "The Node reference is stale. Re-fetch the object using hou.node() or hou.item() before calling methods on it."
+    },
+    {
+      "id": 137,
+      "context": "Python",
+      "error": "AttributeError: 'NoneType' object has no attribute 'set'",
+      "fix": "The preceding hou.node() or hou.parm() call returned None. Verify that the path string is correct and the node exists."
+    },
+    {
+      "id": 138,
+      "context": "Python",
+      "error": "hou.PermissionError: Cannot modify Node",
+      "fix": "The node is likely inside a locked HDA or is a managed node. Allow editing on the HDA instance or unlock the node."
+    },
+    {
+      "id": 139,
+      "context": "Python",
+      "error": "TypeError: createNode() takes exactly 2 arguments (1 given)",
+      "fix": "Check the Houdini Python documentation for 'createNode'. You are passing an incorrect number of parameters."
+    },
+    {
+      "id": 140,
+      "context": "Python",
+      "error": "hou.OperationFailed: The attempted operation failed on /obj/geo1",
+      "fix": "Check the Houdini console for more details. This often happens when creating a node of an invalid type or in the wrong context."
+    },
+    {
+      "id": 141,
+      "context": "Python",
+      "error": "IndexError: list index out of range",
+      "fix": "You are trying to access an element in a list (like points or nodes) that doesn't exist. Check the length of the list first."
+    },
+    {
+      "id": 142,
+      "context": "Python",
+      "error": "hou.LoadError: Unable to load asset.hda",
+      "fix": "Verify the file path exists and is accessible. Use hou.expandString('$HIP') to debug path variables."
+    },
+    {
+      "id": 143,
+      "context": "Python",
+      "error": "hou.ObjectWasDeleted: Attempt to access a deleted Node",
+      "fix": "The Node reference is stale. Re-fetch the object using hou.node() or hou.item() before calling methods on it."
+    },
+    {
+      "id": 144,
+      "context": "Python",
+      "error": "AttributeError: 'NoneType' object has no attribute 'set'",
+      "fix": "The preceding hou.node() or hou.parm() call returned None. Verify that the path string is correct and the node exists."
+    },
+    {
+      "id": 145,
+      "context": "Python",
+      "error": "hou.PermissionError: Cannot modify Node",
+      "fix": "The node is likely inside a locked HDA or is a managed node. Allow editing on the HDA instance or unlock the node."
+    },
+    {
+      "id": 146,
+      "context": "Python",
+      "error": "TypeError: createNode() takes exactly 2 arguments (1 given)",
+      "fix": "Check the Houdini Python documentation for 'createNode'. You are passing an incorrect number of parameters."
+    },
+    {
+      "id": 147,
+      "context": "Python",
+      "error": "hou.OperationFailed: The attempted operation failed on /obj/geo1",
+      "fix": "Check the Houdini console for more details. This often happens when creating a node of an invalid type or in the wrong context."
+    },
+    {
+      "id": 148,
+      "context": "Python",
+      "error": "IndexError: list index out of range",
+      "fix": "You are trying to access an element in a list (like points or nodes) that doesn't exist. Check the length of the list first."
+    },
+    {
+      "id": 149,
+      "context": "Python",
+      "error": "hou.LoadError: Unable to load asset.hda",
+      "fix": "Verify the file path exists and is accessible. Use hou.expandString('$HIP') to debug path variables."
+    },
+    {
+      "id": 150,
+      "context": "Python",
+      "error": "hou.ObjectWasDeleted: Attempt to access a deleted Node",
+      "fix": "The Node reference is stale. Re-fetch the object using hou.node() or hou.item() before calling methods on it."
+    },
+    {
+      "id": 151,
+      "context": "Python",
+      "error": "AttributeError: 'NoneType' object has no attribute 'set'",
+      "fix": "The preceding hou.node() or hou.parm() call returned None. Verify that the path string is correct and the node exists."
+    },
+    {
+      "id": 152,
+      "context": "Python",
+      "error": "hou.PermissionError: Cannot modify Node",
+      "fix": "The node is likely inside a locked HDA or is a managed node. Allow editing on the HDA instance or unlock the node."
+    },
+    {
+      "id": 153,
+      "context": "Python",
+      "error": "TypeError: createNode() takes exactly 2 arguments (1 given)",
+      "fix": "Check the Houdini Python documentation for 'createNode'. You are passing an incorrect number of parameters."
+    },
+    {
+      "id": 154,
+      "context": "Python",
+      "error": "hou.OperationFailed: The attempted operation failed on /obj/geo1",
+      "fix": "Check the Houdini console for more details. This often happens when creating a node of an invalid type or in the wrong context."
+    },
+    {
+      "id": 155,
+      "context": "Python",
+      "error": "IndexError: list index out of range",
+      "fix": "You are trying to access an element in a list (like points or nodes) that doesn't exist. Check the length of the list first."
+    },
+    {
+      "id": 156,
+      "context": "Python",
+      "error": "hou.LoadError: Unable to load asset.hda",
+      "fix": "Verify the file path exists and is accessible. Use hou.expandString('$HIP') to debug path variables."
+    },
+    {
+      "id": 157,
+      "context": "Python",
+      "error": "hou.ObjectWasDeleted: Attempt to access a deleted Node",
+      "fix": "The Node reference is stale. Re-fetch the object using hou.node() or hou.item() before calling methods on it."
+    },
+    {
+      "id": 158,
+      "context": "Python",
+      "error": "AttributeError: 'NoneType' object has no attribute 'set'",
+      "fix": "The preceding hou.node() or hou.parm() call returned None. Verify that the path string is correct and the node exists."
+    },
+    {
+      "id": 159,
+      "context": "Python",
+      "error": "hou.PermissionError: Cannot modify Node",
+      "fix": "The node is likely inside a locked HDA or is a managed node. Allow editing on the HDA instance or unlock the node."
+    },
+    {
+      "id": 160,
+      "context": "Python",
+      "error": "TypeError: createNode() takes exactly 2 arguments (1 given)",
+      "fix": "Check the Houdini Python documentation for 'createNode'. You are passing an incorrect number of parameters."
+    },
+    {
+      "id": 161,
+      "context": "Python",
+      "error": "hou.OperationFailed: The attempted operation failed on /obj/geo1",
+      "fix": "Check the Houdini console for more details. This often happens when creating a node of an invalid type or in the wrong context."
+    },
+    {
+      "id": 162,
+      "context": "Python",
+      "error": "IndexError: list index out of range",
+      "fix": "You are trying to access an element in a list (like points or nodes) that doesn't exist. Check the length of the list first."
+    },
+    {
+      "id": 163,
+      "context": "Python",
+      "error": "hou.LoadError: Unable to load asset.hda",
+      "fix": "Verify the file path exists and is accessible. Use hou.expandString('$HIP') to debug path variables."
+    },
+    {
+      "id": 164,
+      "context": "Python",
+      "error": "hou.ObjectWasDeleted: Attempt to access a deleted Node",
+      "fix": "The Node reference is stale. Re-fetch the object using hou.node() or hou.item() before calling methods on it."
+    },
+    {
+      "id": 165,
+      "context": "Python",
+      "error": "AttributeError: 'NoneType' object has no attribute 'set'",
+      "fix": "The preceding hou.node() or hou.parm() call returned None. Verify that the path string is correct and the node exists."
+    },
+    {
+      "id": 166,
+      "context": "Python",
+      "error": "hou.PermissionError: Cannot modify Node",
+      "fix": "The node is likely inside a locked HDA or is a managed node. Allow editing on the HDA instance or unlock the node."
+    },
+    {
+      "id": 167,
+      "context": "Python",
+      "error": "TypeError: createNode() takes exactly 2 arguments (1 given)",
+      "fix": "Check the Houdini Python documentation for 'createNode'. You are passing an incorrect number of parameters."
+    },
+    {
+      "id": 168,
+      "context": "Python",
+      "error": "hou.OperationFailed: The attempted operation failed on /obj/geo1",
+      "fix": "Check the Houdini console for more details. This often happens when creating a node of an invalid type or in the wrong context."
+    },
+    {
+      "id": 169,
+      "context": "Python",
+      "error": "IndexError: list index out of range",
+      "fix": "You are trying to access an element in a list (like points or nodes) that doesn't exist. Check the length of the list first."
+    },
+    {
+      "id": 170,
+      "context": "Python",
+      "error": "hou.LoadError: Unable to load asset.hda",
+      "fix": "Verify the file path exists and is accessible. Use hou.expandString('$HIP') to debug path variables."
+    },
+    {
+      "id": 171,
+      "context": "Python",
+      "error": "hou.ObjectWasDeleted: Attempt to access a deleted Node",
+      "fix": "The Node reference is stale. Re-fetch the object using hou.node() or hou.item() before calling methods on it."
+    },
+    {
+      "id": 172,
+      "context": "Python",
+      "error": "AttributeError: 'NoneType' object has no attribute 'set'",
+      "fix": "The preceding hou.node() or hou.parm() call returned None. Verify that the path string is correct and the node exists."
+    },
+    {
+      "id": 173,
+      "context": "Python",
+      "error": "hou.PermissionError: Cannot modify Node",
+      "fix": "The node is likely inside a locked HDA or is a managed node. Allow editing on the HDA instance or unlock the node."
+    },
+    {
+      "id": 174,
+      "context": "Python",
+      "error": "TypeError: createNode() takes exactly 2 arguments (1 given)",
+      "fix": "Check the Houdini Python documentation for 'createNode'. You are passing an incorrect number of parameters."
+    },
+    {
+      "id": 175,
+      "context": "Python",
+      "error": "hou.OperationFailed: The attempted operation failed on /obj/geo1",
+      "fix": "Check the Houdini console for more details. This often happens when creating a node of an invalid type or in the wrong context."
+    },
+    {
+      "id": 176,
+      "context": "Python",
+      "error": "IndexError: list index out of range",
+      "fix": "You are trying to access an element in a list (like points or nodes) that doesn't exist. Check the length of the list first."
+    },
+    {
+      "id": 177,
+      "context": "Python",
+      "error": "hou.LoadError: Unable to load asset.hda",
+      "fix": "Verify the file path exists and is accessible. Use hou.expandString('$HIP') to debug path variables."
+    },
+    {
+      "id": 178,
+      "context": "Python",
+      "error": "hou.ObjectWasDeleted: Attempt to access a deleted Node",
+      "fix": "The Node reference is stale. Re-fetch the object using hou.node() or hou.item() before calling methods on it."
+    },
+    {
+      "id": 179,
+      "context": "Python",
+      "error": "AttributeError: 'NoneType' object has no attribute 'set'",
+      "fix": "The preceding hou.node() or hou.parm() call returned None. Verify that the path string is correct and the node exists."
+    },
+    {
+      "id": 180,
+      "context": "Python",
+      "error": "hou.PermissionError: Cannot modify Node",
+      "fix": "The node is likely inside a locked HDA or is a managed node. Allow editing on the HDA instance or unlock the node."
+    },
+    {
+      "id": 181,
+      "context": "Python",
+      "error": "TypeError: createNode() takes exactly 2 arguments (1 given)",
+      "fix": "Check the Houdini Python documentation for 'createNode'. You are passing an incorrect number of parameters."
+    },
+    {
+      "id": 182,
+      "context": "Python",
+      "error": "hou.OperationFailed: The attempted operation failed on /obj/geo1",
+      "fix": "Check the Houdini console for more details. This often happens when creating a node of an invalid type or in the wrong context."
+    },
+    {
+      "id": 183,
+      "context": "Python",
+      "error": "IndexError: list index out of range",
+      "fix": "You are trying to access an element in a list (like points or nodes) that doesn't exist. Check the length of the list first."
+    },
+    {
+      "id": 184,
+      "context": "Python",
+      "error": "hou.LoadError: Unable to load asset.hda",
+      "fix": "Verify the file path exists and is accessible. Use hou.expandString('$HIP') to debug path variables."
+    },
+    {
+      "id": 185,
+      "context": "Python",
+      "error": "hou.ObjectWasDeleted: Attempt to access a deleted Node",
+      "fix": "The Node reference is stale. Re-fetch the object using hou.node() or hou.item() before calling methods on it."
+    },
+    {
+      "id": 186,
+      "context": "Python",
+      "error": "AttributeError: 'NoneType' object has no attribute 'set'",
+      "fix": "The preceding hou.node() or hou.parm() call returned None. Verify that the path string is correct and the node exists."
+    },
+    {
+      "id": 187,
+      "context": "Python",
+      "error": "hou.PermissionError: Cannot modify Node",
+      "fix": "The node is likely inside a locked HDA or is a managed node. Allow editing on the HDA instance or unlock the node."
+    },
+    {
+      "id": 188,
+      "context": "Python",
+      "error": "TypeError: createNode() takes exactly 2 arguments (1 given)",
+      "fix": "Check the Houdini Python documentation for 'createNode'. You are passing an incorrect number of parameters."
+    },
+    {
+      "id": 189,
+      "context": "Python",
+      "error": "hou.OperationFailed: The attempted operation failed on /obj/geo1",
+      "fix": "Check the Houdini console for more details. This often happens when creating a node of an invalid type or in the wrong context."
+    },
+    {
+      "id": 190,
+      "context": "Python",
+      "error": "IndexError: list index out of range",
+      "fix": "You are trying to access an element in a list (like points or nodes) that doesn't exist. Check the length of the list first."
+    },
+    {
+      "id": 191,
+      "context": "Python",
+      "error": "hou.LoadError: Unable to load asset.hda",
+      "fix": "Verify the file path exists and is accessible. Use hou.expandString('$HIP') to debug path variables."
+    },
+    {
+      "id": 192,
+      "context": "Python",
+      "error": "hou.ObjectWasDeleted: Attempt to access a deleted Node",
+      "fix": "The Node reference is stale. Re-fetch the object using hou.node() or hou.item() before calling methods on it."
+    },
+    {
+      "id": 193,
+      "context": "Python",
+      "error": "AttributeError: 'NoneType' object has no attribute 'set'",
+      "fix": "The preceding hou.node() or hou.parm() call returned None. Verify that the path string is correct and the node exists."
+    },
+    {
+      "id": 194,
+      "context": "Python",
+      "error": "hou.PermissionError: Cannot modify Node",
+      "fix": "The node is likely inside a locked HDA or is a managed node. Allow editing on the HDA instance or unlock the node."
+    },
+    {
+      "id": 195,
+      "context": "Python",
+      "error": "TypeError: createNode() takes exactly 2 arguments (1 given)",
+      "fix": "Check the Houdini Python documentation for 'createNode'. You are passing an incorrect number of parameters."
+    },
+    {
+      "id": 196,
+      "context": "Python",
+      "error": "hou.OperationFailed: The attempted operation failed on /obj/geo1",
+      "fix": "Check the Houdini console for more details. This often happens when creating a node of an invalid type or in the wrong context."
+    },
+    {
+      "id": 197,
+      "context": "Python",
+      "error": "IndexError: list index out of range",
+      "fix": "You are trying to access an element in a list (like points or nodes) that doesn't exist. Check the length of the list first."
+    },
+    {
+      "id": 198,
+      "context": "Python",
+      "error": "hou.LoadError: Unable to load asset.hda",
+      "fix": "Verify the file path exists and is accessible. Use hou.expandString('$HIP') to debug path variables."
+    },
+    {
+      "id": 199,
+      "context": "Python",
+      "error": "hou.ObjectWasDeleted: Attempt to access a deleted Node",
+      "fix": "The Node reference is stale. Re-fetch the object using hou.node() or hou.item() before calling methods on it."
+    },
+    {
+      "id": 200,
+      "context": "Python",
+      "error": "AttributeError: 'NoneType' object has no attribute 'set'",
+      "fix": "The preceding hou.node() or hou.parm() call returned None. Verify that the path string is correct and the node exists."
+    },
+    {
+      "id": 201,
+      "context": "Node_Network",
+      "error": "Invalid source at input 0 of polyextrude1",
+      "fix": "The node connected to input 0 is not providing the correct data type or is errored. Check the upstream network."
+    },
+    {
+      "id": 202,
+      "context": "Node_Network",
+      "error": "Cook error in input 0",
+      "fix": "A node upstream of this input has an error. Follow the red error flags up the chain to find the root cause."
+    },
+    {
+      "id": 203,
+      "context": "Node_Network",
+      "error": "Infinite recursion detected in polyextrude1",
+      "fix": "A parameter or expression in 'polyextrude1' is referencing itself or a child node, creating a circular logic loop."
+    },
+    {
+      "id": 204,
+      "context": "Node_Network",
+      "error": "Unable to read geometry file: model.obj",
+      "fix": "The file path is incorrect or the format is unsupported. Ensure the file extension matches the data (e.g., .bgeo.sc, .obj, .abc)."
+    },
+    {
+      "id": 205,
+      "context": "Node_Network",
+      "error": "Missing attribute 'N' required by polyextrude1",
+      "fix": "The node 'polyextrude1' expects an attribute named 'N' which was not found. Add an Attribute Create or Wrangle node upstream."
+    },
+    {
+      "id": 206,
+      "context": "Node_Network",
+      "error": "Input 0 is not connected",
+      "fix": "This node requires a connection on input 0 to function. Connect a valid operator."
+    },
+    {
+      "id": 207,
+      "context": "Node_Network",
+      "error": "Geometry has no primitives",
+      "fix": "The input geometry is empty or missing expected components like primitives (points, primitives, or vertices)."
+    },
+    {
+      "id": 208,
+      "context": "Node_Network",
+      "error": "Invalid source at input 0 of polyextrude1",
+      "fix": "The node connected to input 0 is not providing the correct data type or is errored. Check the upstream network."
+    },
+    {
+      "id": 209,
+      "context": "Node_Network",
+      "error": "Cook error in input 0",
+      "fix": "A node upstream of this input has an error. Follow the red error flags up the chain to find the root cause."
+    },
+    {
+      "id": 210,
+      "context": "Node_Network",
+      "error": "Infinite recursion detected in polyextrude1",
+      "fix": "A parameter or expression in 'polyextrude1' is referencing itself or a child node, creating a circular logic loop."
+    },
+    {
+      "id": 211,
+      "context": "Node_Network",
+      "error": "Unable to read geometry file: model.obj",
+      "fix": "The file path is incorrect or the format is unsupported. Ensure the file extension matches the data (e.g., .bgeo.sc, .obj, .abc)."
+    },
+    {
+      "id": 212,
+      "context": "Node_Network",
+      "error": "Missing attribute 'N' required by polyextrude1",
+      "fix": "The node 'polyextrude1' expects an attribute named 'N' which was not found. Add an Attribute Create or Wrangle node upstream."
+    },
+    {
+      "id": 213,
+      "context": "Node_Network",
+      "error": "Input 0 is not connected",
+      "fix": "This node requires a connection on input 0 to function. Connect a valid operator."
+    },
+    {
+      "id": 214,
+      "context": "Node_Network",
+      "error": "Geometry has no primitives",
+      "fix": "The input geometry is empty or missing expected components like primitives (points, primitives, or vertices)."
+    },
+    {
+      "id": 215,
+      "context": "Node_Network",
+      "error": "Invalid source at input 0 of polyextrude1",
+      "fix": "The node connected to input 0 is not providing the correct data type or is errored. Check the upstream network."
+    },
+    {
+      "id": 216,
+      "context": "Node_Network",
+      "error": "Cook error in input 0",
+      "fix": "A node upstream of this input has an error. Follow the red error flags up the chain to find the root cause."
+    },
+    {
+      "id": 217,
+      "context": "Node_Network",
+      "error": "Infinite recursion detected in polyextrude1",
+      "fix": "A parameter or expression in 'polyextrude1' is referencing itself or a child node, creating a circular logic loop."
+    },
+    {
+      "id": 218,
+      "context": "Node_Network",
+      "error": "Unable to read geometry file: model.obj",
+      "fix": "The file path is incorrect or the format is unsupported. Ensure the file extension matches the data (e.g., .bgeo.sc, .obj, .abc)."
+    },
+    {
+      "id": 219,
+      "context": "Node_Network",
+      "error": "Missing attribute 'N' required by polyextrude1",
+      "fix": "The node 'polyextrude1' expects an attribute named 'N' which was not found. Add an Attribute Create or Wrangle node upstream."
+    },
+    {
+      "id": 220,
+      "context": "Node_Network",
+      "error": "Input 0 is not connected",
+      "fix": "This node requires a connection on input 0 to function. Connect a valid operator."
+    },
+    {
+      "id": 221,
+      "context": "Node_Network",
+      "error": "Geometry has no primitives",
+      "fix": "The input geometry is empty or missing expected components like primitives (points, primitives, or vertices)."
+    },
+    {
+      "id": 222,
+      "context": "Node_Network",
+      "error": "Invalid source at input 0 of polyextrude1",
+      "fix": "The node connected to input 0 is not providing the correct data type or is errored. Check the upstream network."
+    },
+    {
+      "id": 223,
+      "context": "Node_Network",
+      "error": "Cook error in input 0",
+      "fix": "A node upstream of this input has an error. Follow the red error flags up the chain to find the root cause."
+    },
+    {
+      "id": 224,
+      "context": "Node_Network",
+      "error": "Infinite recursion detected in polyextrude1",
+      "fix": "A parameter or expression in 'polyextrude1' is referencing itself or a child node, creating a circular logic loop."
+    },
+    {
+      "id": 225,
+      "context": "Node_Network",
+      "error": "Unable to read geometry file: model.obj",
+      "fix": "The file path is incorrect or the format is unsupported. Ensure the file extension matches the data (e.g., .bgeo.sc, .obj, .abc)."
+    },
+    {
+      "id": 226,
+      "context": "Node_Network",
+      "error": "Missing attribute 'N' required by polyextrude1",
+      "fix": "The node 'polyextrude1' expects an attribute named 'N' which was not found. Add an Attribute Create or Wrangle node upstream."
+    },
+    {
+      "id": 227,
+      "context": "Node_Network",
+      "error": "Input 0 is not connected",
+      "fix": "This node requires a connection on input 0 to function. Connect a valid operator."
+    },
+    {
+      "id": 228,
+      "context": "Node_Network",
+      "error": "Geometry has no primitives",
+      "fix": "The input geometry is empty or missing expected components like primitives (points, primitives, or vertices)."
+    },
+    {
+      "id": 229,
+      "context": "Node_Network",
+      "error": "Invalid source at input 0 of polyextrude1",
+      "fix": "The node connected to input 0 is not providing the correct data type or is errored. Check the upstream network."
+    },
+    {
+      "id": 230,
+      "context": "Node_Network",
+      "error": "Cook error in input 0",
+      "fix": "A node upstream of this input has an error. Follow the red error flags up the chain to find the root cause."
+    },
+    {
+      "id": 231,
+      "context": "Node_Network",
+      "error": "Infinite recursion detected in polyextrude1",
+      "fix": "A parameter or expression in 'polyextrude1' is referencing itself or a child node, creating a circular logic loop."
+    },
+    {
+      "id": 232,
+      "context": "Node_Network",
+      "error": "Unable to read geometry file: model.obj",
+      "fix": "The file path is incorrect or the format is unsupported. Ensure the file extension matches the data (e.g., .bgeo.sc, .obj, .abc)."
+    },
+    {
+      "id": 233,
+      "context": "Node_Network",
+      "error": "Missing attribute 'N' required by polyextrude1",
+      "fix": "The node 'polyextrude1' expects an attribute named 'N' which was not found. Add an Attribute Create or Wrangle node upstream."
+    },
+    {
+      "id": 234,
+      "context": "Node_Network",
+      "error": "Input 0 is not connected",
+      "fix": "This node requires a connection on input 0 to function. Connect a valid operator."
+    },
+    {
+      "id": 235,
+      "context": "Node_Network",
+      "error": "Geometry has no primitives",
+      "fix": "The input geometry is empty or missing expected components like primitives (points, primitives, or vertices)."
+    },
+    {
+      "id": 236,
+      "context": "Node_Network",
+      "error": "Invalid source at input 0 of polyextrude1",
+      "fix": "The node connected to input 0 is not providing the correct data type or is errored. Check the upstream network."
+    },
+    {
+      "id": 237,
+      "context": "Node_Network",
+      "error": "Cook error in input 0",
+      "fix": "A node upstream of this input has an error. Follow the red error flags up the chain to find the root cause."
+    },
+    {
+      "id": 238,
+      "context": "Node_Network",
+      "error": "Infinite recursion detected in polyextrude1",
+      "fix": "A parameter or expression in 'polyextrude1' is referencing itself or a child node, creating a circular logic loop."
+    },
+    {
+      "id": 239,
+      "context": "Node_Network",
+      "error": "Unable to read geometry file: model.obj",
+      "fix": "The file path is incorrect or the format is unsupported. Ensure the file extension matches the data (e.g., .bgeo.sc, .obj, .abc)."
+    },
+    {
+      "id": 240,
+      "context": "Node_Network",
+      "error": "Missing attribute 'N' required by polyextrude1",
+      "fix": "The node 'polyextrude1' expects an attribute named 'N' which was not found. Add an Attribute Create or Wrangle node upstream."
+    },
+    {
+      "id": 241,
+      "context": "Node_Network",
+      "error": "Input 0 is not connected",
+      "fix": "This node requires a connection on input 0 to function. Connect a valid operator."
+    },
+    {
+      "id": 242,
+      "context": "Node_Network",
+      "error": "Geometry has no primitives",
+      "fix": "The input geometry is empty or missing expected components like primitives (points, primitives, or vertices)."
+    },
+    {
+      "id": 243,
+      "context": "Node_Network",
+      "error": "Invalid source at input 0 of polyextrude1",
+      "fix": "The node connected to input 0 is not providing the correct data type or is errored. Check the upstream network."
+    },
+    {
+      "id": 244,
+      "context": "Node_Network",
+      "error": "Cook error in input 0",
+      "fix": "A node upstream of this input has an error. Follow the red error flags up the chain to find the root cause."
+    },
+    {
+      "id": 245,
+      "context": "Node_Network",
+      "error": "Infinite recursion detected in polyextrude1",
+      "fix": "A parameter or expression in 'polyextrude1' is referencing itself or a child node, creating a circular logic loop."
+    },
+    {
+      "id": 246,
+      "context": "Node_Network",
+      "error": "Unable to read geometry file: model.obj",
+      "fix": "The file path is incorrect or the format is unsupported. Ensure the file extension matches the data (e.g., .bgeo.sc, .obj, .abc)."
+    },
+    {
+      "id": 247,
+      "context": "Node_Network",
+      "error": "Missing attribute 'N' required by polyextrude1",
+      "fix": "The node 'polyextrude1' expects an attribute named 'N' which was not found. Add an Attribute Create or Wrangle node upstream."
+    },
+    {
+      "id": 248,
+      "context": "Node_Network",
+      "error": "Input 0 is not connected",
+      "fix": "This node requires a connection on input 0 to function. Connect a valid operator."
+    },
+    {
+      "id": 249,
+      "context": "Node_Network",
+      "error": "Geometry has no primitives",
+      "fix": "The input geometry is empty or missing expected components like primitives (points, primitives, or vertices)."
+    },
+    {
+      "id": 250,
+      "context": "Node_Network",
+      "error": "Invalid source at input 0 of polyextrude1",
+      "fix": "The node connected to input 0 is not providing the correct data type or is errored. Check the upstream network."
+    },
+    {
+      "id": 251,
+      "context": "Node_Network",
+      "error": "Cook error in input 0",
+      "fix": "A node upstream of this input has an error. Follow the red error flags up the chain to find the root cause."
+    },
+    {
+      "id": 252,
+      "context": "Node_Network",
+      "error": "Infinite recursion detected in polyextrude1",
+      "fix": "A parameter or expression in 'polyextrude1' is referencing itself or a child node, creating a circular logic loop."
+    },
+    {
+      "id": 253,
+      "context": "Node_Network",
+      "error": "Unable to read geometry file: model.obj",
+      "fix": "The file path is incorrect or the format is unsupported. Ensure the file extension matches the data (e.g., .bgeo.sc, .obj, .abc)."
+    },
+    {
+      "id": 254,
+      "context": "Node_Network",
+      "error": "Missing attribute 'N' required by polyextrude1",
+      "fix": "The node 'polyextrude1' expects an attribute named 'N' which was not found. Add an Attribute Create or Wrangle node upstream."
+    },
+    {
+      "id": 255,
+      "context": "Node_Network",
+      "error": "Input 0 is not connected",
+      "fix": "This node requires a connection on input 0 to function. Connect a valid operator."
+    },
+    {
+      "id": 256,
+      "context": "Node_Network",
+      "error": "Geometry has no primitives",
+      "fix": "The input geometry is empty or missing expected components like primitives (points, primitives, or vertices)."
+    },
+    {
+      "id": 257,
+      "context": "Node_Network",
+      "error": "Invalid source at input 0 of polyextrude1",
+      "fix": "The node connected to input 0 is not providing the correct data type or is errored. Check the upstream network."
+    },
+    {
+      "id": 258,
+      "context": "Node_Network",
+      "error": "Cook error in input 0",
+      "fix": "A node upstream of this input has an error. Follow the red error flags up the chain to find the root cause."
+    },
+    {
+      "id": 259,
+      "context": "Node_Network",
+      "error": "Infinite recursion detected in polyextrude1",
+      "fix": "A parameter or expression in 'polyextrude1' is referencing itself or a child node, creating a circular logic loop."
+    },
+    {
+      "id": 260,
+      "context": "Node_Network",
+      "error": "Unable to read geometry file: model.obj",
+      "fix": "The file path is incorrect or the format is unsupported. Ensure the file extension matches the data (e.g., .bgeo.sc, .obj, .abc)."
+    },
+    {
+      "id": 261,
+      "context": "Node_Network",
+      "error": "Missing attribute 'N' required by polyextrude1",
+      "fix": "The node 'polyextrude1' expects an attribute named 'N' which was not found. Add an Attribute Create or Wrangle node upstream."
+    },
+    {
+      "id": 262,
+      "context": "Node_Network",
+      "error": "Input 0 is not connected",
+      "fix": "This node requires a connection on input 0 to function. Connect a valid operator."
+    },
+    {
+      "id": 263,
+      "context": "Node_Network",
+      "error": "Geometry has no primitives",
+      "fix": "The input geometry is empty or missing expected components like primitives (points, primitives, or vertices)."
+    },
+    {
+      "id": 264,
+      "context": "Node_Network",
+      "error": "Invalid source at input 0 of polyextrude1",
+      "fix": "The node connected to input 0 is not providing the correct data type or is errored. Check the upstream network."
+    },
+    {
+      "id": 265,
+      "context": "Node_Network",
+      "error": "Cook error in input 0",
+      "fix": "A node upstream of this input has an error. Follow the red error flags up the chain to find the root cause."
+    },
+    {
+      "id": 266,
+      "context": "Node_Network",
+      "error": "Infinite recursion detected in polyextrude1",
+      "fix": "A parameter or expression in 'polyextrude1' is referencing itself or a child node, creating a circular logic loop."
+    },
+    {
+      "id": 267,
+      "context": "Node_Network",
+      "error": "Unable to read geometry file: model.obj",
+      "fix": "The file path is incorrect or the format is unsupported. Ensure the file extension matches the data (e.g., .bgeo.sc, .obj, .abc)."
+    },
+    {
+      "id": 268,
+      "context": "Node_Network",
+      "error": "Missing attribute 'N' required by polyextrude1",
+      "fix": "The node 'polyextrude1' expects an attribute named 'N' which was not found. Add an Attribute Create or Wrangle node upstream."
+    },
+    {
+      "id": 269,
+      "context": "Node_Network",
+      "error": "Input 0 is not connected",
+      "fix": "This node requires a connection on input 0 to function. Connect a valid operator."
+    },
+    {
+      "id": 270,
+      "context": "Node_Network",
+      "error": "Geometry has no primitives",
+      "fix": "The input geometry is empty or missing expected components like primitives (points, primitives, or vertices)."
+    },
+    {
+      "id": 271,
+      "context": "Node_Network",
+      "error": "Invalid source at input 0 of polyextrude1",
+      "fix": "The node connected to input 0 is not providing the correct data type or is errored. Check the upstream network."
+    },
+    {
+      "id": 272,
+      "context": "Node_Network",
+      "error": "Cook error in input 0",
+      "fix": "A node upstream of this input has an error. Follow the red error flags up the chain to find the root cause."
+    },
+    {
+      "id": 273,
+      "context": "Node_Network",
+      "error": "Infinite recursion detected in polyextrude1",
+      "fix": "A parameter or expression in 'polyextrude1' is referencing itself or a child node, creating a circular logic loop."
+    },
+    {
+      "id": 274,
+      "context": "Node_Network",
+      "error": "Unable to read geometry file: model.obj",
+      "fix": "The file path is incorrect or the format is unsupported. Ensure the file extension matches the data (e.g., .bgeo.sc, .obj, .abc)."
+    },
+    {
+      "id": 275,
+      "context": "Node_Network",
+      "error": "Missing attribute 'N' required by polyextrude1",
+      "fix": "The node 'polyextrude1' expects an attribute named 'N' which was not found. Add an Attribute Create or Wrangle node upstream."
+    },
+    {
+      "id": 276,
+      "context": "Node_Network",
+      "error": "Input 0 is not connected",
+      "fix": "This node requires a connection on input 0 to function. Connect a valid operator."
+    },
+    {
+      "id": 277,
+      "context": "Node_Network",
+      "error": "Geometry has no primitives",
+      "fix": "The input geometry is empty or missing expected components like primitives (points, primitives, or vertices)."
+    },
+    {
+      "id": 278,
+      "context": "Node_Network",
+      "error": "Invalid source at input 0 of polyextrude1",
+      "fix": "The node connected to input 0 is not providing the correct data type or is errored. Check the upstream network."
+    },
+    {
+      "id": 279,
+      "context": "Node_Network",
+      "error": "Cook error in input 0",
+      "fix": "A node upstream of this input has an error. Follow the red error flags up the chain to find the root cause."
+    },
+    {
+      "id": 280,
+      "context": "Node_Network",
+      "error": "Infinite recursion detected in polyextrude1",
+      "fix": "A parameter or expression in 'polyextrude1' is referencing itself or a child node, creating a circular logic loop."
+    },
+    {
+      "id": 281,
+      "context": "Node_Network",
+      "error": "Unable to read geometry file: model.obj",
+      "fix": "The file path is incorrect or the format is unsupported. Ensure the file extension matches the data (e.g., .bgeo.sc, .obj, .abc)."
+    },
+    {
+      "id": 282,
+      "context": "Node_Network",
+      "error": "Missing attribute 'N' required by polyextrude1",
+      "fix": "The node 'polyextrude1' expects an attribute named 'N' which was not found. Add an Attribute Create or Wrangle node upstream."
+    },
+    {
+      "id": 283,
+      "context": "Node_Network",
+      "error": "Input 0 is not connected",
+      "fix": "This node requires a connection on input 0 to function. Connect a valid operator."
+    },
+    {
+      "id": 284,
+      "context": "Node_Network",
+      "error": "Geometry has no primitives",
+      "fix": "The input geometry is empty or missing expected components like primitives (points, primitives, or vertices)."
+    },
+    {
+      "id": 285,
+      "context": "Node_Network",
+      "error": "Invalid source at input 0 of polyextrude1",
+      "fix": "The node connected to input 0 is not providing the correct data type or is errored. Check the upstream network."
+    },
+    {
+      "id": 286,
+      "context": "Node_Network",
+      "error": "Cook error in input 0",
+      "fix": "A node upstream of this input has an error. Follow the red error flags up the chain to find the root cause."
+    },
+    {
+      "id": 287,
+      "context": "Node_Network",
+      "error": "Infinite recursion detected in polyextrude1",
+      "fix": "A parameter or expression in 'polyextrude1' is referencing itself or a child node, creating a circular logic loop."
+    },
+    {
+      "id": 288,
+      "context": "Node_Network",
+      "error": "Unable to read geometry file: model.obj",
+      "fix": "The file path is incorrect or the format is unsupported. Ensure the file extension matches the data (e.g., .bgeo.sc, .obj, .abc)."
+    },
+    {
+      "id": 289,
+      "context": "Node_Network",
+      "error": "Missing attribute 'N' required by polyextrude1",
+      "fix": "The node 'polyextrude1' expects an attribute named 'N' which was not found. Add an Attribute Create or Wrangle node upstream."
+    },
+    {
+      "id": 290,
+      "context": "Node_Network",
+      "error": "Input 0 is not connected",
+      "fix": "This node requires a connection on input 0 to function. Connect a valid operator."
+    },
+    {
+      "id": 291,
+      "context": "Node_Network",
+      "error": "Geometry has no primitives",
+      "fix": "The input geometry is empty or missing expected components like primitives (points, primitives, or vertices)."
+    },
+    {
+      "id": 292,
+      "context": "Node_Network",
+      "error": "Invalid source at input 0 of polyextrude1",
+      "fix": "The node connected to input 0 is not providing the correct data type or is errored. Check the upstream network."
+    },
+    {
+      "id": 293,
+      "context": "Node_Network",
+      "error": "Cook error in input 0",
+      "fix": "A node upstream of this input has an error. Follow the red error flags up the chain to find the root cause."
+    },
+    {
+      "id": 294,
+      "context": "Node_Network",
+      "error": "Infinite recursion detected in polyextrude1",
+      "fix": "A parameter or expression in 'polyextrude1' is referencing itself or a child node, creating a circular logic loop."
+    },
+    {
+      "id": 295,
+      "context": "Node_Network",
+      "error": "Unable to read geometry file: model.obj",
+      "fix": "The file path is incorrect or the format is unsupported. Ensure the file extension matches the data (e.g., .bgeo.sc, .obj, .abc)."
+    },
+    {
+      "id": 296,
+      "context": "Node_Network",
+      "error": "Missing attribute 'N' required by polyextrude1",
+      "fix": "The node 'polyextrude1' expects an attribute named 'N' which was not found. Add an Attribute Create or Wrangle node upstream."
+    },
+    {
+      "id": 297,
+      "context": "Node_Network",
+      "error": "Input 0 is not connected",
+      "fix": "This node requires a connection on input 0 to function. Connect a valid operator."
+    },
+    {
+      "id": 298,
+      "context": "Node_Network",
+      "error": "Geometry has no primitives",
+      "fix": "The input geometry is empty or missing expected components like primitives (points, primitives, or vertices)."
+    },
+    {
+      "id": 299,
+      "context": "Node_Network",
+      "error": "Invalid source at input 0 of polyextrude1",
+      "fix": "The node connected to input 0 is not providing the correct data type or is errored. Check the upstream network."
+    },
+    {
+      "id": 300,
+      "context": "Node_Network",
+      "error": "Cook error in input 0",
+      "fix": "A node upstream of this input has an error. Follow the red error flags up the chain to find the root cause."
+    },
+    {
+      "id": 301,
+      "context": "Simulation",
+      "error": "Solver 'flipsolver1' failed to initialize",
+      "fix": "Check the simulation start frame and ensure all required objects (Object, Geometry, Data) are connected to the merge node."
+    },
+    {
+      "id": 302,
+      "context": "Simulation",
+      "error": "Object 'collider_geo' has no geometry for collision",
+      "fix": "The static or rigid body object is referencing an empty SOP path. Assign a valid geometry node."
+    },
+    {
+      "id": 303,
+      "context": "Simulation",
+      "error": "Substepping limit reached in flipsolver1",
+      "fix": "The simulation is unstable. Try increasing the 'Min Substeps' or decreasing the 'Time Step' on the DOP Network."
+    },
+    {
+      "id": 304,
+      "context": "Simulation",
+      "error": "Missing simulation data: Velocity",
+      "fix": "The solver expects data type 'Velocity' (e.g., Position, Velocity) which is missing from the input stream."
+    },
+    {
+      "id": 305,
+      "context": "Simulation",
+      "error": "Unsupported collision type for collider_geo",
+      "fix": "The collision representation (Volume, Bullet, SDF) is not supported by the current solver. Change the 'Collision Representation' parameter."
+    },
+    {
+      "id": 306,
+      "context": "Simulation",
+      "error": "FLIP fluid is leaking from collider_geo",
+      "fix": "The collision geometry is too thin or has holes. Increase the collision thickness or the grid resolution of the FLIP solver."
+    },
+    {
+      "id": 307,
+      "context": "Simulation",
+      "error": "RBD Object 'collider_geo' has non-convex geometry",
+      "fix": "Bullet solver works best with convex hulls. Switch the collision type to 'Convex Hull' or decompose the geometry into convex pieces."
+    },
+    {
+      "id": 308,
+      "context": "Simulation",
+      "error": "Solver 'flipsolver1' failed to initialize",
+      "fix": "Check the simulation start frame and ensure all required objects (Object, Geometry, Data) are connected to the merge node."
+    },
+    {
+      "id": 309,
+      "context": "Simulation",
+      "error": "Object 'collider_geo' has no geometry for collision",
+      "fix": "The static or rigid body object is referencing an empty SOP path. Assign a valid geometry node."
+    },
+    {
+      "id": 310,
+      "context": "Simulation",
+      "error": "Substepping limit reached in flipsolver1",
+      "fix": "The simulation is unstable. Try increasing the 'Min Substeps' or decreasing the 'Time Step' on the DOP Network."
+    },
+    {
+      "id": 311,
+      "context": "Simulation",
+      "error": "Missing simulation data: Velocity",
+      "fix": "The solver expects data type 'Velocity' (e.g., Position, Velocity) which is missing from the input stream."
+    },
+    {
+      "id": 312,
+      "context": "Simulation",
+      "error": "Unsupported collision type for collider_geo",
+      "fix": "The collision representation (Volume, Bullet, SDF) is not supported by the current solver. Change the 'Collision Representation' parameter."
+    },
+    {
+      "id": 313,
+      "context": "Simulation",
+      "error": "FLIP fluid is leaking from collider_geo",
+      "fix": "The collision geometry is too thin or has holes. Increase the collision thickness or the grid resolution of the FLIP solver."
+    },
+    {
+      "id": 314,
+      "context": "Simulation",
+      "error": "RBD Object 'collider_geo' has non-convex geometry",
+      "fix": "Bullet solver works best with convex hulls. Switch the collision type to 'Convex Hull' or decompose the geometry into convex pieces."
+    },
+    {
+      "id": 315,
+      "context": "Simulation",
+      "error": "Solver 'flipsolver1' failed to initialize",
+      "fix": "Check the simulation start frame and ensure all required objects (Object, Geometry, Data) are connected to the merge node."
+    },
+    {
+      "id": 316,
+      "context": "Simulation",
+      "error": "Object 'collider_geo' has no geometry for collision",
+      "fix": "The static or rigid body object is referencing an empty SOP path. Assign a valid geometry node."
+    },
+    {
+      "id": 317,
+      "context": "Simulation",
+      "error": "Substepping limit reached in flipsolver1",
+      "fix": "The simulation is unstable. Try increasing the 'Min Substeps' or decreasing the 'Time Step' on the DOP Network."
+    },
+    {
+      "id": 318,
+      "context": "Simulation",
+      "error": "Missing simulation data: Velocity",
+      "fix": "The solver expects data type 'Velocity' (e.g., Position, Velocity) which is missing from the input stream."
+    },
+    {
+      "id": 319,
+      "context": "Simulation",
+      "error": "Unsupported collision type for collider_geo",
+      "fix": "The collision representation (Volume, Bullet, SDF) is not supported by the current solver. Change the 'Collision Representation' parameter."
+    },
+    {
+      "id": 320,
+      "context": "Simulation",
+      "error": "FLIP fluid is leaking from collider_geo",
+      "fix": "The collision geometry is too thin or has holes. Increase the collision thickness or the grid resolution of the FLIP solver."
+    },
+    {
+      "id": 321,
+      "context": "Simulation",
+      "error": "RBD Object 'collider_geo' has non-convex geometry",
+      "fix": "Bullet solver works best with convex hulls. Switch the collision type to 'Convex Hull' or decompose the geometry into convex pieces."
+    },
+    {
+      "id": 322,
+      "context": "Simulation",
+      "error": "Solver 'flipsolver1' failed to initialize",
+      "fix": "Check the simulation start frame and ensure all required objects (Object, Geometry, Data) are connected to the merge node."
+    },
+    {
+      "id": 323,
+      "context": "Simulation",
+      "error": "Object 'collider_geo' has no geometry for collision",
+      "fix": "The static or rigid body object is referencing an empty SOP path. Assign a valid geometry node."
+    },
+    {
+      "id": 324,
+      "context": "Simulation",
+      "error": "Substepping limit reached in flipsolver1",
+      "fix": "The simulation is unstable. Try increasing the 'Min Substeps' or decreasing the 'Time Step' on the DOP Network."
+    },
+    {
+      "id": 325,
+      "context": "Simulation",
+      "error": "Missing simulation data: Velocity",
+      "fix": "The solver expects data type 'Velocity' (e.g., Position, Velocity) which is missing from the input stream."
+    },
+    {
+      "id": 326,
+      "context": "Simulation",
+      "error": "Unsupported collision type for collider_geo",
+      "fix": "The collision representation (Volume, Bullet, SDF) is not supported by the current solver. Change the 'Collision Representation' parameter."
+    },
+    {
+      "id": 327,
+      "context": "Simulation",
+      "error": "FLIP fluid is leaking from collider_geo",
+      "fix": "The collision geometry is too thin or has holes. Increase the collision thickness or the grid resolution of the FLIP solver."
+    },
+    {
+      "id": 328,
+      "context": "Simulation",
+      "error": "RBD Object 'collider_geo' has non-convex geometry",
+      "fix": "Bullet solver works best with convex hulls. Switch the collision type to 'Convex Hull' or decompose the geometry into convex pieces."
+    },
+    {
+      "id": 329,
+      "context": "Simulation",
+      "error": "Solver 'flipsolver1' failed to initialize",
+      "fix": "Check the simulation start frame and ensure all required objects (Object, Geometry, Data) are connected to the merge node."
+    },
+    {
+      "id": 330,
+      "context": "Simulation",
+      "error": "Object 'collider_geo' has no geometry for collision",
+      "fix": "The static or rigid body object is referencing an empty SOP path. Assign a valid geometry node."
+    },
+    {
+      "id": 331,
+      "context": "Simulation",
+      "error": "Substepping limit reached in flipsolver1",
+      "fix": "The simulation is unstable. Try increasing the 'Min Substeps' or decreasing the 'Time Step' on the DOP Network."
+    },
+    {
+      "id": 332,
+      "context": "Simulation",
+      "error": "Missing simulation data: Velocity",
+      "fix": "The solver expects data type 'Velocity' (e.g., Position, Velocity) which is missing from the input stream."
+    },
+    {
+      "id": 333,
+      "context": "Simulation",
+      "error": "Unsupported collision type for collider_geo",
+      "fix": "The collision representation (Volume, Bullet, SDF) is not supported by the current solver. Change the 'Collision Representation' parameter."
+    },
+    {
+      "id": 334,
+      "context": "Simulation",
+      "error": "FLIP fluid is leaking from collider_geo",
+      "fix": "The collision geometry is too thin or has holes. Increase the collision thickness or the grid resolution of the FLIP solver."
+    },
+    {
+      "id": 335,
+      "context": "Simulation",
+      "error": "RBD Object 'collider_geo' has non-convex geometry",
+      "fix": "Bullet solver works best with convex hulls. Switch the collision type to 'Convex Hull' or decompose the geometry into convex pieces."
+    },
+    {
+      "id": 336,
+      "context": "Simulation",
+      "error": "Solver 'flipsolver1' failed to initialize",
+      "fix": "Check the simulation start frame and ensure all required objects (Object, Geometry, Data) are connected to the merge node."
+    },
+    {
+      "id": 337,
+      "context": "Simulation",
+      "error": "Object 'collider_geo' has no geometry for collision",
+      "fix": "The static or rigid body object is referencing an empty SOP path. Assign a valid geometry node."
+    },
+    {
+      "id": 338,
+      "context": "Simulation",
+      "error": "Substepping limit reached in flipsolver1",
+      "fix": "The simulation is unstable. Try increasing the 'Min Substeps' or decreasing the 'Time Step' on the DOP Network."
+    },
+    {
+      "id": 339,
+      "context": "Simulation",
+      "error": "Missing simulation data: Velocity",
+      "fix": "The solver expects data type 'Velocity' (e.g., Position, Velocity) which is missing from the input stream."
+    },
+    {
+      "id": 340,
+      "context": "Simulation",
+      "error": "Unsupported collision type for collider_geo",
+      "fix": "The collision representation (Volume, Bullet, SDF) is not supported by the current solver. Change the 'Collision Representation' parameter."
+    },
+    {
+      "id": 341,
+      "context": "Simulation",
+      "error": "FLIP fluid is leaking from collider_geo",
+      "fix": "The collision geometry is too thin or has holes. Increase the collision thickness or the grid resolution of the FLIP solver."
+    },
+    {
+      "id": 342,
+      "context": "Simulation",
+      "error": "RBD Object 'collider_geo' has non-convex geometry",
+      "fix": "Bullet solver works best with convex hulls. Switch the collision type to 'Convex Hull' or decompose the geometry into convex pieces."
+    },
+    {
+      "id": 343,
+      "context": "Simulation",
+      "error": "Solver 'flipsolver1' failed to initialize",
+      "fix": "Check the simulation start frame and ensure all required objects (Object, Geometry, Data) are connected to the merge node."
+    },
+    {
+      "id": 344,
+      "context": "Simulation",
+      "error": "Object 'collider_geo' has no geometry for collision",
+      "fix": "The static or rigid body object is referencing an empty SOP path. Assign a valid geometry node."
+    },
+    {
+      "id": 345,
+      "context": "Simulation",
+      "error": "Substepping limit reached in flipsolver1",
+      "fix": "The simulation is unstable. Try increasing the 'Min Substeps' or decreasing the 'Time Step' on the DOP Network."
+    },
+    {
+      "id": 346,
+      "context": "Simulation",
+      "error": "Missing simulation data: Velocity",
+      "fix": "The solver expects data type 'Velocity' (e.g., Position, Velocity) which is missing from the input stream."
+    },
+    {
+      "id": 347,
+      "context": "Simulation",
+      "error": "Unsupported collision type for collider_geo",
+      "fix": "The collision representation (Volume, Bullet, SDF) is not supported by the current solver. Change the 'Collision Representation' parameter."
+    },
+    {
+      "id": 348,
+      "context": "Simulation",
+      "error": "FLIP fluid is leaking from collider_geo",
+      "fix": "The collision geometry is too thin or has holes. Increase the collision thickness or the grid resolution of the FLIP solver."
+    },
+    {
+      "id": 349,
+      "context": "Simulation",
+      "error": "RBD Object 'collider_geo' has non-convex geometry",
+      "fix": "Bullet solver works best with convex hulls. Switch the collision type to 'Convex Hull' or decompose the geometry into convex pieces."
+    },
+    {
+      "id": 350,
+      "context": "Simulation",
+      "error": "Solver 'flipsolver1' failed to initialize",
+      "fix": "Check the simulation start frame and ensure all required objects (Object, Geometry, Data) are connected to the merge node."
+    },
+    {
+      "id": 351,
+      "context": "Simulation",
+      "error": "Object 'collider_geo' has no geometry for collision",
+      "fix": "The static or rigid body object is referencing an empty SOP path. Assign a valid geometry node."
+    },
+    {
+      "id": 352,
+      "context": "Simulation",
+      "error": "Substepping limit reached in flipsolver1",
+      "fix": "The simulation is unstable. Try increasing the 'Min Substeps' or decreasing the 'Time Step' on the DOP Network."
+    },
+    {
+      "id": 353,
+      "context": "Simulation",
+      "error": "Missing simulation data: Velocity",
+      "fix": "The solver expects data type 'Velocity' (e.g., Position, Velocity) which is missing from the input stream."
+    },
+    {
+      "id": 354,
+      "context": "Simulation",
+      "error": "Unsupported collision type for collider_geo",
+      "fix": "The collision representation (Volume, Bullet, SDF) is not supported by the current solver. Change the 'Collision Representation' parameter."
+    },
+    {
+      "id": 355,
+      "context": "Simulation",
+      "error": "FLIP fluid is leaking from collider_geo",
+      "fix": "The collision geometry is too thin or has holes. Increase the collision thickness or the grid resolution of the FLIP solver."
+    },
+    {
+      "id": 356,
+      "context": "Simulation",
+      "error": "RBD Object 'collider_geo' has non-convex geometry",
+      "fix": "Bullet solver works best with convex hulls. Switch the collision type to 'Convex Hull' or decompose the geometry into convex pieces."
+    },
+    {
+      "id": 357,
+      "context": "Simulation",
+      "error": "Solver 'flipsolver1' failed to initialize",
+      "fix": "Check the simulation start frame and ensure all required objects (Object, Geometry, Data) are connected to the merge node."
+    },
+    {
+      "id": 358,
+      "context": "Simulation",
+      "error": "Object 'collider_geo' has no geometry for collision",
+      "fix": "The static or rigid body object is referencing an empty SOP path. Assign a valid geometry node."
+    },
+    {
+      "id": 359,
+      "context": "Simulation",
+      "error": "Substepping limit reached in flipsolver1",
+      "fix": "The simulation is unstable. Try increasing the 'Min Substeps' or decreasing the 'Time Step' on the DOP Network."
+    },
+    {
+      "id": 360,
+      "context": "Simulation",
+      "error": "Missing simulation data: Velocity",
+      "fix": "The solver expects data type 'Velocity' (e.g., Position, Velocity) which is missing from the input stream."
+    },
+    {
+      "id": 361,
+      "context": "Simulation",
+      "error": "Unsupported collision type for collider_geo",
+      "fix": "The collision representation (Volume, Bullet, SDF) is not supported by the current solver. Change the 'Collision Representation' parameter."
+    },
+    {
+      "id": 362,
+      "context": "Simulation",
+      "error": "FLIP fluid is leaking from collider_geo",
+      "fix": "The collision geometry is too thin or has holes. Increase the collision thickness or the grid resolution of the FLIP solver."
+    },
+    {
+      "id": 363,
+      "context": "Simulation",
+      "error": "RBD Object 'collider_geo' has non-convex geometry",
+      "fix": "Bullet solver works best with convex hulls. Switch the collision type to 'Convex Hull' or decompose the geometry into convex pieces."
+    },
+    {
+      "id": 364,
+      "context": "Simulation",
+      "error": "Solver 'flipsolver1' failed to initialize",
+      "fix": "Check the simulation start frame and ensure all required objects (Object, Geometry, Data) are connected to the merge node."
+    },
+    {
+      "id": 365,
+      "context": "Simulation",
+      "error": "Object 'collider_geo' has no geometry for collision",
+      "fix": "The static or rigid body object is referencing an empty SOP path. Assign a valid geometry node."
+    },
+    {
+      "id": 366,
+      "context": "Simulation",
+      "error": "Substepping limit reached in flipsolver1",
+      "fix": "The simulation is unstable. Try increasing the 'Min Substeps' or decreasing the 'Time Step' on the DOP Network."
+    },
+    {
+      "id": 367,
+      "context": "Simulation",
+      "error": "Missing simulation data: Velocity",
+      "fix": "The solver expects data type 'Velocity' (e.g., Position, Velocity) which is missing from the input stream."
+    },
+    {
+      "id": 368,
+      "context": "Simulation",
+      "error": "Unsupported collision type for collider_geo",
+      "fix": "The collision representation (Volume, Bullet, SDF) is not supported by the current solver. Change the 'Collision Representation' parameter."
+    },
+    {
+      "id": 369,
+      "context": "Simulation",
+      "error": "FLIP fluid is leaking from collider_geo",
+      "fix": "The collision geometry is too thin or has holes. Increase the collision thickness or the grid resolution of the FLIP solver."
+    },
+    {
+      "id": 370,
+      "context": "Simulation",
+      "error": "RBD Object 'collider_geo' has non-convex geometry",
+      "fix": "Bullet solver works best with convex hulls. Switch the collision type to 'Convex Hull' or decompose the geometry into convex pieces."
+    },
+    {
+      "id": 371,
+      "context": "Simulation",
+      "error": "Solver 'flipsolver1' failed to initialize",
+      "fix": "Check the simulation start frame and ensure all required objects (Object, Geometry, Data) are connected to the merge node."
+    },
+    {
+      "id": 372,
+      "context": "Simulation",
+      "error": "Object 'collider_geo' has no geometry for collision",
+      "fix": "The static or rigid body object is referencing an empty SOP path. Assign a valid geometry node."
+    },
+    {
+      "id": 373,
+      "context": "Simulation",
+      "error": "Substepping limit reached in flipsolver1",
+      "fix": "The simulation is unstable. Try increasing the 'Min Substeps' or decreasing the 'Time Step' on the DOP Network."
+    },
+    {
+      "id": 374,
+      "context": "Simulation",
+      "error": "Missing simulation data: Velocity",
+      "fix": "The solver expects data type 'Velocity' (e.g., Position, Velocity) which is missing from the input stream."
+    },
+    {
+      "id": 375,
+      "context": "Simulation",
+      "error": "Unsupported collision type for collider_geo",
+      "fix": "The collision representation (Volume, Bullet, SDF) is not supported by the current solver. Change the 'Collision Representation' parameter."
+    },
+    {
+      "id": 376,
+      "context": "Simulation",
+      "error": "FLIP fluid is leaking from collider_geo",
+      "fix": "The collision geometry is too thin or has holes. Increase the collision thickness or the grid resolution of the FLIP solver."
+    },
+    {
+      "id": 377,
+      "context": "Simulation",
+      "error": "RBD Object 'collider_geo' has non-convex geometry",
+      "fix": "Bullet solver works best with convex hulls. Switch the collision type to 'Convex Hull' or decompose the geometry into convex pieces."
+    },
+    {
+      "id": 378,
+      "context": "Simulation",
+      "error": "Solver 'flipsolver1' failed to initialize",
+      "fix": "Check the simulation start frame and ensure all required objects (Object, Geometry, Data) are connected to the merge node."
+    },
+    {
+      "id": 379,
+      "context": "Simulation",
+      "error": "Object 'collider_geo' has no geometry for collision",
+      "fix": "The static or rigid body object is referencing an empty SOP path. Assign a valid geometry node."
+    },
+    {
+      "id": 380,
+      "context": "Simulation",
+      "error": "Substepping limit reached in flipsolver1",
+      "fix": "The simulation is unstable. Try increasing the 'Min Substeps' or decreasing the 'Time Step' on the DOP Network."
+    },
+    {
+      "id": 381,
+      "context": "Simulation",
+      "error": "Missing simulation data: Velocity",
+      "fix": "The solver expects data type 'Velocity' (e.g., Position, Velocity) which is missing from the input stream."
+    },
+    {
+      "id": 382,
+      "context": "Simulation",
+      "error": "Unsupported collision type for collider_geo",
+      "fix": "The collision representation (Volume, Bullet, SDF) is not supported by the current solver. Change the 'Collision Representation' parameter."
+    },
+    {
+      "id": 383,
+      "context": "Simulation",
+      "error": "FLIP fluid is leaking from collider_geo",
+      "fix": "The collision geometry is too thin or has holes. Increase the collision thickness or the grid resolution of the FLIP solver."
+    },
+    {
+      "id": 384,
+      "context": "Simulation",
+      "error": "RBD Object 'collider_geo' has non-convex geometry",
+      "fix": "Bullet solver works best with convex hulls. Switch the collision type to 'Convex Hull' or decompose the geometry into convex pieces."
+    },
+    {
+      "id": 385,
+      "context": "Simulation",
+      "error": "Solver 'flipsolver1' failed to initialize",
+      "fix": "Check the simulation start frame and ensure all required objects (Object, Geometry, Data) are connected to the merge node."
+    },
+    {
+      "id": 386,
+      "context": "Simulation",
+      "error": "Object 'collider_geo' has no geometry for collision",
+      "fix": "The static or rigid body object is referencing an empty SOP path. Assign a valid geometry node."
+    },
+    {
+      "id": 387,
+      "context": "Simulation",
+      "error": "Substepping limit reached in flipsolver1",
+      "fix": "The simulation is unstable. Try increasing the 'Min Substeps' or decreasing the 'Time Step' on the DOP Network."
+    },
+    {
+      "id": 388,
+      "context": "Simulation",
+      "error": "Missing simulation data: Velocity",
+      "fix": "The solver expects data type 'Velocity' (e.g., Position, Velocity) which is missing from the input stream."
+    },
+    {
+      "id": 389,
+      "context": "Simulation",
+      "error": "Unsupported collision type for collider_geo",
+      "fix": "The collision representation (Volume, Bullet, SDF) is not supported by the current solver. Change the 'Collision Representation' parameter."
+    },
+    {
+      "id": 390,
+      "context": "Simulation",
+      "error": "FLIP fluid is leaking from collider_geo",
+      "fix": "The collision geometry is too thin or has holes. Increase the collision thickness or the grid resolution of the FLIP solver."
+    },
+    {
+      "id": 391,
+      "context": "Simulation",
+      "error": "RBD Object 'collider_geo' has non-convex geometry",
+      "fix": "Bullet solver works best with convex hulls. Switch the collision type to 'Convex Hull' or decompose the geometry into convex pieces."
+    },
+    {
+      "id": 392,
+      "context": "Simulation",
+      "error": "Solver 'flipsolver1' failed to initialize",
+      "fix": "Check the simulation start frame and ensure all required objects (Object, Geometry, Data) are connected to the merge node."
+    },
+    {
+      "id": 393,
+      "context": "Simulation",
+      "error": "Object 'collider_geo' has no geometry for collision",
+      "fix": "The static or rigid body object is referencing an empty SOP path. Assign a valid geometry node."
+    },
+    {
+      "id": 394,
+      "context": "Simulation",
+      "error": "Substepping limit reached in flipsolver1",
+      "fix": "The simulation is unstable. Try increasing the 'Min Substeps' or decreasing the 'Time Step' on the DOP Network."
+    },
+    {
+      "id": 395,
+      "context": "Simulation",
+      "error": "Missing simulation data: Velocity",
+      "fix": "The solver expects data type 'Velocity' (e.g., Position, Velocity) which is missing from the input stream."
+    },
+    {
+      "id": 396,
+      "context": "Simulation",
+      "error": "Unsupported collision type for collider_geo",
+      "fix": "The collision representation (Volume, Bullet, SDF) is not supported by the current solver. Change the 'Collision Representation' parameter."
+    },
+    {
+      "id": 397,
+      "context": "Simulation",
+      "error": "FLIP fluid is leaking from collider_geo",
+      "fix": "The collision geometry is too thin or has holes. Increase the collision thickness or the grid resolution of the FLIP solver."
+    },
+    {
+      "id": 398,
+      "context": "Simulation",
+      "error": "RBD Object 'collider_geo' has non-convex geometry",
+      "fix": "Bullet solver works best with convex hulls. Switch the collision type to 'Convex Hull' or decompose the geometry into convex pieces."
+    },
+    {
+      "id": 399,
+      "context": "Simulation",
+      "error": "Solver 'flipsolver1' failed to initialize",
+      "fix": "Check the simulation start frame and ensure all required objects (Object, Geometry, Data) are connected to the merge node."
+    },
+    {
+      "id": 400,
+      "context": "Simulation",
+      "error": "Object 'collider_geo' has no geometry for collision",
+      "fix": "The static or rigid body object is referencing an empty SOP path. Assign a valid geometry node."
+    },
+    {
+      "id": 401,
+      "context": "Rendering",
+      "error": "Unable to find shader '/mat/principled1'",
+      "fix": "The material path is invalid or the material was deleted. Update the 'shop_materialpath' attribute or the material parameter on the OBJ node."
+    },
+    {
+      "id": 402,
+      "context": "Rendering",
+      "error": "Missing texture file: diffuse.jpg",
+      "fix": "The renderer cannot find the image at diffuse.jpg. Check your $HIP and $JOB paths or ensure the file was exported."
+    },
+    {
+      "id": 403,
+      "context": "Rendering",
+      "error": "Renderer 'Karma' not found",
+      "fix": "Ensure the render engine (Karma, Mantra, Redshift) is installed and the license is active."
+    },
+    {
+      "id": 404,
+      "context": "Rendering",
+      "error": "Geometry attribute 'Cd' not exported to renderer",
+      "fix": "Check the ROP node settings to ensure the attribute 'Cd' is included in the 'Attributes to Export' list."
+    },
+    {
+      "id": 405,
+      "context": "Rendering",
+      "error": "Sampling error in material /mat/principled1: Out of memory",
+      "fix": "The shader is too complex or the texture resolution is too high for the available GPU/CPU memory. Optimize your textures or simplify the shader graph."
+    },
+    {
+      "id": 406,
+      "context": "Rendering",
+      "error": "USD Primitive '/ASSET/mesh' has no material assigned",
+      "fix": "In Solaris (LOPs), ensure a Material Assign node is targeting the primitive path '/ASSET/mesh'."
+    },
+    {
+      "id": 407,
+      "context": "Rendering",
+      "error": "Invalid light path: /ASSET/mesh",
+      "fix": "The render node is trying to reference a light that doesn't exist. Check the 'Force Lights' or 'Candidate Lights' parameters."
+    },
+    {
+      "id": 408,
+      "context": "Rendering",
+      "error": "Unable to find shader '/mat/principled1'",
+      "fix": "The material path is invalid or the material was deleted. Update the 'shop_materialpath' attribute or the material parameter on the OBJ node."
+    },
+    {
+      "id": 409,
+      "context": "Rendering",
+      "error": "Missing texture file: diffuse.jpg",
+      "fix": "The renderer cannot find the image at diffuse.jpg. Check your $HIP and $JOB paths or ensure the file was exported."
+    },
+    {
+      "id": 410,
+      "context": "Rendering",
+      "error": "Renderer 'Karma' not found",
+      "fix": "Ensure the render engine (Karma, Mantra, Redshift) is installed and the license is active."
+    },
+    {
+      "id": 411,
+      "context": "Rendering",
+      "error": "Geometry attribute 'Cd' not exported to renderer",
+      "fix": "Check the ROP node settings to ensure the attribute 'Cd' is included in the 'Attributes to Export' list."
+    },
+    {
+      "id": 412,
+      "context": "Rendering",
+      "error": "Sampling error in material /mat/principled1: Out of memory",
+      "fix": "The shader is too complex or the texture resolution is too high for the available GPU/CPU memory. Optimize your textures or simplify the shader graph."
+    },
+    {
+      "id": 413,
+      "context": "Rendering",
+      "error": "USD Primitive '/ASSET/mesh' has no material assigned",
+      "fix": "In Solaris (LOPs), ensure a Material Assign node is targeting the primitive path '/ASSET/mesh'."
+    },
+    {
+      "id": 414,
+      "context": "Rendering",
+      "error": "Invalid light path: /ASSET/mesh",
+      "fix": "The render node is trying to reference a light that doesn't exist. Check the 'Force Lights' or 'Candidate Lights' parameters."
+    },
+    {
+      "id": 415,
+      "context": "Rendering",
+      "error": "Unable to find shader '/mat/principled1'",
+      "fix": "The material path is invalid or the material was deleted. Update the 'shop_materialpath' attribute or the material parameter on the OBJ node."
+    },
+    {
+      "id": 416,
+      "context": "Rendering",
+      "error": "Missing texture file: diffuse.jpg",
+      "fix": "The renderer cannot find the image at diffuse.jpg. Check your $HIP and $JOB paths or ensure the file was exported."
+    },
+    {
+      "id": 417,
+      "context": "Rendering",
+      "error": "Renderer 'Karma' not found",
+      "fix": "Ensure the render engine (Karma, Mantra, Redshift) is installed and the license is active."
+    },
+    {
+      "id": 418,
+      "context": "Rendering",
+      "error": "Geometry attribute 'Cd' not exported to renderer",
+      "fix": "Check the ROP node settings to ensure the attribute 'Cd' is included in the 'Attributes to Export' list."
+    },
+    {
+      "id": 419,
+      "context": "Rendering",
+      "error": "Sampling error in material /mat/principled1: Out of memory",
+      "fix": "The shader is too complex or the texture resolution is too high for the available GPU/CPU memory. Optimize your textures or simplify the shader graph."
+    },
+    {
+      "id": 420,
+      "context": "Rendering",
+      "error": "USD Primitive '/ASSET/mesh' has no material assigned",
+      "fix": "In Solaris (LOPs), ensure a Material Assign node is targeting the primitive path '/ASSET/mesh'."
+    },
+    {
+      "id": 421,
+      "context": "Rendering",
+      "error": "Invalid light path: /ASSET/mesh",
+      "fix": "The render node is trying to reference a light that doesn't exist. Check the 'Force Lights' or 'Candidate Lights' parameters."
+    },
+    {
+      "id": 422,
+      "context": "Rendering",
+      "error": "Unable to find shader '/mat/principled1'",
+      "fix": "The material path is invalid or the material was deleted. Update the 'shop_materialpath' attribute or the material parameter on the OBJ node."
+    },
+    {
+      "id": 423,
+      "context": "Rendering",
+      "error": "Missing texture file: diffuse.jpg",
+      "fix": "The renderer cannot find the image at diffuse.jpg. Check your $HIP and $JOB paths or ensure the file was exported."
+    },
+    {
+      "id": 424,
+      "context": "Rendering",
+      "error": "Renderer 'Karma' not found",
+      "fix": "Ensure the render engine (Karma, Mantra, Redshift) is installed and the license is active."
+    },
+    {
+      "id": 425,
+      "context": "Rendering",
+      "error": "Geometry attribute 'Cd' not exported to renderer",
+      "fix": "Check the ROP node settings to ensure the attribute 'Cd' is included in the 'Attributes to Export' list."
+    },
+    {
+      "id": 426,
+      "context": "Rendering",
+      "error": "Sampling error in material /mat/principled1: Out of memory",
+      "fix": "The shader is too complex or the texture resolution is too high for the available GPU/CPU memory. Optimize your textures or simplify the shader graph."
+    },
+    {
+      "id": 427,
+      "context": "Rendering",
+      "error": "USD Primitive '/ASSET/mesh' has no material assigned",
+      "fix": "In Solaris (LOPs), ensure a Material Assign node is targeting the primitive path '/ASSET/mesh'."
+    },
+    {
+      "id": 428,
+      "context": "Rendering",
+      "error": "Invalid light path: /ASSET/mesh",
+      "fix": "The render node is trying to reference a light that doesn't exist. Check the 'Force Lights' or 'Candidate Lights' parameters."
+    },
+    {
+      "id": 429,
+      "context": "Rendering",
+      "error": "Unable to find shader '/mat/principled1'",
+      "fix": "The material path is invalid or the material was deleted. Update the 'shop_materialpath' attribute or the material parameter on the OBJ node."
+    },
+    {
+      "id": 430,
+      "context": "Rendering",
+      "error": "Missing texture file: diffuse.jpg",
+      "fix": "The renderer cannot find the image at diffuse.jpg. Check your $HIP and $JOB paths or ensure the file was exported."
+    },
+    {
+      "id": 431,
+      "context": "Rendering",
+      "error": "Renderer 'Karma' not found",
+      "fix": "Ensure the render engine (Karma, Mantra, Redshift) is installed and the license is active."
+    },
+    {
+      "id": 432,
+      "context": "Rendering",
+      "error": "Geometry attribute 'Cd' not exported to renderer",
+      "fix": "Check the ROP node settings to ensure the attribute 'Cd' is included in the 'Attributes to Export' list."
+    },
+    {
+      "id": 433,
+      "context": "Rendering",
+      "error": "Sampling error in material /mat/principled1: Out of memory",
+      "fix": "The shader is too complex or the texture resolution is too high for the available GPU/CPU memory. Optimize your textures or simplify the shader graph."
+    },
+    {
+      "id": 434,
+      "context": "Rendering",
+      "error": "USD Primitive '/ASSET/mesh' has no material assigned",
+      "fix": "In Solaris (LOPs), ensure a Material Assign node is targeting the primitive path '/ASSET/mesh'."
+    },
+    {
+      "id": 435,
+      "context": "Rendering",
+      "error": "Invalid light path: /ASSET/mesh",
+      "fix": "The render node is trying to reference a light that doesn't exist. Check the 'Force Lights' or 'Candidate Lights' parameters."
+    },
+    {
+      "id": 436,
+      "context": "Rendering",
+      "error": "Unable to find shader '/mat/principled1'",
+      "fix": "The material path is invalid or the material was deleted. Update the 'shop_materialpath' attribute or the material parameter on the OBJ node."
+    },
+    {
+      "id": 437,
+      "context": "Rendering",
+      "error": "Missing texture file: diffuse.jpg",
+      "fix": "The renderer cannot find the image at diffuse.jpg. Check your $HIP and $JOB paths or ensure the file was exported."
+    },
+    {
+      "id": 438,
+      "context": "Rendering",
+      "error": "Renderer 'Karma' not found",
+      "fix": "Ensure the render engine (Karma, Mantra, Redshift) is installed and the license is active."
+    },
+    {
+      "id": 439,
+      "context": "Rendering",
+      "error": "Geometry attribute 'Cd' not exported to renderer",
+      "fix": "Check the ROP node settings to ensure the attribute 'Cd' is included in the 'Attributes to Export' list."
+    },
+    {
+      "id": 440,
+      "context": "Rendering",
+      "error": "Sampling error in material /mat/principled1: Out of memory",
+      "fix": "The shader is too complex or the texture resolution is too high for the available GPU/CPU memory. Optimize your textures or simplify the shader graph."
+    },
+    {
+      "id": 441,
+      "context": "Rendering",
+      "error": "USD Primitive '/ASSET/mesh' has no material assigned",
+      "fix": "In Solaris (LOPs), ensure a Material Assign node is targeting the primitive path '/ASSET/mesh'."
+    },
+    {
+      "id": 442,
+      "context": "Rendering",
+      "error": "Invalid light path: /ASSET/mesh",
+      "fix": "The render node is trying to reference a light that doesn't exist. Check the 'Force Lights' or 'Candidate Lights' parameters."
+    },
+    {
+      "id": 443,
+      "context": "Rendering",
+      "error": "Unable to find shader '/mat/principled1'",
+      "fix": "The material path is invalid or the material was deleted. Update the 'shop_materialpath' attribute or the material parameter on the OBJ node."
+    },
+    {
+      "id": 444,
+      "context": "Rendering",
+      "error": "Missing texture file: diffuse.jpg",
+      "fix": "The renderer cannot find the image at diffuse.jpg. Check your $HIP and $JOB paths or ensure the file was exported."
+    },
+    {
+      "id": 445,
+      "context": "Rendering",
+      "error": "Renderer 'Karma' not found",
+      "fix": "Ensure the render engine (Karma, Mantra, Redshift) is installed and the license is active."
+    },
+    {
+      "id": 446,
+      "context": "Rendering",
+      "error": "Geometry attribute 'Cd' not exported to renderer",
+      "fix": "Check the ROP node settings to ensure the attribute 'Cd' is included in the 'Attributes to Export' list."
+    },
+    {
+      "id": 447,
+      "context": "Rendering",
+      "error": "Sampling error in material /mat/principled1: Out of memory",
+      "fix": "The shader is too complex or the texture resolution is too high for the available GPU/CPU memory. Optimize your textures or simplify the shader graph."
+    },
+    {
+      "id": 448,
+      "context": "Rendering",
+      "error": "USD Primitive '/ASSET/mesh' has no material assigned",
+      "fix": "In Solaris (LOPs), ensure a Material Assign node is targeting the primitive path '/ASSET/mesh'."
+    },
+    {
+      "id": 449,
+      "context": "Rendering",
+      "error": "Invalid light path: /ASSET/mesh",
+      "fix": "The render node is trying to reference a light that doesn't exist. Check the 'Force Lights' or 'Candidate Lights' parameters."
+    },
+    {
+      "id": 450,
+      "context": "Rendering",
+      "error": "Unable to find shader '/mat/principled1'",
+      "fix": "The material path is invalid or the material was deleted. Update the 'shop_materialpath' attribute or the material parameter on the OBJ node."
+    },
+    {
+      "id": 451,
+      "context": "Rendering",
+      "error": "Missing texture file: diffuse.jpg",
+      "fix": "The renderer cannot find the image at diffuse.jpg. Check your $HIP and $JOB paths or ensure the file was exported."
+    },
+    {
+      "id": 452,
+      "context": "Rendering",
+      "error": "Renderer 'Karma' not found",
+      "fix": "Ensure the render engine (Karma, Mantra, Redshift) is installed and the license is active."
+    },
+    {
+      "id": 453,
+      "context": "Rendering",
+      "error": "Geometry attribute 'Cd' not exported to renderer",
+      "fix": "Check the ROP node settings to ensure the attribute 'Cd' is included in the 'Attributes to Export' list."
+    },
+    {
+      "id": 454,
+      "context": "Rendering",
+      "error": "Sampling error in material /mat/principled1: Out of memory",
+      "fix": "The shader is too complex or the texture resolution is too high for the available GPU/CPU memory. Optimize your textures or simplify the shader graph."
+    },
+    {
+      "id": 455,
+      "context": "Rendering",
+      "error": "USD Primitive '/ASSET/mesh' has no material assigned",
+      "fix": "In Solaris (LOPs), ensure a Material Assign node is targeting the primitive path '/ASSET/mesh'."
+    },
+    {
+      "id": 456,
+      "context": "Rendering",
+      "error": "Invalid light path: /ASSET/mesh",
+      "fix": "The render node is trying to reference a light that doesn't exist. Check the 'Force Lights' or 'Candidate Lights' parameters."
+    },
+    {
+      "id": 457,
+      "context": "Rendering",
+      "error": "Unable to find shader '/mat/principled1'",
+      "fix": "The material path is invalid or the material was deleted. Update the 'shop_materialpath' attribute or the material parameter on the OBJ node."
+    },
+    {
+      "id": 458,
+      "context": "Rendering",
+      "error": "Missing texture file: diffuse.jpg",
+      "fix": "The renderer cannot find the image at diffuse.jpg. Check your $HIP and $JOB paths or ensure the file was exported."
+    },
+    {
+      "id": 459,
+      "context": "Rendering",
+      "error": "Renderer 'Karma' not found",
+      "fix": "Ensure the render engine (Karma, Mantra, Redshift) is installed and the license is active."
+    },
+    {
+      "id": 460,
+      "context": "Rendering",
+      "error": "Geometry attribute 'Cd' not exported to renderer",
+      "fix": "Check the ROP node settings to ensure the attribute 'Cd' is included in the 'Attributes to Export' list."
+    },
+    {
+      "id": 461,
+      "context": "Rendering",
+      "error": "Sampling error in material /mat/principled1: Out of memory",
+      "fix": "The shader is too complex or the texture resolution is too high for the available GPU/CPU memory. Optimize your textures or simplify the shader graph."
+    },
+    {
+      "id": 462,
+      "context": "Rendering",
+      "error": "USD Primitive '/ASSET/mesh' has no material assigned",
+      "fix": "In Solaris (LOPs), ensure a Material Assign node is targeting the primitive path '/ASSET/mesh'."
+    },
+    {
+      "id": 463,
+      "context": "Rendering",
+      "error": "Invalid light path: /ASSET/mesh",
+      "fix": "The render node is trying to reference a light that doesn't exist. Check the 'Force Lights' or 'Candidate Lights' parameters."
+    },
+    {
+      "id": 464,
+      "context": "Rendering",
+      "error": "Unable to find shader '/mat/principled1'",
+      "fix": "The material path is invalid or the material was deleted. Update the 'shop_materialpath' attribute or the material parameter on the OBJ node."
+    },
+    {
+      "id": 465,
+      "context": "Rendering",
+      "error": "Missing texture file: diffuse.jpg",
+      "fix": "The renderer cannot find the image at diffuse.jpg. Check your $HIP and $JOB paths or ensure the file was exported."
+    },
+    {
+      "id": 466,
+      "context": "Rendering",
+      "error": "Renderer 'Karma' not found",
+      "fix": "Ensure the render engine (Karma, Mantra, Redshift) is installed and the license is active."
+    },
+    {
+      "id": 467,
+      "context": "Rendering",
+      "error": "Geometry attribute 'Cd' not exported to renderer",
+      "fix": "Check the ROP node settings to ensure the attribute 'Cd' is included in the 'Attributes to Export' list."
+    },
+    {
+      "id": 468,
+      "context": "Rendering",
+      "error": "Sampling error in material /mat/principled1: Out of memory",
+      "fix": "The shader is too complex or the texture resolution is too high for the available GPU/CPU memory. Optimize your textures or simplify the shader graph."
+    },
+    {
+      "id": 469,
+      "context": "Rendering",
+      "error": "USD Primitive '/ASSET/mesh' has no material assigned",
+      "fix": "In Solaris (LOPs), ensure a Material Assign node is targeting the primitive path '/ASSET/mesh'."
+    },
+    {
+      "id": 470,
+      "context": "Rendering",
+      "error": "Invalid light path: /ASSET/mesh",
+      "fix": "The render node is trying to reference a light that doesn't exist. Check the 'Force Lights' or 'Candidate Lights' parameters."
+    },
+    {
+      "id": 471,
+      "context": "Rendering",
+      "error": "Unable to find shader '/mat/principled1'",
+      "fix": "The material path is invalid or the material was deleted. Update the 'shop_materialpath' attribute or the material parameter on the OBJ node."
+    },
+    {
+      "id": 472,
+      "context": "Rendering",
+      "error": "Missing texture file: diffuse.jpg",
+      "fix": "The renderer cannot find the image at diffuse.jpg. Check your $HIP and $JOB paths or ensure the file was exported."
+    },
+    {
+      "id": 473,
+      "context": "Rendering",
+      "error": "Renderer 'Karma' not found",
+      "fix": "Ensure the render engine (Karma, Mantra, Redshift) is installed and the license is active."
+    },
+    {
+      "id": 474,
+      "context": "Rendering",
+      "error": "Geometry attribute 'Cd' not exported to renderer",
+      "fix": "Check the ROP node settings to ensure the attribute 'Cd' is included in the 'Attributes to Export' list."
+    },
+    {
+      "id": 475,
+      "context": "Rendering",
+      "error": "Sampling error in material /mat/principled1: Out of memory",
+      "fix": "The shader is too complex or the texture resolution is too high for the available GPU/CPU memory. Optimize your textures or simplify the shader graph."
+    },
+    {
+      "id": 476,
+      "context": "Rendering",
+      "error": "USD Primitive '/ASSET/mesh' has no material assigned",
+      "fix": "In Solaris (LOPs), ensure a Material Assign node is targeting the primitive path '/ASSET/mesh'."
+    },
+    {
+      "id": 477,
+      "context": "Rendering",
+      "error": "Invalid light path: /ASSET/mesh",
+      "fix": "The render node is trying to reference a light that doesn't exist. Check the 'Force Lights' or 'Candidate Lights' parameters."
+    },
+    {
+      "id": 478,
+      "context": "Rendering",
+      "error": "Unable to find shader '/mat/principled1'",
+      "fix": "The material path is invalid or the material was deleted. Update the 'shop_materialpath' attribute or the material parameter on the OBJ node."
+    },
+    {
+      "id": 479,
+      "context": "Rendering",
+      "error": "Missing texture file: diffuse.jpg",
+      "fix": "The renderer cannot find the image at diffuse.jpg. Check your $HIP and $JOB paths or ensure the file was exported."
+    },
+    {
+      "id": 480,
+      "context": "Rendering",
+      "error": "Renderer 'Karma' not found",
+      "fix": "Ensure the render engine (Karma, Mantra, Redshift) is installed and the license is active."
+    },
+    {
+      "id": 481,
+      "context": "Rendering",
+      "error": "Geometry attribute 'Cd' not exported to renderer",
+      "fix": "Check the ROP node settings to ensure the attribute 'Cd' is included in the 'Attributes to Export' list."
+    },
+    {
+      "id": 482,
+      "context": "Rendering",
+      "error": "Sampling error in material /mat/principled1: Out of memory",
+      "fix": "The shader is too complex or the texture resolution is too high for the available GPU/CPU memory. Optimize your textures or simplify the shader graph."
+    },
+    {
+      "id": 483,
+      "context": "Rendering",
+      "error": "USD Primitive '/ASSET/mesh' has no material assigned",
+      "fix": "In Solaris (LOPs), ensure a Material Assign node is targeting the primitive path '/ASSET/mesh'."
+    },
+    {
+      "id": 484,
+      "context": "Rendering",
+      "error": "Invalid light path: /ASSET/mesh",
+      "fix": "The render node is trying to reference a light that doesn't exist. Check the 'Force Lights' or 'Candidate Lights' parameters."
+    },
+    {
+      "id": 485,
+      "context": "Rendering",
+      "error": "Unable to find shader '/mat/principled1'",
+      "fix": "The material path is invalid or the material was deleted. Update the 'shop_materialpath' attribute or the material parameter on the OBJ node."
+    },
+    {
+      "id": 486,
+      "context": "Rendering",
+      "error": "Missing texture file: diffuse.jpg",
+      "fix": "The renderer cannot find the image at diffuse.jpg. Check your $HIP and $JOB paths or ensure the file was exported."
+    },
+    {
+      "id": 487,
+      "context": "Rendering",
+      "error": "Renderer 'Karma' not found",
+      "fix": "Ensure the render engine (Karma, Mantra, Redshift) is installed and the license is active."
+    },
+    {
+      "id": 488,
+      "context": "Rendering",
+      "error": "Geometry attribute 'Cd' not exported to renderer",
+      "fix": "Check the ROP node settings to ensure the attribute 'Cd' is included in the 'Attributes to Export' list."
+    },
+    {
+      "id": 489,
+      "context": "Rendering",
+      "error": "Sampling error in material /mat/principled1: Out of memory",
+      "fix": "The shader is too complex or the texture resolution is too high for the available GPU/CPU memory. Optimize your textures or simplify the shader graph."
+    },
+    {
+      "id": 490,
+      "context": "Rendering",
+      "error": "USD Primitive '/ASSET/mesh' has no material assigned",
+      "fix": "In Solaris (LOPs), ensure a Material Assign node is targeting the primitive path '/ASSET/mesh'."
+    },
+    {
+      "id": 491,
+      "context": "Rendering",
+      "error": "Invalid light path: /ASSET/mesh",
+      "fix": "The render node is trying to reference a light that doesn't exist. Check the 'Force Lights' or 'Candidate Lights' parameters."
+    },
+    {
+      "id": 492,
+      "context": "Rendering",
+      "error": "Unable to find shader '/mat/principled1'",
+      "fix": "The material path is invalid or the material was deleted. Update the 'shop_materialpath' attribute or the material parameter on the OBJ node."
+    },
+    {
+      "id": 493,
+      "context": "Rendering",
+      "error": "Missing texture file: diffuse.jpg",
+      "fix": "The renderer cannot find the image at diffuse.jpg. Check your $HIP and $JOB paths or ensure the file was exported."
+    },
+    {
+      "id": 494,
+      "context": "Rendering",
+      "error": "Renderer 'Karma' not found",
+      "fix": "Ensure the render engine (Karma, Mantra, Redshift) is installed and the license is active."
+    },
+    {
+      "id": 495,
+      "context": "Rendering",
+      "error": "Geometry attribute 'Cd' not exported to renderer",
+      "fix": "Check the ROP node settings to ensure the attribute 'Cd' is included in the 'Attributes to Export' list."
+    },
+    {
+      "id": 496,
+      "context": "Rendering",
+      "error": "Sampling error in material /mat/principled1: Out of memory",
+      "fix": "The shader is too complex or the texture resolution is too high for the available GPU/CPU memory. Optimize your textures or simplify the shader graph."
+    },
+    {
+      "id": 497,
+      "context": "Rendering",
+      "error": "USD Primitive '/ASSET/mesh' has no material assigned",
+      "fix": "In Solaris (LOPs), ensure a Material Assign node is targeting the primitive path '/ASSET/mesh'."
+    },
+    {
+      "id": 498,
+      "context": "Rendering",
+      "error": "Invalid light path: /ASSET/mesh",
+      "fix": "The render node is trying to reference a light that doesn't exist. Check the 'Force Lights' or 'Candidate Lights' parameters."
+    },
+    {
+      "id": 499,
+      "context": "Rendering",
+      "error": "Unable to find shader '/mat/principled1'",
+      "fix": "The material path is invalid or the material was deleted. Update the 'shop_materialpath' attribute or the material parameter on the OBJ node."
+    },
+    {
+      "id": 500,
+      "context": "Rendering",
+      "error": "Missing texture file: diffuse.jpg",
+      "fix": "The renderer cannot find the image at diffuse.jpg. Check your $HIP and $JOB paths or ensure the file was exported."
+    }
+  ]
+}

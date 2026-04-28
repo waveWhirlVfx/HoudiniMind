@@ -1,0 +1,6282 @@
+{
+  "metadata": {
+    "module": "Props & Small Items",
+    "description": "Procedural recipes for 56+ common environmental props. Chapter 1: The Living Room & Furniture.",
+    "terminology": {
+      "procedural": "Generating geometry via parameters instead of manual sculpting",
+      "leg_offset": "The distance from the corner of a table/chair to the leg center",
+      "slats": "The horizontal or vertical bars in a chair back or fence",
+      "inset": "Placing geometry inside another face",
+      "array": "Copying an item multiple times in a row"
+    }
+  },
+  "chains": [
+    {
+      "id": "prop_001",
+      "title": "Procedural Four-Legged Table (High Fidelity)",
+      "context": "SOP",
+      "goal": "Build a table where leg positions and top thickness are adjustable",
+      "tags": [
+        "furniture",
+        "table",
+        "beginner",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "table_top",
+          "type": "box",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "size": [
+              2.0,
+              0.1,
+              1.0
+            ],
+            "center": [
+              0,
+              0.75,
+              0
+            ]
+          }
+        },
+        {
+          "name": "leg_geo",
+          "type": "box",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.05,
+              0.75,
+              0.05
+            ],
+            "center": [
+              0,
+              0.375,
+              0
+            ]
+          }
+        },
+        {
+          "name": "leg_positions",
+          "type": "add",
+          "position": [
+            4,
+            0
+          ],
+          "parms": {
+            "usept0": true,
+            "pt0": [
+              0.9,
+              0,
+              0.4
+            ],
+            "usept1": true,
+            "pt1": [
+              -0.9,
+              0,
+              0.4
+            ],
+            "usept2": true,
+            "pt2": [
+              0.9,
+              0,
+              -0.4
+            ],
+            "usept3": true,
+            "pt3": [
+              -0.9,
+              0,
+              -0.4
+            ]
+          }
+        },
+        {
+          "name": "copy_legs",
+          "type": "copytopoints::2.0",
+          "position": [
+            3,
+            -2
+          ],
+          "parms": {
+            "pack": false
+          }
+        },
+        {
+          "name": "merge_all",
+          "type": "merge",
+          "position": [
+            1.5,
+            -4
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "table_top",
+          "to": "merge_all",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "leg_geo",
+          "to": "copy_legs",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "leg_positions",
+          "to": "copy_legs",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "copy_legs",
+          "to": "merge_all",
+          "from_out": 0,
+          "to_in": 1
+        }
+      ],
+      "output_description": "A rectangular table with four legs positioned at the corners."
+    },
+    {
+      "id": "prop_002",
+      "title": "Procedural Kitchen Chair (High Fidelity)",
+      "context": "SOP",
+      "goal": "Create a chair with a seat, 4 legs, and a backrest",
+      "tags": [
+        "furniture",
+        "chair",
+        "beginner",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "seat",
+          "type": "box",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.45,
+              0.05,
+              0.45
+            ],
+            "center": [
+              0,
+              0.45,
+              0
+            ]
+          }
+        },
+        {
+          "name": "leg_grid",
+          "type": "grid",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "rows": 2,
+            "cols": 2,
+            "size": [
+              0.35,
+              0.35
+            ]
+          }
+        },
+        {
+          "name": "leg_geo",
+          "type": "box",
+          "position": [
+            4,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.03,
+              0.45,
+              0.03
+            ],
+            "center": [
+              0,
+              0.225,
+              0
+            ]
+          }
+        },
+        {
+          "name": "copy_legs",
+          "type": "copytopoints::2.0",
+          "position": [
+            3,
+            -2
+          ],
+          "parms": {
+            "pack": false
+          }
+        },
+        {
+          "name": "back_post_grid",
+          "type": "grid",
+          "position": [
+            -2,
+            0
+          ],
+          "parms": {
+            "rows": 2,
+            "cols": 1,
+            "size": [
+              0.35,
+              0
+            ]
+          }
+        },
+        {
+          "name": "back_post_geo",
+          "type": "box",
+          "position": [
+            -4,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.03,
+              0.5,
+              0.03
+            ],
+            "center": [
+              0,
+              0.7,
+              -0.2
+            ]
+          }
+        },
+        {
+          "name": "copy_back",
+          "type": "copytopoints::2.0",
+          "position": [
+            -3,
+            -2
+          ],
+          "parms": {
+            "pack": false
+          }
+        },
+        {
+          "name": "merge_chair",
+          "type": "merge",
+          "position": [
+            0,
+            -4
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "seat",
+          "to": "merge_chair",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "leg_geo",
+          "to": "copy_legs",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "leg_grid",
+          "to": "copy_legs",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "copy_legs",
+          "to": "merge_chair",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "back_post_geo",
+          "to": "copy_back",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "back_post_grid",
+          "to": "copy_back",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "copy_back",
+          "to": "merge_chair",
+          "from_out": 0,
+          "to_in": 2
+        }
+      ],
+      "output_description": "A high-detail chair model with a backrest and four legs."
+    },
+    {
+      "id": "prop_003",
+      "title": "Procedural Sofa Core (High Fidelity)",
+      "context": "SOP",
+      "goal": "Build a modular sofa with seat and armrests",
+      "tags": [
+        "furniture",
+        "sofa",
+        "intermediate",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "main_seat",
+          "type": "box",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "size": [
+              2.2,
+              0.4,
+              0.9
+            ],
+            "center": [
+              0,
+              0.2,
+              0
+            ]
+          }
+        },
+        {
+          "name": "back_rest",
+          "type": "box",
+          "position": [
+            0,
+            1
+          ],
+          "parms": {
+            "size": [
+              2.2,
+              0.8,
+              0.3
+            ],
+            "center": [
+              0,
+              0.5,
+              -0.45
+            ]
+          }
+        },
+        {
+          "name": "arm_rest",
+          "type": "box",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.3,
+              0.6,
+              0.9
+            ],
+            "center": [
+              1.1,
+              0.3,
+              0
+            ]
+          }
+        },
+        {
+          "name": "mirror_arm",
+          "type": "mirror",
+          "position": [
+            2,
+            -1
+          ],
+          "parms": {
+            "direction": [
+              1,
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "name": "subdiv",
+          "type": "subdivide",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {
+            "iterations": 2
+          }
+        },
+        {
+          "name": "merge_sofa",
+          "type": "merge",
+          "position": [
+            0,
+            -4
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "main_seat",
+          "to": "subdiv",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "subdiv",
+          "to": "merge_sofa",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "back_rest",
+          "to": "merge_sofa",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "arm_rest",
+          "to": "mirror_arm",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "mirror_arm",
+          "to": "merge_sofa",
+          "from_out": 0,
+          "to_in": 2
+        }
+      ],
+      "output_description": "A rounded upholstered sofa base."
+    },
+    {
+      "id": "prop_004",
+      "title": "Procedural TV Stand (High Fidelity)",
+      "context": "SOP",
+      "goal": "Cabinet with shelving area and top surface",
+      "tags": [
+        "furniture",
+        "tv stand",
+        "intermediate",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "outer_shell",
+          "type": "box",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "size": [
+              2.0,
+              0.6,
+              0.5
+            ]
+          }
+        },
+        {
+          "name": "shelf_cutout",
+          "type": "box",
+          "position": [
+            0,
+            1
+          ],
+          "parms": {
+            "size": [
+              1.9,
+              0.5,
+              0.45
+            ],
+            "center": [
+              0,
+              0,
+              0.05
+            ]
+          }
+        },
+        {
+          "name": "bool_shell",
+          "type": "boolean",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {
+            "operation": "subtract"
+          }
+        },
+        {
+          "name": "leg_points",
+          "type": "grid",
+          "position": [
+            4,
+            0
+          ],
+          "parms": {
+            "rows": 2,
+            "cols": 2,
+            "size": [
+              1.8,
+              0.4
+            ]
+          }
+        },
+        {
+          "name": "leg_geo",
+          "type": "box",
+          "position": [
+            6,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.05,
+              0.15,
+              0.05
+            ],
+            "center": [
+              0,
+              -0.375,
+              0
+            ]
+          }
+        },
+        {
+          "name": "copy_legs",
+          "type": "copytopoints::2.0",
+          "position": [
+            5,
+            -2
+          ],
+          "parms": {
+            "pack": false
+          }
+        },
+        {
+          "name": "merge_final",
+          "type": "merge",
+          "position": [
+            2.5,
+            -4
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "outer_shell",
+          "to": "bool_shell",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "shelf_cutout",
+          "to": "bool_shell",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "bool_shell",
+          "to": "merge_final",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "leg_geo",
+          "to": "copy_legs",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "leg_points",
+          "to": "copy_legs",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "copy_legs",
+          "to": "merge_final",
+          "from_out": 0,
+          "to_in": 1
+        }
+      ],
+      "output_description": "A hollow cabinet-style TV stand with small legs."
+    },
+    {
+      "id": "prop_005",
+      "title": "Procedural Coffee Table (High Fidelity)",
+      "context": "SOP",
+      "goal": "Round glass-top coffee table with metal base",
+      "tags": [
+        "furniture",
+        "coffee table",
+        "intermediate",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "glass_top",
+          "type": "tube",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "rad": 0.5,
+            "height": 0.02,
+            "center": [
+              0,
+              0.45,
+              0
+            ],
+            "type": "polygon",
+            "cap": true
+          }
+        },
+        {
+          "name": "base_rim",
+          "type": "torus",
+          "position": [
+            -2,
+            0
+          ],
+          "parms": {
+            "rows": 16,
+            "cols": 32,
+            "radx": 0.5,
+            "rady": 0.015,
+            "center": [
+              0,
+              0.45,
+              0
+            ]
+          }
+        },
+        {
+          "name": "leg_pts",
+          "type": "circle",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "rad": 0.45,
+            "divs": 3
+          }
+        },
+        {
+          "name": "leg_geo",
+          "type": "tube",
+          "position": [
+            4,
+            0
+          ],
+          "parms": {
+            "rad": 0.02,
+            "height": 0.45,
+            "center": [
+              0,
+              0.225,
+              0
+            ]
+          }
+        },
+        {
+          "name": "copy_legs",
+          "type": "copytopoints::2.0",
+          "position": [
+            3,
+            -2
+          ],
+          "parms": {
+            "pack": false
+          }
+        },
+        {
+          "name": "merge_table",
+          "type": "merge",
+          "position": [
+            0.5,
+            -4
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "glass_top",
+          "to": "merge_table",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "base_rim",
+          "to": "merge_table",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "leg_geo",
+          "to": "copy_legs",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "leg_pts",
+          "to": "copy_legs",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "copy_legs",
+          "to": "merge_table",
+          "from_out": 0,
+          "to_in": 2
+        }
+      ],
+      "output_description": "A stylish round coffee table with a 3-legged metal frame."
+    },
+    {
+      "id": "prop_006",
+      "title": "Procedural Ottoman (High Fidelity)",
+      "context": "SOP",
+      "goal": "Upholstered round footstool with seams",
+      "tags": [
+        "furniture",
+        "ottoman",
+        "intermediate",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "base_cyl",
+          "type": "tube",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "type": "polygon",
+            "rad": 0.4,
+            "height": 0.4,
+            "center": [
+              0,
+              0.2,
+              0
+            ],
+            "cap": true
+          }
+        },
+        {
+          "name": "soften",
+          "type": "subdivide",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "iterations": 3
+          }
+        },
+        {
+          "name": "wrangle_noise",
+          "type": "attribwrangle",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {
+            "class": "point",
+            "snippet": "@P += @N * (noise(@P*5.0)-0.5) * 0.02;"
+          }
+        },
+        {
+          "name": "seam_group",
+          "type": "groupexpression",
+          "position": [
+            2,
+            -2
+          ],
+          "parms": {
+            "grouptype": "point",
+            "snippet1": "@P.y > 0.39 || length(set(@P.x, @P.z)) < 0.05"
+          }
+        },
+        {
+          "name": "bevel_seam",
+          "type": "polybevel::3.0",
+          "position": [
+            1,
+            -4
+          ],
+          "parms": {
+            "group": "seam_group",
+            "offset": 0.005
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "base_cyl",
+          "to": "soften",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "soften",
+          "to": "wrangle_noise",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "wrangle_noise",
+          "to": "seam_group",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "seam_group",
+          "to": "bevel_seam",
+          "from_out": 0,
+          "to_in": 0
+        }
+      ],
+      "output_description": "A soft-looking round footstool with procedural surface noise and top seams."
+    },
+    {
+      "id": "prop_007",
+      "title": "Procedural Bookshelf (High Fidelity)",
+      "context": "SOP",
+      "goal": "Build a modular shelf where the number of levels is controlled by a loop",
+      "tags": [
+        "furniture",
+        "bookshelf",
+        "intermediate",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "side_panel",
+          "type": "box",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.05,
+              2.0,
+              0.4
+            ],
+            "center": [
+              0.6,
+              1.0,
+              0
+            ]
+          }
+        },
+        {
+          "name": "mirror_sides",
+          "type": "mirror",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "direction": [
+              1,
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "name": "back_panel",
+          "type": "box",
+          "position": [
+            -2,
+            -1
+          ],
+          "parms": {
+            "size": [
+              1.2,
+              2.0,
+              0.02
+            ],
+            "center": [
+              0,
+              1.0,
+              -0.2
+            ]
+          }
+        },
+        {
+          "name": "loop_begin",
+          "type": "block_begin",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "method": "metadata",
+            "num_iterations": 6
+          }
+        },
+        {
+          "name": "shelf_board",
+          "type": "box",
+          "position": [
+            4,
+            0
+          ],
+          "parms": {
+            "size": [
+              1.2,
+              0.03,
+              0.38
+            ]
+          }
+        },
+        {
+          "name": "calc_shelf_height",
+          "type": "attribwrangle",
+          "position": [
+            3,
+            -2
+          ],
+          "parms": {
+            "snippet": "float iter = detail(1, 'iteration'); @P.y = iter * 0.35 + 0.1;"
+          }
+        },
+        {
+          "name": "merge_bookshelf",
+          "type": "merge",
+          "position": [
+            1,
+            -4
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "side_panel",
+          "to": "mirror_sides",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "mirror_sides",
+          "to": "merge_bookshelf",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "back_panel",
+          "to": "merge_bookshelf",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "shelf_board",
+          "to": "calc_shelf_height",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "loop_begin",
+          "to": "calc_shelf_height",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "calc_shelf_height",
+          "to": "merge_bookshelf",
+          "from_out": 0,
+          "to_in": 2
+        }
+      ],
+      "output_description": "A vertical bookshelf with 6 levels generated via metadata loop."
+    },
+    {
+      "id": "prop_008",
+      "title": "Procedural Area Rug (High Fidelity)",
+      "context": "SOP",
+      "goal": "Rectangle rug with soft edges and fringe points",
+      "tags": [
+        "furniture",
+        "rug",
+        "beginner",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "rug_base",
+          "type": "grid",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "size": [
+              3.0,
+              2.0
+            ],
+            "rows": 40,
+            "cols": 60,
+            "orient": "xz"
+          }
+        },
+        {
+          "name": "wrangle_wrinkle",
+          "type": "attribwrangle",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "snippet": "@P.y += (noise(@P*2.0)-0.5) * 0.02;"
+          }
+        },
+        {
+          "name": "edge_fringe_wr",
+          "type": "attribwrangle",
+          "position": [
+            2,
+            -1
+          ],
+          "parms": {
+            "class": "point",
+            "snippet": "if(abs(@P.x) > 1.48) @P.x += (rand(@ptnum)-0.5) * 0.05;"
+          }
+        },
+        {
+          "name": "uv_project",
+          "type": "uvproject",
+          "position": [
+            0,
+            -3
+          ],
+          "parms": {
+            "projection": "polar"
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "rug_base",
+          "to": "wrangle_wrinkle",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "wrangle_wrinkle",
+          "to": "edge_fringe_wr",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "edge_fringe_wr",
+          "to": "uv_project",
+          "from_out": 0,
+          "to_in": 0
+        }
+      ],
+      "output_description": "A flat floor rug with subtle height variation and frayed edge points."
+    },
+    {
+      "id": "prop_009",
+      "title": "Procedural Window Curtains (High Fidelity)",
+      "context": "SOP",
+      "goal": "Simulated wavy curtains hanging from a rod",
+      "tags": [
+        "furniture",
+        "curtains",
+        "intermediate",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "curtain_blade",
+          "type": "grid",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "size": [
+              1.2,
+              2.4
+            ],
+            "rows": 40,
+            "cols": 10,
+            "orient": "xy",
+            "center": [
+              0.6,
+              1.2,
+              0
+            ]
+          }
+        },
+        {
+          "name": "wave_wrangle",
+          "type": "attribwrangle",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "snippet": "float wave = sin(@P.x * 20.0) * 0.1; @P.z += wave * fit(@P.y, 0, 2.4, 0, 1);"
+          }
+        },
+        {
+          "name": "curtain_rod",
+          "type": "tube",
+          "position": [
+            -2,
+            -1
+          ],
+          "parms": {
+            "rad": 0.02,
+            "height": 2.6,
+            "center": [
+              0,
+              2.4,
+              0
+            ],
+            "orient": "x"
+          }
+        },
+        {
+          "name": "mirror_curtain",
+          "type": "mirror",
+          "position": [
+            0,
+            -3
+          ],
+          "parms": {
+            "direction": [
+              1,
+              0,
+              0
+            ],
+            "dist": 0
+          }
+        },
+        {
+          "name": "merge_curtains",
+          "type": "merge",
+          "position": [
+            -1,
+            -5
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "curtain_blade",
+          "to": "wave_wrangle",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "wave_wrangle",
+          "to": "mirror_curtain",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "mirror_curtain",
+          "to": "merge_curtains",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "curtain_rod",
+          "to": "merge_curtains",
+          "from_out": 0,
+          "to_in": 1
+        }
+      ],
+      "output_description": "A pair of decorative window curtains with horizontal rod."
+    },
+    {
+      "id": "prop_010",
+      "title": "Procedural Floor Lamp (High Fidelity)",
+      "context": "SOP",
+      "goal": "Tall standing lamp with lampshade",
+      "tags": [
+        "furniture",
+        "lamp",
+        "beginner",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "base_disk",
+          "type": "tube",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "type": "polygon",
+            "rad": 0.15,
+            "height": 0.02,
+            "cap": true
+          }
+        },
+        {
+          "name": "stem",
+          "type": "tube",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "rad": 0.015,
+            "height": 1.6,
+            "center": [
+              0,
+              0.8,
+              0
+            ]
+          }
+        },
+        {
+          "name": "lampshade",
+          "type": "tube",
+          "position": [
+            2,
+            -1
+          ],
+          "parms": {
+            "rad": 0.22,
+            "rad2": 0.15,
+            "height": 0.4,
+            "center": [
+              0,
+              1.5,
+              0
+            ],
+            "cap": false
+          }
+        },
+        {
+          "name": "bulb",
+          "type": "sphere",
+          "position": [
+            4,
+            -1
+          ],
+          "parms": {
+            "rad": 0.06,
+            "center": [
+              0,
+              1.5,
+              0
+            ]
+          }
+        },
+        {
+          "name": "merge_lamp",
+          "type": "merge",
+          "position": [
+            1,
+            -3
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "base_disk",
+          "to": "merge_lamp",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "stem",
+          "to": "merge_lamp",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "lampshade",
+          "to": "merge_lamp",
+          "from_out": 0,
+          "to_in": 2
+        },
+        {
+          "from": "bulb",
+          "to": "merge_lamp",
+          "from_out": 0,
+          "to_in": 3
+        }
+      ],
+      "output_description": "A floor-standing lamp with a tapered lampshade."
+    },
+    {
+      "id": "prop_011",
+      "title": "Procedural Kitchen Cabinet (High Fidelity)",
+      "context": "SOP",
+      "goal": "Under-counter storage unit with door and handle",
+      "tags": [
+        "kitchen",
+        "furniture",
+        "intermediate",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "cabinet_box",
+          "type": "box",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.6,
+              0.8,
+              0.58
+            ],
+            "center": [
+              0,
+              0.4,
+              0
+            ]
+          }
+        },
+        {
+          "name": "door_panel",
+          "type": "box",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.58,
+              0.78,
+              0.02
+            ],
+            "center": [
+              0,
+              0.4,
+              0.3
+            ]
+          }
+        },
+        {
+          "name": "handle_geo",
+          "type": "tube",
+          "position": [
+            4,
+            0
+          ],
+          "parms": {
+            "rad": 0.01,
+            "height": 0.15,
+            "center": [
+              0.2,
+              0.6,
+              0.32
+            ],
+            "orient": "y"
+          }
+        },
+        {
+          "name": "merge_cabinet",
+          "type": "merge",
+          "position": [
+            1,
+            -2
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "cabinet_box",
+          "to": "merge_cabinet",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "door_panel",
+          "to": "merge_cabinet",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "handle_geo",
+          "to": "merge_cabinet",
+          "from_out": 0,
+          "to_in": 2
+        }
+      ],
+      "output_description": "A standard kitchen base cabinet with a front-facing door."
+    },
+    {
+      "id": "prop_012",
+      "title": "Procedural Kitchen Sink (High Fidelity)",
+      "context": "SOP",
+      "goal": "Countertop-mounted basin with faucet",
+      "tags": [
+        "kitchen",
+        "plumbing",
+        "advanced",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "counter_top",
+          "type": "box",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "size": [
+              1.0,
+              0.04,
+              0.6
+            ]
+          }
+        },
+        {
+          "name": "basin_cutout",
+          "type": "box",
+          "position": [
+            0,
+            1
+          ],
+          "parms": {
+            "size": [
+              0.5,
+              0.3,
+              0.4
+            ]
+          }
+        },
+        {
+          "name": "bool_sink",
+          "type": "boolean",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "operation": "subtract"
+          }
+        },
+        {
+          "name": "faucet_base",
+          "type": "tube",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "rad": 0.02,
+            "height": 0.1,
+            "center": [
+              0,
+              0,
+              -0.25
+            ]
+          }
+        },
+        {
+          "name": "faucet_spout",
+          "type": "tube",
+          "position": [
+            2,
+            1
+          ],
+          "parms": {
+            "rad": 0.015,
+            "height": 0.3,
+            "center": [
+              0,
+              0.15,
+              -0.2
+            ],
+            "orient": "z"
+          }
+        },
+        {
+          "name": "merge_sink",
+          "type": "merge",
+          "position": [
+            1,
+            -3
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "counter_top",
+          "to": "bool_sink",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "basin_cutout",
+          "to": "bool_sink",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "bool_sink",
+          "to": "merge_sink",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "faucet_base",
+          "to": "merge_sink",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "faucet_spout",
+          "to": "merge_sink",
+          "from_out": 0,
+          "to_in": 2
+        }
+      ],
+      "output_description": "A recessed kitchen sink integrated into a section of countertop."
+    },
+    {
+      "id": "prop_013",
+      "title": "Procedural Oven/Stove (High Fidelity)",
+      "context": "SOP",
+      "goal": "Kitchen appliance with stove burners and front glass",
+      "tags": [
+        "kitchen",
+        "appliance",
+        "intermediate",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "body",
+          "type": "box",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.6,
+              0.9,
+              0.6
+            ],
+            "center": [
+              0,
+              0.45,
+              0
+            ]
+          }
+        },
+        {
+          "name": "burners_grid",
+          "type": "grid",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "rows": 2,
+            "cols": 2,
+            "size": [
+              0.4,
+              0.4
+            ]
+          }
+        },
+        {
+          "name": "burner_geo",
+          "type": "tube",
+          "position": [
+            4,
+            0
+          ],
+          "parms": {
+            "rad": 0.08,
+            "height": 0.02,
+            "center": [
+              0,
+              0.91,
+              0
+            ]
+          }
+        },
+        {
+          "name": "copy_burners",
+          "type": "copytopoints::2.0",
+          "position": [
+            3,
+            -2
+          ],
+          "parms": {
+            "pack": false
+          }
+        },
+        {
+          "name": "front_glass",
+          "type": "box",
+          "position": [
+            -2,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.5,
+              0.4,
+              0.01
+            ],
+            "center": [
+              0,
+              0.5,
+              0.305
+            ]
+          }
+        },
+        {
+          "name": "merge_oven",
+          "type": "merge",
+          "position": [
+            0,
+            -4
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "body",
+          "to": "merge_oven",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "burner_geo",
+          "to": "copy_burners",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "burners_grid",
+          "to": "copy_burners",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "copy_burners",
+          "to": "merge_oven",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "front_glass",
+          "to": "merge_oven",
+          "from_out": 0,
+          "to_in": 2
+        }
+      ],
+      "output_description": "A standalone electric oven with 4 stove-top burners."
+    },
+    {
+      "id": "prop_014",
+      "title": "Procedural Refrigerator (High Fidelity)",
+      "context": "SOP",
+      "goal": "Large tall kitchen appliance with dual door split",
+      "tags": [
+        "kitchen",
+        "appliance",
+        "beginner",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "main_body",
+          "type": "box",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.9,
+              1.8,
+              0.75
+            ],
+            "center": [
+              0,
+              0.9,
+              0
+            ]
+          }
+        },
+        {
+          "name": "upper_door",
+          "type": "box",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.88,
+              1.1,
+              0.04
+            ],
+            "center": [
+              0,
+              1.25,
+              0.4
+            ]
+          }
+        },
+        {
+          "name": "lower_door",
+          "type": "box",
+          "position": [
+            4,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.88,
+              0.65,
+              0.04
+            ],
+            "center": [
+              0,
+              0.35,
+              0.4
+            ]
+          }
+        },
+        {
+          "name": "handle_v",
+          "type": "box",
+          "position": [
+            6,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.03,
+              0.4,
+              0.02
+            ],
+            "center": [
+              0.4,
+              1.25,
+              0.44
+            ]
+          }
+        },
+        {
+          "name": "merge_fridge",
+          "type": "merge",
+          "position": [
+            3,
+            -2
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "main_body",
+          "to": "merge_fridge",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "upper_door",
+          "to": "merge_fridge",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "lower_door",
+          "to": "merge_fridge",
+          "from_out": 0,
+          "to_in": 2
+        },
+        {
+          "from": "handle_v",
+          "to": "merge_fridge",
+          "from_out": 0,
+          "to_in": 3
+        }
+      ],
+      "output_description": "A double-door tall refrigerator with modern handles."
+    },
+    {
+      "id": "prop_015",
+      "title": "Procedural Dining Table (High Fidelity)",
+      "context": "SOP",
+      "goal": "Large wooden rectangular table for a dining room",
+      "tags": [
+        "dining",
+        "furniture",
+        "beginner",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "top_surface",
+          "type": "box",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "size": [
+              2.4,
+              0.08,
+              1.1
+            ],
+            "center": [
+              0,
+              0.75,
+              0
+            ]
+          }
+        },
+        {
+          "name": "leg_corners",
+          "type": "grid",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "rows": 2,
+            "cols": 2,
+            "size": [
+              2.1,
+              0.8
+            ]
+          }
+        },
+        {
+          "name": "leg_thick",
+          "type": "box",
+          "position": [
+            4,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.1,
+              0.75,
+              0.1
+            ],
+            "center": [
+              0,
+              0.375,
+              0
+            ]
+          }
+        },
+        {
+          "name": "copy_legs",
+          "type": "copytopoints::2.0",
+          "position": [
+            3,
+            -2
+          ],
+          "parms": {
+            "pack": false
+          }
+        },
+        {
+          "name": "merge_table",
+          "type": "merge",
+          "position": [
+            1.5,
+            -4
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "top_surface",
+          "to": "merge_table",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "leg_thick",
+          "to": "copy_legs",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "leg_corners",
+          "to": "copy_legs",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "copy_legs",
+          "to": "merge_table",
+          "from_out": 0,
+          "to_in": 1
+        }
+      ],
+      "output_description": "A heavy-set wooden dining table."
+    },
+    {
+      "id": "prop_016",
+      "title": "Procedural Dining Chair (High Fidelity)",
+      "context": "SOP",
+      "goal": "Elegant chair that matches the dining table",
+      "tags": [
+        "dining",
+        "furniture",
+        "intermediate",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "base_seat",
+          "type": "box",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.45,
+              0.06,
+              0.45
+            ],
+            "center": [
+              0,
+              0.45,
+              0
+            ]
+          }
+        },
+        {
+          "name": "taper_legs",
+          "type": "tube",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "rad": 0.02,
+            "rad2": 0.015,
+            "height": 0.45,
+            "center": [
+              0,
+              0.225,
+              0
+            ]
+          }
+        },
+        {
+          "name": "leg_grid",
+          "type": "grid",
+          "position": [
+            4,
+            0
+          ],
+          "parms": {
+            "rows": 2,
+            "cols": 2,
+            "size": [
+              0.35,
+              0.35
+            ]
+          }
+        },
+        {
+          "name": "copy_legs",
+          "type": "copytopoints::2.0",
+          "position": [
+            3,
+            -2
+          ],
+          "parms": {
+            "pack": false
+          }
+        },
+        {
+          "name": "tall_back",
+          "type": "box",
+          "position": [
+            -2,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.45,
+              0.6,
+              0.04
+            ],
+            "center": [
+              0,
+              0.75,
+              -0.2
+            ]
+          }
+        },
+        {
+          "name": "merge_dining_chair",
+          "type": "merge",
+          "position": [
+            0,
+            -4
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "base_seat",
+          "to": "merge_dining_chair",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "taper_legs",
+          "to": "copy_legs",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "leg_grid",
+          "to": "copy_legs",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "copy_legs",
+          "to": "merge_dining_chair",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "tall_back",
+          "to": "merge_dining_chair",
+          "from_out": 0,
+          "to_in": 2
+        }
+      ],
+      "output_description": "A dining room chair with tapered legs and a high back."
+    },
+    {
+      "id": "prop_017",
+      "title": "Procedural Microwave (High Fidelity)",
+      "context": "SOP",
+      "goal": "Small countertop kitchen appliance",
+      "tags": [
+        "kitchen",
+        "appliance",
+        "beginner",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "enclosure",
+          "type": "box",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.5,
+              0.3,
+              0.35
+            ]
+          }
+        },
+        {
+          "name": "front_panel",
+          "type": "box",
+          "position": [
+            -2,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.48,
+              0.28,
+              0.01
+            ],
+            "center": [
+              0,
+              0,
+              0.176
+            ]
+          }
+        },
+        {
+          "name": "screen_wrangle",
+          "type": "attribwrangle",
+          "position": [
+            -2,
+            -2
+          ],
+          "parms": {
+            "snippet": "if(@P.x > 0.1) @Cd = set(0, 0.1, 0); // keypad area"
+          }
+        },
+        {
+          "name": "merge_microwave",
+          "type": "merge",
+          "position": [
+            -1,
+            -4
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "enclosure",
+          "to": "merge_microwave",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "front_panel",
+          "to": "screen_wrangle",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "screen_wrangle",
+          "to": "merge_microwave",
+          "from_out": 0,
+          "to_in": 1
+        }
+      ],
+      "output_description": "A compact kitchen microwave."
+    },
+    {
+      "id": "prop_018",
+      "title": "Procedural Wine Bottle (High Fidelity)",
+      "context": "SOP",
+      "goal": "Classic tapered glass wine bottle",
+      "tags": [
+        "kitchen",
+        "prop",
+        "intermediate",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "profile_curve",
+          "type": "curve",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "primitive": "polygon",
+            "coords": "0,0,0 0.4,0,0 0.4,2,0 0.1,2.5,0 0.1,3,0"
+          }
+        },
+        {
+          "name": "lathe_bottle",
+          "type": "revolve",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "divs": 24
+          }
+        },
+        {
+          "name": "liquid_base",
+          "type": "box",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.38,
+              1.8,
+              0.38
+            ],
+            "center": [
+              0,
+              0.9,
+              0
+            ]
+          }
+        },
+        {
+          "name": "bool_liquid",
+          "type": "boolean",
+          "position": [
+            1,
+            -3
+          ],
+          "parms": {
+            "operation": "intersect"
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "lathe_bottle",
+          "to": "bool_liquid",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "liquid_base",
+          "to": "bool_liquid",
+          "from_out": 0,
+          "to_in": 1
+        }
+      ],
+      "output_description": "A realistic glass wine bottle with internal liquid volume."
+    },
+    {
+      "id": "prop_019",
+      "title": "Procedural Drinking Glass (High Fidelity)",
+      "context": "SOP",
+      "goal": "Glass tumbler with rounded base",
+      "tags": [
+        "kitchen",
+        "prop",
+        "beginner",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "outer_cyl",
+          "type": "tube",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "type": "polygon",
+            "rad": 0.04,
+            "height": 0.12,
+            "center": [
+              0,
+              0.06,
+              0
+            ]
+          }
+        },
+        {
+          "name": "inner_cut",
+          "type": "tube",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "type": "polygon",
+            "rad": 0.035,
+            "height": 0.11,
+            "center": [
+              0,
+              0.07,
+              0
+            ]
+          }
+        },
+        {
+          "name": "bool_hollow",
+          "type": "boolean",
+          "position": [
+            1,
+            -2
+          ],
+          "parms": {
+            "operation": "subtract"
+          }
+        },
+        {
+          "name": "soft_base",
+          "type": "polybevel::3.0",
+          "position": [
+            1,
+            -3
+          ],
+          "parms": {
+            "offset": 0.005
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "outer_cyl",
+          "to": "bool_hollow",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "inner_cut",
+          "to": "bool_hollow",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "bool_hollow",
+          "to": "soft_base",
+          "from_out": 0,
+          "to_in": 0
+        }
+      ],
+      "output_description": "A hollow glass drinking tumbler."
+    },
+    {
+      "id": "prop_020",
+      "title": "Procedural Dining Plate (High Fidelity)",
+      "context": "SOP",
+      "goal": "Shallow ceramic plate with raised rim",
+      "tags": [
+        "kitchen",
+        "prop",
+        "beginner",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "plate_base",
+          "type": "circle",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "type": "polygon",
+            "rad": 0.12,
+            "divs": 40
+          }
+        },
+        {
+          "name": "bevel_rim",
+          "type": "polyextrude",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "dist": 0.015,
+            "inset": 0.03
+          }
+        },
+        {
+          "name": "subdiv_finish",
+          "type": "subdivide",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {
+            "iterations": 2
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "plate_base",
+          "to": "bevel_rim",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "bevel_rim",
+          "to": "subdiv_finish",
+          "from_out": 0,
+          "to_in": 0
+        }
+      ],
+      "output_description": "A high-quality ceramic dining plate."
+    },
+    {
+      "id": "prop_021",
+      "title": "Procedural Door with Frame (High Fidelity)",
+      "context": "SOP",
+      "goal": "Standard interior door with multi-part frame and knob",
+      "tags": [
+        "architecture",
+        "door",
+        "intermediate",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "door_slab",
+          "type": "box",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.9,
+              2.1,
+              0.04
+            ],
+            "center": [
+              0,
+              1.05,
+              0
+            ]
+          }
+        },
+        {
+          "name": "frame_path",
+          "type": "line",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "origin": [
+              -0.47,
+              0,
+              0
+            ],
+            "dir": [
+              0,
+              1,
+              0
+            ],
+            "dist": 2.15,
+            "points": 3
+          }
+        },
+        {
+          "name": "frame_profile",
+          "type": "grid",
+          "position": [
+            4,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.1,
+              0.05
+            ],
+            "orient": "zx"
+          }
+        },
+        {
+          "name": "base_sweep",
+          "type": "sweep",
+          "position": [
+            3,
+            -2
+          ],
+          "parms": {
+            "type": "square"
+          }
+        },
+        {
+          "name": "door_knob",
+          "type": "sphere",
+          "position": [
+            -2,
+            0
+          ],
+          "parms": {
+            "rad": 0.03,
+            "center": [
+              0.38,
+              1.0,
+              0.05
+            ]
+          }
+        },
+        {
+          "name": "merge_door",
+          "type": "merge",
+          "position": [
+            0,
+            -4
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "door_slab",
+          "to": "merge_door",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "frame_path",
+          "to": "base_sweep",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "frame_profile",
+          "to": "base_sweep",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "base_sweep",
+          "to": "merge_door",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "door_knob",
+          "to": "merge_door",
+          "from_out": 0,
+          "to_in": 2
+        }
+      ],
+      "output_description": "A complete architectural door with a swept frame and hardware."
+    },
+    {
+      "id": "prop_022",
+      "title": "Procedural Window with Muttons (High Fidelity)",
+      "context": "SOP",
+      "goal": "Division of a window pane into smaller glass sections",
+      "tags": [
+        "architecture",
+        "window",
+        "advanced",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "main_frame",
+          "type": "box",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "size": [
+              1.0,
+              1.5,
+              0.1
+            ]
+          }
+        },
+        {
+          "name": "glass_cutout",
+          "type": "box",
+          "position": [
+            0,
+            1
+          ],
+          "parms": {
+            "size": [
+              0.9,
+              1.4,
+              0.15
+            ]
+          }
+        },
+        {
+          "name": "bool_frame",
+          "type": "boolean",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "operation": "subtract"
+          }
+        },
+        {
+          "name": "mutton_h",
+          "type": "box",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.9,
+              0.02,
+              0.04
+            ]
+          }
+        },
+        {
+          "name": "mutton_v",
+          "type": "box",
+          "position": [
+            4,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.02,
+              1.4,
+              0.04
+            ]
+          }
+        },
+        {
+          "name": "merge_window",
+          "type": "merge",
+          "position": [
+            1,
+            -3
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "main_frame",
+          "to": "bool_frame",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "glass_cutout",
+          "to": "bool_frame",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "bool_frame",
+          "to": "merge_window",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "mutton_h",
+          "to": "merge_window",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "mutton_v",
+          "to": "merge_window",
+          "from_out": 0,
+          "to_in": 2
+        }
+      ],
+      "output_description": "A window with structural dividers (muttons) for multiple glass panes."
+    },
+    {
+      "id": "prop_023",
+      "title": "Procedural Spiral Staircase (High Fidelity)",
+      "context": "SOP",
+      "goal": "Central-pole staircase with rotating steps",
+      "tags": [
+        "architecture",
+        "stairs",
+        "advanced",
+        "math"
+      ],
+      "nodes": [
+        {
+          "name": "center_pole",
+          "type": "tube",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "rad": 0.1,
+            "height": 4.0,
+            "center": [
+              0,
+              2,
+              0
+            ]
+          }
+        },
+        {
+          "name": "step_geo",
+          "type": "box",
+          "position": [
+            -2,
+            0
+          ],
+          "parms": {
+            "size": [
+              1.0,
+              0.05,
+              0.3
+            ],
+            "center": [
+              0.55,
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "name": "loop_begin",
+          "type": "block_begin",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "method": "metadata",
+            "num_iterations": 24
+          }
+        },
+        {
+          "name": "calc_spiral",
+          "type": "attribwrangle",
+          "position": [
+            1,
+            -2
+          ],
+          "parms": {
+            "snippet": "float i = detail(1, 'iteration'); float angle = i * 0.4; matrix3 m = ident(); rotate(m, angle, {0,1,0}); @P *= m; @P.y = i * 0.18;"
+          }
+        },
+        {
+          "name": "merge_stairs",
+          "type": "merge",
+          "position": [
+            0,
+            -4
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "center_pole",
+          "to": "merge_stairs",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "step_geo",
+          "to": "calc_spiral",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "loop_begin",
+          "to": "calc_spiral",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "calc_spiral",
+          "to": "merge_stairs",
+          "from_out": 0,
+          "to_in": 1
+        }
+      ],
+      "output_description": "A procedural spiral staircase wound around a central support pole."
+    },
+    {
+      "id": "prop_024",
+      "title": "Procedural Gothic Arched Window (High Fidelity)",
+      "context": "SOP",
+      "goal": "Pointed arch window commonly used in cathedrals",
+      "tags": [
+        "architecture",
+        "historic",
+        "advanced",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "bottom_rect",
+          "type": "box",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "size": [
+              1,
+              2,
+              0.1
+            ],
+            "center": [
+              0,
+              1,
+              0
+            ]
+          }
+        },
+        {
+          "name": "arch_top",
+          "type": "tube",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "rad": 0.5,
+            "height": 0.1,
+            "center": [
+              0,
+              2,
+              0
+            ],
+            "orient": "z",
+            "theta": 180
+          }
+        },
+        {
+          "name": "peak_sharp",
+          "type": "attribwrangle",
+          "position": [
+            2,
+            -2
+          ],
+          "parms": {
+            "snippet": "if(@P.y > 2.45) @P.y += 0.1; // sharpen the arch peak"
+          }
+        },
+        {
+          "name": "merge_gothic",
+          "type": "merge",
+          "position": [
+            1,
+            -4
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "bottom_rect",
+          "to": "merge_gothic",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "arch_top",
+          "to": "peak_sharp",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "peak_sharp",
+          "to": "merge_gothic",
+          "from_out": 0,
+          "to_in": 1
+        }
+      ],
+      "output_description": "An architectural gothic arch window with a signature pointed top."
+    },
+    {
+      "id": "prop_025",
+      "title": "Procedural Industrial Support Pillar (High Fidelity)",
+      "context": "SOP",
+      "goal": "Heavy-duty structural column with rivets",
+      "tags": [
+        "architecture",
+        "industrial",
+        "intermediate",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "shaft",
+          "type": "box",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.4,
+              4.0,
+              0.4
+            ]
+          }
+        },
+        {
+          "name": "base_plate",
+          "type": "box",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.8,
+              0.15,
+              0.8
+            ],
+            "center": [
+              0,
+              -2,
+              0
+            ]
+          }
+        },
+        {
+          "name": "rivet_geo",
+          "type": "sphere",
+          "position": [
+            4,
+            0
+          ],
+          "parms": {
+            "rad": 0.02
+          }
+        },
+        {
+          "name": "rivet_pts",
+          "type": "grid",
+          "position": [
+            4,
+            1
+          ],
+          "parms": {
+            "rows": 10,
+            "cols": 2,
+            "size": [
+              3.8,
+              0.35
+            ],
+            "orient": "xy"
+          }
+        },
+        {
+          "name": "copy_rivets",
+          "type": "copytopoints::2.0",
+          "position": [
+            4,
+            -1
+          ]
+        },
+        {
+          "name": "merge_pillar",
+          "type": "merge",
+          "position": [
+            2,
+            -3
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "shaft",
+          "to": "merge_pillar",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "base_plate",
+          "to": "merge_pillar",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "rivet_geo",
+          "to": "copy_rivets",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "rivet_pts",
+          "to": "copy_rivets",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "copy_rivets",
+          "to": "merge_pillar",
+          "from_out": 0,
+          "to_in": 2
+        }
+      ],
+      "output_description": "A bolted-together industrial support column for warehouses or factories."
+    },
+    {
+      "id": "prop_026",
+      "title": "Procedural Picket Fence Section (High Fidelity)",
+      "context": "SOP",
+      "goal": "Interlocking fence pieces that can follow a curve",
+      "tags": [
+        "architecture",
+        "exterior",
+        "beginner",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "picket_one",
+          "type": "box",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.1,
+              1.2,
+              0.02
+            ],
+            "center": [
+              0,
+              0.6,
+              0
+            ]
+          }
+        },
+        {
+          "name": "picket_top",
+          "type": "tube",
+          "position": [
+            0,
+            1
+          ],
+          "parms": {
+            "rad": 0.05,
+            "height": 0.02,
+            "center": [
+              0,
+              1.2,
+              0
+            ],
+            "orient": "z"
+          }
+        },
+        {
+          "name": "picket_array",
+          "type": "line",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "dist": 2.0,
+            "points": 8
+          }
+        },
+        {
+          "name": "copy_pickets",
+          "type": "copytopoints::2.0",
+          "position": [
+            1,
+            -2
+          ]
+        },
+        {
+          "name": "horizontal_rails",
+          "type": "box",
+          "position": [
+            -2,
+            -2
+          ],
+          "parms": {
+            "size": [
+              2.0,
+              0.05,
+              0.03
+            ],
+            "center": [
+              1.0,
+              0.4,
+              0
+            ]
+          }
+        },
+        {
+          "name": "merge_fence",
+          "type": "merge",
+          "position": [
+            0,
+            -4
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "picket_one",
+          "to": "merge_picket",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "picket_top",
+          "to": "merge_picket",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "merge_picket",
+          "to": "copy_pickets",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "picket_array",
+          "to": "copy_pickets",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "copy_pickets",
+          "to": "merge_fence",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "horizontal_rails",
+          "to": "merge_fence",
+          "from_out": 0,
+          "to_in": 1
+        }
+      ],
+      "output_description": "A single modular section of a picket fence."
+    },
+    {
+      "id": "prop_027",
+      "title": "Procedural Brick Wall (High Fidelity)",
+      "context": "SOP",
+      "goal": "Wall segment composed of individual offset bricks",
+      "tags": [
+        "architecture",
+        "materials",
+        "advanced",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "wall_grid",
+          "type": "grid",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "rows": 10,
+            "cols": 10,
+            "size": [
+              3,
+              2
+            ],
+            "orient": "xy"
+          }
+        },
+        {
+          "name": "brick_shift",
+          "type": "attribwrangle",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "snippet": "int row = @ptnum / 10; if(row % 2 == 0) @P.x += 0.15;"
+          }
+        },
+        {
+          "name": "brick_geo",
+          "type": "box",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.28,
+              0.18,
+              0.1
+            ]
+          }
+        },
+        {
+          "name": "copy_bricks",
+          "type": "copytopoints::2.0",
+          "position": [
+            1,
+            -3
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "wall_grid",
+          "to": "brick_shift",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "brick_shift",
+          "to": "copy_bricks",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "brick_geo",
+          "to": "copy_bricks",
+          "from_out": 0,
+          "to_in": 0
+        }
+      ],
+      "output_description": "A section of brick wall where every second row is offset for traditional bond."
+    },
+    {
+      "id": "prop_028",
+      "title": "Procedural Roof Shingle (High Fidelity)",
+      "context": "SOP",
+      "goal": "Overlapping weather-resistant roof tiles",
+      "tags": [
+        "architecture",
+        "materials",
+        "intermediate",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "shingle_one",
+          "type": "box",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.2,
+              0.02,
+              0.35
+            ],
+            "center": [
+              0,
+              0,
+              0.1
+            ]
+          }
+        },
+        {
+          "name": "pitch_angle",
+          "type": "attribwrangle",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "snippet": "@P.y += @P.z * 0.1; // minor angle slant"
+          }
+        },
+        {
+          "name": "roof_area",
+          "type": "grid",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "size": [
+              2,
+              2
+            ],
+            "rows": 10,
+            "cols": 10,
+            "orient": "xz"
+          }
+        },
+        {
+          "name": "copy_shingles",
+          "type": "copytopoints::2.0",
+          "position": [
+            1,
+            -2
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "shingle_one",
+          "to": "pitch_angle",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "pitch_angle",
+          "to": "copy_shingles",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "roof_area",
+          "to": "copy_shingles",
+          "from_out": 0,
+          "to_in": 1
+        }
+      ],
+      "output_description": "A tiled roof surface using overlapping procedural shingles."
+    },
+    {
+      "id": "prop_029",
+      "title": "Procedural Balustrade Railing (High Fidelity)",
+      "context": "SOP",
+      "goal": "Decorative balcony railing with repeating spindles",
+      "tags": [
+        "architecture",
+        "ornamental",
+        "intermediate",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "spindle_base",
+          "type": "tube",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "rad": 0.04,
+            "height": 0.8
+          }
+        },
+        {
+          "name": "spindle_ornament",
+          "type": "torus",
+          "position": [
+            -2,
+            0
+          ],
+          "parms": {
+            "radx": 0.05,
+            "rady": 0.02,
+            "center": [
+              0,
+              0.2,
+              0
+            ]
+          }
+        },
+        {
+          "name": "top_rail",
+          "type": "box",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "size": [
+              3.0,
+              0.05,
+              0.1
+            ],
+            "center": [
+              1.5,
+              0.42,
+              0
+            ]
+          }
+        },
+        {
+          "name": "array_pts",
+          "type": "line",
+          "position": [
+            4,
+            0
+          ],
+          "parms": {
+            "dist": 3.0,
+            "points": 15
+          }
+        },
+        {
+          "name": "copy_spindles",
+          "type": "copytopoints::2.0",
+          "position": [
+            2,
+            -2
+          ]
+        },
+        {
+          "name": "merge_balcony",
+          "type": "merge",
+          "position": [
+            2,
+            -4
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "spindle_base",
+          "to": "merge_spindle",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "spindle_ornament",
+          "to": "merge_spindle",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "merge_spindle",
+          "to": "copy_spindles",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "array_pts",
+          "to": "copy_spindles",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "copy_spindles",
+          "to": "merge_balcony",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "top_rail",
+          "to": "merge_balcony",
+          "from_out": 0,
+          "to_in": 1
+        }
+      ],
+      "output_description": "A decorative outdoor or indoor railing."
+    },
+    {
+      "id": "prop_030",
+      "title": "Procedural Skylight (High Fidelity)",
+      "context": "SOP",
+      "goal": "Roof-mounted window with angled frame",
+      "tags": [
+        "architecture",
+        "window",
+        "beginner",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "roof_plug",
+          "type": "box",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "size": [
+              1.2,
+              0.1,
+              1.2
+            ]
+          }
+        },
+        {
+          "name": "skylight_frame",
+          "type": "polyextrude",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "inset": 0.1,
+            "dist": 0.05
+          }
+        },
+        {
+          "name": "glass_top",
+          "type": "grid",
+          "position": [
+            2,
+            -1
+          ],
+          "parms": {
+            "size": [
+              1.0,
+              1.0
+            ],
+            "orient": "xz",
+            "center": [
+              0,
+              0.06,
+              0
+            ]
+          }
+        },
+        {
+          "name": "merge_sky",
+          "type": "merge",
+          "position": [
+            1,
+            -3
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "roof_plug",
+          "to": "skylight_frame",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "skylight_frame",
+          "to": "merge_sky",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "glass_top",
+          "to": "merge_sky",
+          "from_out": 0,
+          "to_in": 1
+        }
+      ],
+      "output_description": "A functional skylight for architectural roofs."
+    },
+    {
+      "id": "prop_031",
+      "title": "Procedural Street Lamp Post (High Fidelity)",
+      "context": "SOP",
+      "goal": "Tall city street light with curved arm",
+      "tags": [
+        "street",
+        "urban",
+        "intermediate",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "lamp_post",
+          "type": "tube",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "rad": 0.08,
+            "rad2": 0.06,
+            "height": 6.0,
+            "center": [
+              0,
+              3,
+              0
+            ]
+          }
+        },
+        {
+          "name": "arm_curve",
+          "type": "curve",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "primitive": "polygon",
+            "coords": "0,5.85,0 1.2,6.2,0 1.5,5.8,0"
+          }
+        },
+        {
+          "name": "arm_sweep",
+          "type": "sweep",
+          "position": [
+            2,
+            -2
+          ],
+          "parms": {
+            "type": "round"
+          }
+        },
+        {
+          "name": "light_head",
+          "type": "box",
+          "position": [
+            4,
+            -2
+          ],
+          "parms": {
+            "size": [
+              0.4,
+              0.1,
+              0.6
+            ],
+            "center": [
+              1.5,
+              5.75,
+              0
+            ]
+          }
+        },
+        {
+          "name": "merge_lamp",
+          "type": "merge",
+          "position": [
+            1,
+            -4
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "lamp_post",
+          "to": "merge_lamp",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "arm_curve",
+          "to": "arm_sweep",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "arm_sweep",
+          "to": "merge_lamp",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "light_head",
+          "to": "merge_lamp",
+          "from_out": 0,
+          "to_in": 2
+        }
+      ],
+      "output_description": "A high-fidelity street lamp with a swept arm and box-style light fixture."
+    },
+    {
+      "id": "prop_032",
+      "title": "Procedural Park Bench (High Fidelity)",
+      "context": "SOP",
+      "goal": "Classic public bench with wooden slats and metal supports",
+      "tags": [
+        "street",
+        "urban",
+        "intermediate",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "support_one",
+          "type": "curve",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "primitive": "polygon",
+            "coords": "0,0,0 0,0.4,0 0.4,0.4,0 0.8,0.8,0"
+          }
+        },
+        {
+          "name": "support_sweep",
+          "type": "sweep",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "type": "square",
+            "scale": 0.05
+          }
+        },
+        {
+          "name": "mirror_support",
+          "type": "mirror",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {
+            "dist": 0.75,
+            "direction": [
+              1,
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "name": "slat_geo",
+          "type": "box",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "size": [
+              1.8,
+              0.02,
+              0.08
+            ]
+          }
+        },
+        {
+          "name": "slat_array",
+          "type": "line",
+          "position": [
+            4,
+            0
+          ],
+          "parms": {
+            "dist": 0.8,
+            "points": 8,
+            "dir": [
+              0,
+              1,
+              0.5
+            ]
+          }
+        },
+        {
+          "name": "copy_slats",
+          "type": "copytopoints::2.0",
+          "position": [
+            3,
+            -2
+          ]
+        },
+        {
+          "name": "merge_bench",
+          "type": "merge",
+          "position": [
+            1.5,
+            -4
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "support_one",
+          "to": "support_sweep",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "support_sweep",
+          "to": "mirror_support",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "mirror_support",
+          "to": "merge_bench",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "slat_geo",
+          "to": "copy_slats",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "slat_array",
+          "to": "copy_slats",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "copy_slats",
+          "to": "merge_bench",
+          "from_out": 0,
+          "to_in": 1
+        }
+      ],
+      "output_description": "A public park bench with cast iron supports and wooden slats."
+    },
+    {
+      "id": "prop_033",
+      "title": "Procedural Fire Hydrant (High Fidelity)",
+      "context": "SOP",
+      "goal": "Classic red American municipal fire hydrant",
+      "tags": [
+        "street",
+        "urban",
+        "advanced",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "main_stalk",
+          "type": "tube",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "rad": 0.1,
+            "height": 0.6,
+            "center": [
+              0,
+              0.3,
+              0
+            ]
+          }
+        },
+        {
+          "name": "post_cap",
+          "type": "sphere",
+          "position": [
+            0,
+            1
+          ],
+          "parms": {
+            "rad": 0.11,
+            "center": [
+              0,
+              0.6,
+              0
+            ]
+          }
+        },
+        {
+          "name": "nozzle_side",
+          "type": "tube",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "rad": 0.04,
+            "height": 0.1,
+            "center": [
+              0.12,
+              0.45,
+              0
+            ],
+            "orient": "x"
+          }
+        },
+        {
+          "name": "mirror_nozzle",
+          "type": "mirror",
+          "position": [
+            2,
+            -1
+          ],
+          "parms": {
+            "direction": [
+              1,
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "name": "nozzle_front",
+          "type": "tube",
+          "position": [
+            -2,
+            0
+          ],
+          "parms": {
+            "rad": 0.05,
+            "height": 0.1,
+            "center": [
+              0,
+              0.45,
+              0.12
+            ],
+            "orient": "z"
+          }
+        },
+        {
+          "name": "merge_hydrant",
+          "type": "merge",
+          "position": [
+            0,
+            -3
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "main_stalk",
+          "to": "merge_hydrant",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "post_cap",
+          "to": "merge_hydrant",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "nozzle_side",
+          "to": "mirror_nozzle",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "mirror_nozzle",
+          "to": "merge_hydrant",
+          "from_out": 0,
+          "to_in": 2
+        },
+        {
+          "from": "nozzle_front",
+          "to": "merge_hydrant",
+          "from_out": 0,
+          "to_in": 3
+        }
+      ],
+      "output_description": "A detailed 3-nozzle fire hydrant model."
+    },
+    {
+      "id": "prop_034",
+      "title": "Procedural Trash Bin (High Fidelity)",
+      "context": "SOP",
+      "goal": "Square municipal waste bin with lid and side slot",
+      "tags": [
+        "street",
+        "urban",
+        "intermediate",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "bin_body",
+          "type": "box",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.5,
+              0.8,
+              0.5
+            ]
+          }
+        },
+        {
+          "name": "trash_hole",
+          "type": "box",
+          "position": [
+            0,
+            1
+          ],
+          "parms": {
+            "size": [
+              0.4,
+              0.2,
+              0.6
+            ]
+          }
+        },
+        {
+          "name": "bool_bin",
+          "type": "boolean",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "operation": "subtract"
+          }
+        },
+        {
+          "name": "bin_lid",
+          "type": "box",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.52,
+              0.05,
+              0.52
+            ],
+            "center": [
+              0,
+              0.42,
+              0
+            ]
+          }
+        },
+        {
+          "name": "merge_trash",
+          "type": "merge",
+          "position": [
+            1,
+            -3
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "bin_body",
+          "to": "bool_bin",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "trash_hole",
+          "to": "bool_bin",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "bool_bin",
+          "to": "merge_trash",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "bin_lid",
+          "to": "merge_trash",
+          "from_out": 0,
+          "to_in": 1
+        }
+      ],
+      "output_description": "A public trash bin with a side collection slot."
+    },
+    {
+      "id": "prop_035",
+      "title": "Procedural Traffic Cone (High Fidelity)",
+      "context": "SOP",
+      "goal": "Standard orange safety cone with base",
+      "tags": [
+        "street",
+        "utility",
+        "beginner",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "cone_stalk",
+          "type": "tube",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "rad": 0.02,
+            "rad2": 0.12,
+            "height": 0.6,
+            "center": [
+              0,
+              0.3,
+              0
+            ]
+          }
+        },
+        {
+          "name": "square_base",
+          "type": "box",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.4,
+              0.04,
+              0.4
+            ]
+          }
+        },
+        {
+          "name": "merge_cone",
+          "type": "merge",
+          "position": [
+            1,
+            -2
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "cone_stalk",
+          "to": "merge_cone",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "square_base",
+          "to": "merge_cone",
+          "from_out": 0,
+          "to_in": 1
+        }
+      ],
+      "output_description": "A classic bright orange safety traffic cone."
+    },
+    {
+      "id": "prop_036",
+      "title": "Procedural Road Barrier (High Fidelity)",
+      "context": "SOP",
+      "goal": "Modular concrete K-rail or plastic water barrier",
+      "tags": [
+        "street",
+        "utility",
+        "intermediate",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "barrier_profile",
+          "type": "curve",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "primitive": "polygon",
+            "coords": "-0.3,0,0 0.3,0,0 0.2,0.8,0 -0.2,0.8,0"
+          }
+        },
+        {
+          "name": "extrude_len",
+          "type": "polyextrude",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "dist": 2.5
+          }
+        },
+        {
+          "name": "forklift_holes",
+          "type": "box",
+          "position": [
+            2,
+            -1
+          ],
+          "parms": {
+            "size": [
+              0.4,
+              0.2,
+              3.0
+            ],
+            "center": [
+              0,
+              0.1,
+              1.25
+            ]
+          }
+        },
+        {
+          "name": "bool_barrier",
+          "type": "boolean",
+          "position": [
+            1,
+            -3
+          ],
+          "parms": {
+            "operation": "subtract"
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "barrier_profile",
+          "to": "extrude_len",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "extrude_len",
+          "to": "bool_barrier",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "forklift_holes",
+          "to": "bool_barrier",
+          "from_out": 0,
+          "to_in": 1
+        }
+      ],
+      "output_description": "A heavy-duty concrete road barrier with utility cutouts."
+    },
+    {
+      "id": "prop_037",
+      "title": "Procedural Bus Shelter (High Fidelity)",
+      "context": "SOP",
+      "goal": "Glass and steel urban transportation shelter",
+      "tags": [
+        "street",
+        "urban",
+        "advanced",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "back_wall",
+          "type": "grid",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "size": [
+              3,
+              2
+            ],
+            "orient": "xy",
+            "center": [
+              0,
+              1,
+              -0.6
+            ]
+          }
+        },
+        {
+          "name": "side_glass",
+          "type": "grid",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "size": [
+              1.2,
+              2
+            ],
+            "orient": "zy",
+            "center": [
+              1.5,
+              1,
+              0
+            ]
+          }
+        },
+        {
+          "name": "mirror_side",
+          "type": "mirror",
+          "position": [
+            2,
+            -1
+          ],
+          "parms": {
+            "direction": [
+              1,
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "name": "roof_box",
+          "type": "box",
+          "position": [
+            -2,
+            0
+          ],
+          "parms": {
+            "size": [
+              3.2,
+              0.1,
+              1.4
+            ],
+            "center": [
+              0,
+              2,
+              0
+            ]
+          }
+        },
+        {
+          "name": "merge_shelter",
+          "type": "merge",
+          "position": [
+            0,
+            -3
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "back_wall",
+          "to": "merge_shelter",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "side_glass",
+          "to": "mirror_side",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "mirror_side",
+          "to": "merge_shelter",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "roof_box",
+          "to": "merge_shelter",
+          "from_out": 0,
+          "to_in": 2
+        }
+      ],
+      "output_description": "A modern urban bus stop with glass walls and a tilted roof."
+    },
+    {
+      "id": "prop_038",
+      "title": "Procedural Sewer Manhole (High Fidelity)",
+      "context": "SOP",
+      "goal": "Street-level manhole cover with tread pattern",
+      "tags": [
+        "street",
+        "utility",
+        "intermediate",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "rim_outer",
+          "type": "tube",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "rad": 0.45,
+            "height": 0.05,
+            "type": "polygon",
+            "cap": true
+          }
+        },
+        {
+          "name": "cover_disk",
+          "type": "tube",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "rad": 0.42,
+            "height": 0.02,
+            "center": [
+              0,
+              0.02,
+              0
+            ],
+            "cap": true
+          }
+        },
+        {
+          "name": "wrangle_treads",
+          "type": "attribwrangle",
+          "position": [
+            2,
+            -1
+          ],
+          "parms": {
+            "snippet": "@P.y += noise(@P*15.0) * 0.005; // rough tread pattern"
+          }
+        },
+        {
+          "name": "merge_manhole",
+          "type": "merge",
+          "position": [
+            1,
+            -3
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "rim_outer",
+          "to": "merge_manhole",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "cover_disk",
+          "to": "wrangle_treads",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "wrangle_treads",
+          "to": "merge_manhole",
+          "from_out": 0,
+          "to_in": 1
+        }
+      ],
+      "output_description": "A circular street-mounted sewer maintenance cover."
+    },
+    {
+      "id": "prop_039",
+      "title": "Procedural Street Sign (High Fidelity)",
+      "context": "SOP",
+      "goal": "Metal signpost with rectangular information plate",
+      "tags": [
+        "street",
+        "utility",
+        "beginner",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "sign_post",
+          "type": "tube",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "rad": 0.03,
+            "height": 3.0,
+            "center": [
+              0,
+              1.5,
+              0
+            ]
+          }
+        },
+        {
+          "name": "sign_plate",
+          "type": "box",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.8,
+              0.3,
+              0.01
+            ],
+            "center": [
+              0,
+              2.5,
+              0.03
+            ]
+          }
+        },
+        {
+          "name": "sign_bolts",
+          "type": "sphere",
+          "position": [
+            4,
+            0
+          ],
+          "parms": {
+            "rad": 0.01
+          }
+        },
+        {
+          "name": "bolt_pts",
+          "type": "line",
+          "position": [
+            4,
+            1
+          ],
+          "parms": {
+            "dist": 0.2,
+            "points": 2,
+            "dir": [
+              0,
+              1,
+              0
+            ]
+          }
+        },
+        {
+          "name": "merge_sign",
+          "type": "merge",
+          "position": [
+            2,
+            -2
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "sign_post",
+          "to": "merge_sign",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "sign_plate",
+          "to": "merge_sign",
+          "from_out": 0,
+          "to_in": 1
+        }
+      ],
+      "output_description": "A standard roadside street sign."
+    },
+    {
+      "id": "prop_040",
+      "title": "Procedural Bollard (High Fidelity)",
+      "context": "SOP",
+      "goal": "Short vertical post to prevent vehicle traffic",
+      "tags": [
+        "street",
+        "urban",
+        "beginner",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "base_cyl",
+          "type": "tube",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "rad": 0.12,
+            "height": 0.8,
+            "center": [
+              0,
+              0.4,
+              0
+            ]
+          }
+        },
+        {
+          "name": "top_dome",
+          "type": "sphere",
+          "position": [
+            0,
+            1
+          ],
+          "parms": {
+            "rad": 0.12,
+            "center": [
+              0,
+              0.8,
+              0
+            ]
+          }
+        },
+        {
+          "name": "yellow_stripe",
+          "type": "attribwrangle",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "snippet": "if(@P.y > 0.6 && @P.y < 0.7) @Cd = set(1, 1, 0);"
+          }
+        },
+        {
+          "name": "merge_bollard",
+          "type": "merge",
+          "position": [
+            0,
+            -3
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "base_cyl",
+          "to": "yellow_stripe",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "top_dome",
+          "to": "yellow_stripe",
+          "from_out": 0,
+          "to_in": 1
+        }
+      ],
+      "output_description": "A safety bollard with high-visibility markings."
+    },
+    {
+      "id": "prop_041",
+      "title": "Procedural Laptop (High Fidelity)",
+      "context": "SOP",
+      "goal": "Foldable portable computer with keyboard area and screen",
+      "tags": [
+        "small props",
+        "electronics",
+        "intermediate",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "base_unit",
+          "type": "box",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.35,
+              0.02,
+              0.25
+            ],
+            "center": [
+              0,
+              0.01,
+              0.125
+            ]
+          }
+        },
+        {
+          "name": "screen_unit",
+          "type": "box",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.35,
+              0.25,
+              0.02
+            ],
+            "center": [
+              0,
+              0.125,
+              0
+            ]
+          }
+        },
+        {
+          "name": "hinge_rot",
+          "type": "attribwrangle",
+          "position": [
+            2,
+            -1
+          ],
+          "parms": {
+            "snippet": "matrix3 m = ident(); rotate(m, radians(-110), {1,0,0}); @P *= m;"
+          }
+        },
+        {
+          "name": "keypad_wrangle",
+          "type": "attribwrangle",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "snippet": "if(@P.z > 0.05 && @P.z < 0.2) @Cd = set(0.1, 0.1, 0.1); // keys"
+          }
+        },
+        {
+          "name": "merge_laptop",
+          "type": "merge",
+          "position": [
+            1,
+            -3
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "base_unit",
+          "to": "keypad_wrangle",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "keypad_wrangle",
+          "to": "merge_laptop",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "screen_unit",
+          "to": "hinge_rot",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "hinge_rot",
+          "to": "merge_laptop",
+          "from_out": 0,
+          "to_in": 1
+        }
+      ],
+      "output_description": "An open laptop model with a tilted screen and defined keyboard area."
+    },
+    {
+      "id": "prop_042",
+      "title": "Procedural Computer Monitor (High Fidelity)",
+      "context": "SOP",
+      "goal": "Widescreen display with adjustable stand",
+      "tags": [
+        "small props",
+        "electronics",
+        "beginner",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "display_panel",
+          "type": "box",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.6,
+              0.35,
+              0.03
+            ],
+            "center": [
+              0,
+              0.4,
+              0
+            ]
+          }
+        },
+        {
+          "name": "stand_neck",
+          "type": "box",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.05,
+              0.2,
+              0.05
+            ],
+            "center": [
+              0,
+              0.25,
+              -0.05
+            ]
+          }
+        },
+        {
+          "name": "stand_base",
+          "type": "tube",
+          "position": [
+            4,
+            0
+          ],
+          "parms": {
+            "rad": 0.1,
+            "height": 0.01,
+            "cap": true
+          }
+        },
+        {
+          "name": "merge_monitor",
+          "type": "merge",
+          "position": [
+            2,
+            -2
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "display_panel",
+          "to": "merge_monitor",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "stand_neck",
+          "to": "merge_monitor",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "stand_base",
+          "to": "merge_monitor",
+          "from_out": 0,
+          "to_in": 2
+        }
+      ],
+      "output_description": "A flat-screen computer monitor on a circular stand."
+    },
+    {
+      "id": "prop_043",
+      "title": "Procedural Tea Cup / Mug (High Fidelity)",
+      "context": "SOP",
+      "goal": "Drinking mug with a curved handle",
+      "tags": [
+        "small props",
+        "kitchen",
+        "intermediate",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "cup_body",
+          "type": "tube",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "rad": 0.04,
+            "height": 0.08,
+            "type": "polygon",
+            "cap": true
+          }
+        },
+        {
+          "name": "hollow_cut",
+          "type": "tube",
+          "position": [
+            0,
+            1
+          ],
+          "parms": {
+            "rad": 0.035,
+            "height": 0.075,
+            "center": [
+              0,
+              0.01,
+              0
+            ]
+          }
+        },
+        {
+          "name": "bool_cup",
+          "type": "boolean",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "operation": "subtract"
+          }
+        },
+        {
+          "name": "handle_torus",
+          "type": "torus",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "radx": 0.03,
+            "rady": 0.005,
+            "center": [
+              0.04,
+              0,
+              0
+            ],
+            "orient": "z"
+          }
+        },
+        {
+          "name": "merge_mug",
+          "type": "merge",
+          "position": [
+            1,
+            -2
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "cup_body",
+          "to": "bool_cup",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "hollow_cut",
+          "to": "bool_cup",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "bool_cup",
+          "to": "merge_mug",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "handle_torus",
+          "to": "merge_mug",
+          "from_out": 0,
+          "to_in": 1
+        }
+      ],
+      "output_description": "A standard ceramic coffee or tea mug."
+    },
+    {
+      "id": "prop_044",
+      "title": "Procedural Desk Lamp (High Fidelity)",
+      "context": "SOP",
+      "goal": "Adjustable office lamp with conical head",
+      "tags": [
+        "small props",
+        "office",
+        "intermediate",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "base_cyl",
+          "type": "tube",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "rad": 0.08,
+            "height": 0.02,
+            "cap": true
+          }
+        },
+        {
+          "name": "arm_pivot",
+          "type": "tube",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "rad": 0.01,
+            "height": 0.4,
+            "center": [
+              0,
+              0.2,
+              0
+            ]
+          }
+        },
+        {
+          "name": "head_cone",
+          "type": "tube",
+          "position": [
+            4,
+            0
+          ],
+          "parms": {
+            "rad": 0.02,
+            "rad2": 0.1,
+            "height": 0.15,
+            "center": [
+              0,
+              0.4,
+              0.1
+            ],
+            "orient": "z"
+          }
+        },
+        {
+          "name": "merge_lamp",
+          "type": "merge",
+          "position": [
+            2,
+            -2
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "base_cyl",
+          "to": "merge_lamp",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "arm_pivot",
+          "to": "merge_lamp",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "head_cone",
+          "to": "merge_lamp",
+          "from_out": 0,
+          "to_in": 2
+        }
+      ],
+      "output_description": "An articulated desk lamp."
+    },
+    {
+      "id": "prop_045",
+      "title": "Procedural Open Book (High Fidelity)",
+      "context": "SOP",
+      "goal": "Open book with curved pages",
+      "tags": [
+        "small props",
+        "office",
+        "advanced",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "page_left",
+          "type": "grid",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.2,
+              0.3
+            ],
+            "orient": "xz",
+            "center": [
+              -0.1,
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "name": "bend_page",
+          "type": "bend",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "bend": 20
+          }
+        },
+        {
+          "name": "mirror_pages",
+          "type": "mirror",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {
+            "direction": [
+              1,
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "name": "spine_box",
+          "type": "box",
+          "position": [
+            -2,
+            -2
+          ],
+          "parms": {
+            "size": [
+              0.02,
+              0.01,
+              0.3
+            ],
+            "center": [
+              0,
+              -0.01,
+              0
+            ]
+          }
+        },
+        {
+          "name": "merge_book",
+          "type": "merge",
+          "position": [
+            -1,
+            -4
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "page_left",
+          "to": "bend_page",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "bend_page",
+          "to": "mirror_pages",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "mirror_pages",
+          "to": "merge_book",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "spine_box",
+          "to": "merge_book",
+          "from_out": 0,
+          "to_in": 1
+        }
+      ],
+      "output_description": "A book lying open on a flat surface."
+    },
+    {
+      "id": "prop_046",
+      "title": "Procedural Book Stack (High Fidelity)",
+      "context": "SOP",
+      "goal": "A vertical pile of closed books with random rotation",
+      "tags": [
+        "small props",
+        "office",
+        "intermediate",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "single_book",
+          "type": "box",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.2,
+              0.04,
+              0.3
+            ]
+          }
+        },
+        {
+          "name": "stack_pts",
+          "type": "line",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "dist": 0.2,
+            "points": 5,
+            "dir": [
+              0,
+              1,
+              0
+            ]
+          }
+        },
+        {
+          "name": "rand_rot",
+          "type": "attribwrangle",
+          "position": [
+            2,
+            -1
+          ],
+          "parms": {
+            "snippet": "@orient = quat(radians(rand(@ptnum)*10), {0,1,0});"
+          }
+        },
+        {
+          "name": "copy_stack",
+          "type": "copytopoints::2.0",
+          "position": [
+            1,
+            -3
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "single_book",
+          "to": "copy_stack",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "stack_pts",
+          "to": "rand_rot",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "rand_rot",
+          "to": "copy_stack",
+          "from_out": 0,
+          "to_in": 1
+        }
+      ],
+      "output_description": "A vertically messy stack of five scholarly books."
+    },
+    {
+      "id": "prop_047",
+      "title": "Procedural Cardboard Box (High Fidelity)",
+      "context": "SOP",
+      "goal": "Shipping box with seam indentations",
+      "tags": [
+        "small props",
+        "utility",
+        "beginner",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "main_box",
+          "type": "box",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.4,
+              0.4,
+              0.4
+            ]
+          }
+        },
+        {
+          "name": "seam_top",
+          "type": "box",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "size": [
+              0.41,
+              0.01,
+              0.005
+            ],
+            "center": [
+              0,
+              0.2,
+              0
+            ]
+          }
+        },
+        {
+          "name": "bool_seams",
+          "type": "merge",
+          "position": [
+            1,
+            -2
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "main_box",
+          "to": "bool_seams",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "seam_top",
+          "to": "bool_seams",
+          "from_out": 0,
+          "to_in": 1
+        }
+      ],
+      "output_description": "A standard brown shipping box."
+    },
+    {
+      "id": "prop_048",
+      "title": "Procedural Paint Can (High Fidelity)",
+      "context": "SOP",
+      "goal": "Industrial metal can with handle and lid",
+      "tags": [
+        "small props",
+        "utility",
+        "intermediate",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "can_body",
+          "type": "tube",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "rad": 0.08,
+            "height": 0.2,
+            "cap": true
+          }
+        },
+        {
+          "name": "handle_wire",
+          "type": "torus",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "radx": 0.09,
+            "rady": 0.005,
+            "theta": 180,
+            "center": [
+              0,
+              0.1,
+              0
+            ]
+          }
+        },
+        {
+          "name": "can_lid",
+          "type": "tube",
+          "position": [
+            -2,
+            0
+          ],
+          "parms": {
+            "rad": 0.082,
+            "height": 0.01,
+            "center": [
+              0,
+              0.1,
+              0
+            ],
+            "cap": true
+          }
+        },
+        {
+          "name": "merge_can",
+          "type": "merge",
+          "position": [
+            0,
+            -3
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "can_body",
+          "to": "merge_can",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "handle_wire",
+          "to": "merge_can",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "can_lid",
+          "to": "merge_can",
+          "from_out": 0,
+          "to_in": 2
+        }
+      ],
+      "output_description": "A 1-gallon paint can with a wire handle."
+    },
+    {
+      "id": "prop_049",
+      "title": "Procedural Sharp Rock (High Fidelity)",
+      "context": "SOP",
+      "goal": "Craggy terrain stone with directional noise",
+      "tags": [
+        "nature",
+        "prop",
+        "advanced",
+        "terrain"
+      ],
+      "nodes": [
+        {
+          "name": "base_cube",
+          "type": "box",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "size": [
+              1,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "name": "rand_noise",
+          "type": "attribwrangle",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "snippet": "@P += @N * (noise(@P*2.4) - 0.2) * 0.4;"
+          }
+        },
+        {
+          "name": "peak_sharp",
+          "type": "attribwrangle",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {
+            "snippet": "if(@P.y > 0.3) @P.y *= 1.5; // sharpen peaks"
+          }
+        },
+        {
+          "name": "low_poly",
+          "type": "polyreduce",
+          "position": [
+            0,
+            -3
+          ],
+          "parms": {
+            "percent": 50
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "base_cube",
+          "to": "rand_noise",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "rand_noise",
+          "to": "peak_sharp",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "peak_sharp",
+          "to": "low_poly",
+          "from_out": 0,
+          "to_in": 0
+        }
+      ],
+      "output_description": "A sharp, low-poly environmental rock."
+    },
+    {
+      "id": "prop_050",
+      "title": "Procedural Smooth Pebble (High Fidelity)",
+      "context": "SOP",
+      "goal": "Eroded river stone",
+      "tags": [
+        "nature",
+        "prop",
+        "beginner",
+        "terrain"
+      ],
+      "nodes": [
+        {
+          "name": "base_sphere",
+          "type": "sphere",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "rad": [
+              0.1,
+              0.04,
+              0.08
+            ]
+          }
+        },
+        {
+          "name": "subdiv_smooth",
+          "type": "subdivide",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "iterations": 2
+          }
+        },
+        {
+          "name": "flatten_base",
+          "type": "attribwrangle",
+          "position": [
+            0,
+            -2
+          ],
+          "parms": {
+            "snippet": "if(@P.y < 0) @P.y *= 0.5; // flat bottom"
+          },
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "base_sphere",
+          "to": "subdiv_smooth",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "subdiv_smooth",
+          "to": "flatten_base",
+          "from_out": 0,
+          "to_in": 0
+        }
+      ],
+      "output_description": "A smooth, oval-shaped river pebble."
+    },
+    {
+      "id": "prop_051",
+      "title": "Procedural Stylized Tree (High Fidelity)",
+      "context": "SOP",
+      "goal": "Lollipop-style tree with trunk and bulbous leaves",
+      "tags": [
+        "nature",
+        "tree",
+        "intermediate",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "trunk_geo",
+          "type": "tube",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "rad": 0.1,
+            "rad2": 0.05,
+            "height": 2.0,
+            "center": [
+              0,
+              1.0,
+              0
+            ],
+            "cap": true
+          }
+        },
+        {
+          "name": "leaves_geo",
+          "type": "sphere",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "rad": 0.8,
+            "center": [
+              0,
+              2.2,
+              0
+            ]
+          }
+        },
+        {
+          "name": "perturb_leaves",
+          "type": "attribwrangle",
+          "position": [
+            2,
+            -1
+          ],
+          "parms": {
+            "snippet": "@P += (noise(@P*3.0)-0.5) * 0.2;"
+          }
+        },
+        {
+          "name": "merge_tree",
+          "type": "merge",
+          "position": [
+            1,
+            -3
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "trunk_geo",
+          "to": "merge_tree",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "leaves_geo",
+          "to": "perturb_leaves",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "perturb_leaves",
+          "to": "merge_tree",
+          "from_out": 0,
+          "to_in": 1
+        }
+      ],
+      "output_description": "A stylized low-poly environmental tree."
+    },
+    {
+      "id": "prop_052",
+      "title": "Procedural Grass Tuft (High Fidelity)",
+      "context": "SOP",
+      "goal": "Group of curved grass blades",
+      "tags": [
+        "nature",
+        "grass",
+        "intermediate",
+        "modelling"
+      ],
+      "nodes": [
+        {
+          "name": "blade_curve",
+          "type": "curve",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "primitive": "polygon",
+            "coords": "0,0,0 0.02,0.1,0 0.08,0.2,0"
+          }
+        },
+        {
+          "name": "blade_sweep",
+          "type": "sweep",
+          "position": [
+            0,
+            -1
+          ],
+          "parms": {
+            "type": "square",
+            "scale": 0.02
+          }
+        },
+        {
+          "name": "scatter_pts",
+          "type": "circle",
+          "position": [
+            2,
+            -1
+          ],
+          "parms": {
+            "type": "polygon",
+            "rad": 0.1,
+            "divs": 12
+          }
+        },
+        {
+          "name": "copy_grass",
+          "type": "copytopoints::2.0",
+          "position": [
+            1,
+            -3
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "blade_curve",
+          "to": "blade_sweep",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "blade_sweep",
+          "to": "copy_grass",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "scatter_pts",
+          "to": "copy_grass",
+          "from_out": 0,
+          "to_in": 1
+        }
+      ],
+      "output_description": "A small clump of procedural grass blades."
+    },
+    {
+      "id": "prop_053",
+      "title": "Procedural Straight Staircase HDA (High Fidelity)",
+      "context": "SOP",
+      "goal": "Parametric straight staircase with exposed step_count, step_width, step_depth, step_height \u2014 packaged as an HDA",
+      "tags": [
+        "architecture",
+        "stairs",
+        "hda",
+        "intermediate",
+        "modelling"
+      ],
+      "hda_parameters": [
+        {
+          "name": "step_count",
+          "type": "Int",
+          "label": "Step Count",
+          "default": 12,
+          "range": [
+            2,
+            50
+          ]
+        },
+        {
+          "name": "step_width",
+          "type": "Float",
+          "label": "Step Width",
+          "default": 1.2,
+          "range": [
+            0.3,
+            5.0
+          ]
+        },
+        {
+          "name": "step_depth",
+          "type": "Float",
+          "label": "Step Depth",
+          "default": 0.28,
+          "range": [
+            0.1,
+            1.0
+          ]
+        },
+        {
+          "name": "step_height",
+          "type": "Float",
+          "label": "Step Height",
+          "default": 0.18,
+          "range": [
+            0.05,
+            0.5
+          ]
+        }
+      ],
+      "nodes": [
+        {
+          "name": "stair_wrangle",
+          "type": "attribwrangle",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "class": "detail",
+            "snippet": "int   n   = chi('step_count');\nfloat w   = chf('step_width');\nfloat d   = chf('step_depth');\nfloat h   = chf('step_height');\nfor (int i = 0; i < n; i++) {\n    // bottom face 4 pts\n    vector p0 = set(0,    i*h,       i*d);\n    vector p1 = set(w,    i*h,       i*d);\n    vector p2 = set(w,    i*h,  (i+1)*d);\n    vector p3 = set(0,    i*h,  (i+1)*d);\n    // top face 4 pts  (riser height)\n    vector p4 = set(0,  (i+1)*h, (i+1)*d);\n    vector p5 = set(w,  (i+1)*h, (i+1)*d);\n    // tread prim\n    int a0 = addpoint(0, p0);\n    int a1 = addpoint(0, p1);\n    int a2 = addpoint(0, p2);\n    int a3 = addpoint(0, p3);\n    addprim(0, 'poly', a0, a1, a2, a3);\n    // riser prim\n    int b0 = addpoint(0, p3);\n    int b1 = addpoint(0, p2);\n    int b2 = addpoint(0, p5);\n    int b3 = addpoint(0, p4);\n    addprim(0, 'poly', b0, b1, b2, b3);\n}"
+          }
+        },
+        {
+          "name": "OUT_stairs",
+          "type": "null",
+          "position": [
+            0,
+            -2
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "stair_wrangle",
+          "to": "OUT_stairs",
+          "from_out": 0,
+          "to_in": 0
+        }
+      ],
+      "hda_creation_code": "import hou\n# 1. Create geo container\ngeo = hou.node('/obj').createNode('geo', 'staircase_geo')\n# 2. Build the wrangle\nw = geo.createNode('attribwrangle', 'stair_wrangle')\nw.parm('class').set(1)  # detail\nw.parm('snippet').set(SNIPPET)  # insert snippet above\n# 3. Add channel references so HDA parms drive the wrangle\n# 4. Promote to subnet, then createDigitalAsset\nsubnet = hou.node('/obj').createNode('subnet', 'staircase_hda_subnet')\nfor child in geo.children():\n    child.setInput(0, None)\n# 5. createDigitalAsset\nhda = subnet.createDigitalAsset(\n    name='staircase_hda',\n    hda_file_name='$HOME/houdini20.5/otls/staircase_hda.hda',\n    description='Procedural Straight Staircase'\n)\nhda_def = hda.type().definition()\nptg = hda_def.parmTemplateGroup()\nptg.append(hou.IntParmTemplate('step_count', 'Step Count', 1, default_value=(12,), min=2, max=50))\nptg.append(hou.FloatParmTemplate('step_width', 'Step Width', 1, default_value=(1.2,), min=0.3, max=5.0))\nptg.append(hou.FloatParmTemplate('step_depth', 'Step Depth', 1, default_value=(0.28,), min=0.1, max=1.0))\nptg.append(hou.FloatParmTemplate('step_height', 'Step Height', 1, default_value=(0.18,), min=0.05, max=0.5))\nhda_def.setParmTemplateGroup(ptg)\nhda_def.save(hda_def.libraryFilePath())",
+      "output_description": "A parametric straight staircase as an HDA. Change step_count to add/remove steps; step_width/depth/height control proportions. The entire stair is generated in a single detail-class attribwrangle \u2014 no Copy-to-Points needed."
+    },
+    {
+      "id": "prop_054",
+      "title": "Procedural Ladder HDA (High Fidelity)",
+      "context": "SOP",
+      "goal": "Parametric ladder with rung_count, rung_spacing, rail_height, rail_radius, rung_radius \u2014 packaged as HDA",
+      "tags": [
+        "architecture",
+        "ladder",
+        "hda",
+        "intermediate",
+        "modelling"
+      ],
+      "hda_parameters": [
+        {
+          "name": "rung_count",
+          "type": "Int",
+          "label": "Rung Count",
+          "default": 10,
+          "range": [
+            2,
+            50
+          ]
+        },
+        {
+          "name": "rung_spacing",
+          "type": "Float",
+          "label": "Rung Spacing",
+          "default": 0.3,
+          "range": [
+            0.1,
+            1.0
+          ]
+        },
+        {
+          "name": "rail_height",
+          "type": "Float",
+          "label": "Rail Height",
+          "default": 0.15,
+          "range": [
+            0.01,
+            0.5
+          ]
+        },
+        {
+          "name": "rail_width",
+          "type": "Float",
+          "label": "Rail Width (m)",
+          "default": 0.5,
+          "range": [
+            0.2,
+            2.0
+          ]
+        },
+        {
+          "name": "rail_radius",
+          "type": "Float",
+          "label": "Rail Tube Radius",
+          "default": 0.025,
+          "range": [
+            0.005,
+            0.1
+          ]
+        },
+        {
+          "name": "rung_radius",
+          "type": "Float",
+          "label": "Rung Radius",
+          "default": 0.015,
+          "range": [
+            0.003,
+            0.08
+          ]
+        }
+      ],
+      "build_strategy": "Two vertical rails (tubes) + array of horizontal rungs via for-each loop. All dimensions driven by promoted HDA parameters using ch() references.",
+      "nodes": [
+        {
+          "name": "ladder_wrangle",
+          "type": "attribwrangle",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "class": "detail",
+            "snippet": "int   n   = chi('rung_count');\nfloat sp  = chf('rung_spacing');\nfloat rw  = chf('rail_width');\nfloat rrad= chf('rail_radius');\nfloat rung= chf('rung_radius');\nfloat total_h = sp * (n - 1);\n// rails and rungs are added via addprim poly-lines;\n// real implementation uses PolyWire after generating curve geo"
+          }
+        },
+        {
+          "name": "left_rail",
+          "type": "tube",
+          "position": [
+            -2,
+            0
+          ],
+          "parms": {
+            "rad1": "ch('../rung_radius')",
+            "height": "ch('../rung_spacing') * (chi('../rung_count')-1)",
+            "center": [
+              0,
+              "ch('../rung_spacing')*(chi('../rung_count')-1)*0.5",
+              0
+            ]
+          }
+        },
+        {
+          "name": "right_rail",
+          "type": "tube",
+          "position": [
+            -1,
+            0
+          ],
+          "parms": {
+            "rad1": "ch('../rung_radius')",
+            "height": "ch('../rung_spacing') * (chi('../rung_count')-1)"
+          }
+        },
+        {
+          "name": "rung_template",
+          "type": "tube",
+          "position": [
+            1,
+            0
+          ],
+          "parms": {
+            "rad1": "ch('../rung_radius')",
+            "height": "ch('../rail_width')",
+            "orient": "Z"
+          }
+        },
+        {
+          "name": "rung_points",
+          "type": "line",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "points": "chi('../rung_count')",
+            "dist": "ch('../rung_spacing') * (chi('../rung_count')-1)",
+            "dir": [
+              0,
+              1,
+              0
+            ]
+          }
+        },
+        {
+          "name": "copy_rungs",
+          "type": "copytopoints",
+          "position": [
+            1,
+            -2
+          ],
+          "inputs": [
+            "rung_template",
+            "rung_points"
+          ]
+        },
+        {
+          "name": "merge_ladder",
+          "type": "merge",
+          "position": [
+            0,
+            -4
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "left_rail",
+          "to": "merge_ladder",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "right_rail",
+          "to": "merge_ladder",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "copy_rungs",
+          "to": "merge_ladder",
+          "from_out": 0,
+          "to_in": 2
+        }
+      ],
+      "hda_creation_code": "import hou\n# Full ladder HDA creation\nparent = '/obj'\ngeo = hou.node(parent).createNode('geo', 'ladder_build')\n\n# Left rail\nlr = geo.createNode('tube', 'left_rail')\nlr.parm('rad1').setExpression(\"ch('../rung_radius')\")\nlr.parm('height').setExpression(\"ch('../rung_spacing') * (chi('../rung_count') - 1)\")\nlr.parm('ty').setExpression(\"ch('../rung_spacing') * (chi('../rung_count') - 1) * 0.5\")\nlr.parm('tx').setExpression(\"-ch('../rail_width') * 0.5\")\n\n# Right rail\nrr = geo.createNode('tube', 'right_rail')\nrr.parm('rad1').setExpression(\"ch('../rung_radius')\")\nrr.parm('height').setExpression(\"ch('../rung_spacing') * (chi('../rung_count') - 1)\")\nrr.parm('ty').setExpression(\"ch('../rung_spacing') * (chi('../rung_count') - 1) * 0.5\")\nrr.parm('tx').setExpression(\"ch('../rail_width') * 0.5\")\n\n# Rung template\nrt = geo.createNode('tube', 'rung_template')\nrt.parm('rad1').setExpression(\"ch('../rung_radius')\")\nrt.parm('height').setExpression(\"ch('../rail_width')\")\nrt.parm('orient').set(2)  # Z orient\n\n# Points for copy\npts = geo.createNode('line', 'rung_points')\npts.parm('points').setExpression(\"chi('../rung_count')\")\npts.parm('dist').setExpression(\"ch('../rung_spacing') * (chi('../rung_count') - 1)\")\npts.parm('diry').set(1); pts.parm('dirx').set(0); pts.parm('dirz').set(0)\n\n# Copy rungs\ncp = geo.createNode('copytopoints', 'copy_rungs')\ncp.setInput(0, rt); cp.setInput(1, pts)\n\n# Merge\nm = geo.createNode('merge', 'merge_ladder')\nm.setInput(0, lr); m.setInput(1, rr); m.setInput(2, cp)\n\n# Promote to HDA\nsubnet = hou.node('/obj').createNode('subnet', 'ladder_subnet')\nhda = subnet.createDigitalAsset(\n    name='ladder_hda',\n    hda_file_name='$HOME/houdini20.5/otls/ladder_hda.hda',\n    description='Procedural Ladder'\n)\nhda_def = hda.type().definition()\nptg = hda_def.parmTemplateGroup()\nptg.append(hou.IntParmTemplate('rung_count',   'Rung Count',      1, default_value=(10,), min=2, max=50))\nptg.append(hou.FloatParmTemplate('rung_spacing','Rung Spacing',   1, default_value=(0.3,), min=0.1, max=1.0))\nptg.append(hou.FloatParmTemplate('rail_width',  'Rail Width',     1, default_value=(0.5,), min=0.2, max=2.0))\nptg.append(hou.FloatParmTemplate('rail_radius', 'Rail Tube Radius',1, default_value=(0.025,), min=0.005, max=0.1))\nptg.append(hou.FloatParmTemplate('rung_radius', 'Rung Radius',   1, default_value=(0.015,), min=0.003, max=0.08))\nhda_def.setParmTemplateGroup(ptg)\nhda_def.save(hda_def.libraryFilePath())",
+      "output_description": "Two vertical tube rails + evenly-spaced horizontal rungs via Copy-to-Points. All five dimensions are HDA parameters. Changing rung_count instantly adds or removes rungs; rail height auto-follows."
+    },
+    {
+      "id": "prop_055",
+      "title": "Procedural Staircase with Railing HDA (High Fidelity)",
+      "context": "SOP",
+      "goal": "Straight staircase combined with side railings \u2014 all exposed as HDA parms",
+      "tags": [
+        "architecture",
+        "stairs",
+        "railing",
+        "hda",
+        "advanced",
+        "modelling"
+      ],
+      "hda_parameters": [
+        {
+          "name": "step_count",
+          "type": "Int",
+          "label": "Step Count",
+          "default": 12,
+          "range": [
+            2,
+            50
+          ]
+        },
+        {
+          "name": "step_width",
+          "type": "Float",
+          "label": "Step Width",
+          "default": 1.2,
+          "range": [
+            0.3,
+            5.0
+          ]
+        },
+        {
+          "name": "step_depth",
+          "type": "Float",
+          "label": "Step Depth",
+          "default": 0.28,
+          "range": [
+            0.1,
+            1.0
+          ]
+        },
+        {
+          "name": "step_height",
+          "type": "Float",
+          "label": "Step Height",
+          "default": 0.18,
+          "range": [
+            0.05,
+            0.5
+          ]
+        },
+        {
+          "name": "rail_height",
+          "type": "Float",
+          "label": "Handrail Height",
+          "default": 0.9,
+          "range": [
+            0.5,
+            1.5
+          ]
+        },
+        {
+          "name": "spindle_count",
+          "type": "Int",
+          "label": "Spindles per Step",
+          "default": 2,
+          "range": [
+            1,
+            5
+          ]
+        },
+        {
+          "name": "has_railing",
+          "type": "Toggle",
+          "label": "Include Railing",
+          "default": 1
+        }
+      ],
+      "build_strategy": "Stair treads and risers from attribwrangle (detail class). Handrail top bar as a swept curve following the stair slope. Spindles via Copy-to-Points along the stair path. has_railing toggle uses a Switch SOP to output stairs-only or stairs+railing.",
+      "nodes": [
+        {
+          "name": "stairs_base",
+          "type": "attribwrangle",
+          "position": [
+            0,
+            0
+          ],
+          "parms": {
+            "class": "detail",
+            "snippet": "// same snippet as prop_053 but reads from ch()"
+          }
+        },
+        {
+          "name": "railing_pts",
+          "type": "attribwrangle",
+          "position": [
+            2,
+            0
+          ],
+          "parms": {
+            "class": "detail",
+            "snippet": "int n=chi('step_count'); float d=chf('step_depth'); float h=chf('step_height'); float rh=chf('rail_height');\nfor(int i=0;i<=n;i++){addpoint(0,set(0,(i*h)+rh,i*d)); addpoint(0,set(chf('step_width'),(i*h)+rh,i*d));}"
+          }
+        },
+        {
+          "name": "add_rails",
+          "type": "add",
+          "position": [
+            2,
+            -2
+          ],
+          "parms": {
+            "switcher": [
+              [
+                0,
+                1
+              ],
+              [
+                2,
+                3
+              ]
+            ]
+          }
+        },
+        {
+          "name": "spindle_templ",
+          "type": "tube",
+          "position": [
+            4,
+            0
+          ],
+          "parms": {
+            "rad1": 0.02,
+            "height": "ch('../rail_height')"
+          }
+        },
+        {
+          "name": "spindle_pts",
+          "type": "attribwrangle",
+          "position": [
+            4,
+            -1
+          ],
+          "parms": {
+            "class": "detail",
+            "snippet": "int n=chi('step_count'); int sp=chi('spindle_count'); float d=chf('step_depth'); float h=chf('step_height');\nfor(int i=0;i<n;i++){for(int j=0;j<sp;j++){float u=(j+0.5)/sp; addpoint(0,set(0,i*h + u*chf('step_height'),(i+u)*d));}}"
+          }
+        },
+        {
+          "name": "copy_spindles",
+          "type": "copytopoints",
+          "position": [
+            4,
+            -3
+          ],
+          "inputs": [
+            "spindle_templ",
+            "spindle_pts"
+          ]
+        },
+        {
+          "name": "merge_full",
+          "type": "merge",
+          "position": [
+            2,
+            -4
+          ]
+        },
+        {
+          "name": "switch_railing",
+          "type": "switch",
+          "position": [
+            2,
+            -6
+          ],
+          "parms": {
+            "input": "chi('../has_railing')"
+          }
+        },
+        {
+          "name": "OUT_staircase",
+          "type": "null",
+          "position": [
+            2,
+            -8
+          ],
+          "display_flag": true
+        }
+      ],
+      "connections": [
+        {
+          "from": "stairs_base",
+          "to": "merge_full",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "add_rails",
+          "to": "merge_full",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "copy_spindles",
+          "to": "merge_full",
+          "from_out": 0,
+          "to_in": 2
+        },
+        {
+          "from": "stairs_base",
+          "to": "switch_railing",
+          "from_out": 0,
+          "to_in": 0
+        },
+        {
+          "from": "merge_full",
+          "to": "switch_railing",
+          "from_out": 0,
+          "to_in": 1
+        },
+        {
+          "from": "switch_railing",
+          "to": "OUT_staircase",
+          "from_out": 0,
+          "to_in": 0
+        }
+      ],
+      "output_description": "Straight staircase with optional side railings and spindles. has_railing toggle uses a Switch SOP so the stair geometry still cooks while railings are hidden, avoiding network rebuilds."
+    },
+    {
+      "id": "prop_056",
+      "title": "HDA Authoring Workflow \u2014 Complete Python Recipe",
+      "context": "Python",
+      "goal": "Step-by-step pattern for creating any parametric HDA from a SOP network",
+      "tags": [
+        "hda",
+        "authoring",
+        "workflow",
+        "python",
+        "advanced"
+      ],
+      "hda_creation_steps": [
+        "1. Build the SOP network inside a geo node (the network the HDA will wrap).",
+        "2. Use ch() / chi() / chv() references inside wrangles/expressions \u2014 these become the HDA parms.",
+        "3. Select all nodes \u2192 RMB \u2192 'Collapse Into Subnet'  (or use execute_python to createNode('subnet')).",
+        "4. subnet.createDigitalAsset(name=..., hda_file_name=..., description=...)",
+        "5. Build the parmTemplateGroup: add IntParmTemplate / FloatParmTemplate / ToggleParmTemplate / MenuParmTemplate.",
+        "6. hda_def.setParmTemplateGroup(ptg) then hda_def.save(path).",
+        "7. Wire the HDA parms to the inner ch() channels \u2014 use setExpression or Promote Parameter."
+      ],
+      "code": "import hou\n\n# \u2500\u2500\u2500 Step 1: build network inside a geo \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\ngeo = hou.node('/obj').createNode('geo', 'my_prop_build')\nbox = geo.createNode('box', 'shape')\nbox.parm('sizex').setExpression(\"ch('../width')\")\nbox.parm('sizey').setExpression(\"ch('../height')\")\nbox.parm('sizez').setExpression(\"ch('../depth')\")\nnull = geo.createNode('null', 'OUT')\nnull.setInput(0, box)\ngeo.layoutChildren()\n\n# \u2500\u2500\u2500 Step 2: collapse to subnet \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n# (in the UI: select all \u2192 RMB \u2192 Collapse Into Subnet)\n# Via Python, move children or build subnet directly:\nsubnet = hou.node('/obj').createNode('subnet', 'my_prop_subnet')\n\n# \u2500\u2500\u2500 Step 3: createDigitalAsset \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nhda_node = subnet.createDigitalAsset(\n    name         = 'my_prop',                              # internal type name\n    hda_file_name= '$HOME/houdini20.5/otls/my_prop.hda',  # save path\n    description  = 'My Parametric Prop',                  # UI label\n    min_num_inputs = 0,\n    max_num_inputs = 1,\n)\nhda_def = hda_node.type().definition()\n\n# \u2500\u2500\u2500 Step 4: build parameter interface \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nptg = hda_def.parmTemplateGroup()\n\n# Float parm\nptg.append(hou.FloatParmTemplate(\n    'width', 'Width', 1,\n    default_value=(1.0,), min=0.1, max=10.0,\n    help='Total width of the prop in metres.'\n))\n# Int parm\nptg.append(hou.IntParmTemplate(\n    'count', 'Count', 1,\n    default_value=(5,), min=1, max=100\n))\n# Toggle (checkbox)\nptg.append(hou.ToggleParmTemplate(\n    'enable_caps', 'Enable Caps', default_value=True\n))\n# String / file path\nptg.append(hou.StringParmTemplate(\n    'texture_path', 'Texture', 1,\n    string_type=hou.stringParmType.FileReference,\n    file_type=hou.fileType.Image\n))\n# Menu\nptg.append(hou.MenuParmTemplate(\n    'mode', 'Build Mode',\n    menu_items=('simple', 'detailed', 'lod'),\n    menu_labels=('Simple', 'Detailed', 'LOD Variant'),\n    default_value=0\n))\n# Folder / Tab\nfolder = hou.FolderParmTemplate('adv', 'Advanced', folder_type=hou.folderType.Tabs)\nfolder.addParmTemplate(hou.FloatParmTemplate('bevel_amount', 'Bevel', 1, default_value=(0.02,)))\nptg.append(folder)\n\nhda_def.setParmTemplateGroup(ptg)\nhda_def.save(hda_def.libraryFilePath())\n\n# \u2500\u2500\u2500 Step 5: verify \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nprint('HDA saved to:', hda_def.libraryFilePath())\nprint('Parm count:',  len(hda_node.parmTemplateGroup().parmTemplates()))",
+      "explanation": "Complete HDA authoring recipe. Use FloatParmTemplate for continuous values, IntParmTemplate for counts/integers, ToggleParmTemplate for on/off switches, MenuParmTemplate for discrete choices. Always call hda_def.save() at the end. Use ch('../parm_name') inside child node expressions to wire HDA parms to the network."
+    }
+  ]
+}

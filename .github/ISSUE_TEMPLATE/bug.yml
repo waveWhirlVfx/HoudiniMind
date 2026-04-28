@@ -1,0 +1,78 @@
+name: Bug report
+description: Something is broken in HoudiniMind.
+title: "[bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug. Please fill in as much as
+        you can — the Houdini version, OS, and model matter a lot.
+
+  - type: input
+    id: houdini-version
+    attributes:
+      label: Houdini version
+      placeholder: "21.0.123"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - macOS (Apple Silicon)
+        - macOS (Intel)
+        - Windows 11
+        - Windows 10
+        - Linux
+    validations:
+      required: true
+
+  - type: input
+    id: model
+    attributes:
+      label: Model
+      placeholder: "qwen2.5-coder:14b via Ollama 0.3.x"
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Exact prompt, starting scene state, and what you clicked.
+      placeholder: |
+        1. Open an empty scene
+        2. Launch the HoudiniMind panel
+        3. Submit prompt "..."
+        4. Observe ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected vs actual
+    validations:
+      required: true
+
+  - type: textarea
+    id: session-log
+    attributes:
+      label: session.md excerpt
+      description: Paste the last ~50 lines of your `session.md` flight recorder.
+      render: markdown
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you submit
+      options:
+        - label: I have searched existing issues.
+          required: true
+        - label: I am on the latest release or `main`.
+          required: true
+        - label: I have removed any API keys or personal paths from the log excerpt.
+          required: true

@@ -1,0 +1,199 @@
+[
+    {
+        "error": "Merge SOP producing wrong point numbering (primnum breaks)",
+        "symptoms": [
+            "Simulations suddenly explode",
+            "Point wrangles referencing @ptnum evaluate incorrectly after the merge",
+            "Geometry flashes or changes unexpectedly frame-to-frame"
+        ],
+        "cause": "The Merge SOP concatenates point lists. If Input A has 10 points and B has 10, Input B's point 0 becomes point 10. Any logic relying on absolute point numbers will break.",
+        "detailed_solution": "1. Before the Merge, append an Attribute Wrangle to both streams. 2. Type `i@id = @ptnum;` to bake original numbers into a persistent 'id' attribute. 3. Update downstream logic to reference `@id` instead of `@ptnum`.",
+        "prevention": "Never rely on `@ptnum` for persistent tracking across changing topology. Always generate an `@id`."
+    },
+    {
+        "error": "Boolean SOP leaves open edges or holes",
+        "symptoms": [
+            "Resulting geometry is not watertight",
+            "Weird shading artifacts at the intersection seam",
+            "Middle mouse button shows 'open primitives'"
+        ],
+        "cause": "Inputs have coincident coplanar faces (they align perfectly, causing math precision errors), zero-thickness walls, or are not closed manifolds.",
+        "detailed_solution": "1. Append a Clean SOP to fix non-planar polygons. 2. Slightly transform (e.g., move by 0.001) the cutter geometry to break exact coplanar ties. 3. Ensure both inputs are capped/closed.",
+        "prevention": "Avoid perfectly aligning the boundaries of boolean operands."
+    },
+    {
+        "error": "CopyToPoints places all copies at the origin (0,0,0)",
+        "symptoms": [
+            "Instead of a forest, there is one giant overlapping mass of geometry at the center of the grid."
+        ],
+        "cause": "The target points (Input 2) are invalid, missing, or lack a valid Position (@P) attribute. Sometimes caused by accidentally swapping Input 1 and Input 2.",
+        "detailed_solution": "1. Verify Input 1 is the geometry to copy, and Input 2 is the points. 2. Middle-mouse click Input 2 to ensure 'Points: X' is greater than 0. 3. Ensure your points haven't been stripped of their P attribute by an over-aggressive Clean SOP.",
+        "prevention": "Always double-check the wire order. Copy to Points expects data in a specific left-to-right order."
+    },
+    {
+        "error": "Fuse SOP not welding points",
+        "symptoms": [
+            "Points that look like they are touching are still separate when viewed in the geometry spreadsheet",
+            "Smooth/Subdivide operations tear at the seams"
+        ],
+        "cause": "The 'Snap Distance' parameter is too small relative to the scale of the object. (e.g., an object scaled to 1000 units, but snap distance is 0.001).",
+        "detailed_solution": "Slowly increase the 'Snap Distance' in the Fuse SOP until the geometry welds. If the mesh shrinks aggressively, the distance is too high.",
+        "prevention": "Model using real-world Houdini units (1 unit = 1 meter) so default tolerances in nodes like Fuse and Boolean work predictably."
+    },
+    {
+        "error": "VDB Conversion produces completely empty volume",
+        "symptoms": [
+            "VDB from Polygons outputs an invisible node",
+            "Middle-mouse shows '0 Voxel count'"
+        ],
+        "cause": "The input polygons have wildly inverted normals, or the mesh is completely open (like a flat plane), meaning it has no interior volume to voxelize.",
+        "detailed_solution": "1. For open planes, change the VDB from Polygons class from 'Surface' to 'Surface (Unsigned Distance Field)'. 2. For closed meshes that fail, append a PolyFill SOP to cap holes and a Reverse/Normal SOP to unify normals pointing outward.",
+        "prevention": "VDBs represent volume. You cannot put a mathematically flat 2D sheet into a 3D volume container without changing settings."
+    },
+    {
+        "error": "Scatter produces 0 points (zero-area surface)",
+        "symptoms": [
+            "Scatter node is red or produces empty geometry",
+            "Downstream instancing disappears"
+        ],
+        "cause": "The input geometry has exactly 0 surface area (e.g., a single un-extruded line, a single point, or degenerate polygons), or the density attribute evaluates to 0 everywhere.",
+        "detailed_solution": "1. Ensure input is a surface (polygons/NURBS), not just curves or points. 2. If using a density attribute, check the Geometry Spreadsheet to ensure it has values > 0. 3. To scatter on lines, use the Resample SOP instead.",
+        "prevention": "Verify input topology type before scattering."
+    },
+    {
+        "error": "Subdivide exploding polygon count (depth too high)",
+        "symptoms": [
+            "Houdini freezes for several minutes",
+            "RAM usage spikes to 100%",
+            "Node turns red with memory allocation error"
+        ],
+        "cause": "The 'Depth' parameter is set too high on an already dense mesh. Subdivide multiplies the polygon count by 4 for every depth level (e.g., depth 3 = 64x more polygons).",
+        "detailed_solution": "Press 'Escape' to interrupt the cook if Houdini is frozen. Lower the Depth parameter to 1 or 2. If you need more detail, apply it locally using a Group, or use displacement at render time.",
+        "prevention": "Never type numbers larger than 3 into the Subdivide depth parameter without checking base polygon count first."
+    },
+    {
+        "error": "Group not found downstream (type mismatch)",
+        "symptoms": [
+            "A node that requires a group has no effect",
+            "Typing the group name in a parameter shows a warning or does nothing"
+        ],
+        "cause": "Houdini groups are strictly typed (Points, Primitives, Edges, Vertices). You created a Point group, but the downstream node (e.g., PolyExtrude) only operates on Primitives.",
+        "detailed_solution": "Append a Group Promote SOP. Select your group, set 'From Type' to Points, and 'To Type' to Primitives.",
+        "prevention": "Always check the group type icon in the node info or use Group Promote when crossing domains."
+    },
+    {
+        "error": "AttribWrangle type mismatch (@P.y vs float)",
+        "symptoms": [
+            "Wrangle produces unexpected results",
+            "Warning flag: 'Ambiguous type for attribute' or 'Implicit cast'"
+        ],
+        "cause": "Assigning a vector to a float, or assuming an attribute exists as one type when it was created as another. E.g., typing `@myattr = 1.0` (float) when `@myattr` is already a vector.",
+        "detailed_solution": "Explicitly declare the type when reading/writing custom attributes. Use `f@myattr` for floats, `v@myattr` for vectors, `i@myattr` for integers. To access vector components, use `v@P.y` or just `@P.y`.",
+        "prevention": "Always use type prefixes (`f@`, `v@`, `i@`, `s@`) when initializing attributes in VEX."
+    },
+    {
+        "error": "Normal SOP not updating after deformation",
+        "symptoms": [
+            "Mesh deforms (e.g., bends or animates), but lighting/shading looks static and weirdly stretched."
+        ],
+        "cause": "Normals (@N) were calculated *before* the deformation node. The deformation moved the points but did not rotate their normal vectors to match the new surface angles.",
+        "detailed_solution": "Move the Normal SOP to the bottom of the chain, *after* all deformations (Bend, Mountain, Transform).",
+        "prevention": "Always recalculate normals as the final step before rendering or exporting."
+    },
+    {
+        "error": "UV coordinates lost after boolean",
+        "symptoms": [
+            "Textures stretch infinitely or disappear completely on faces created by a Boolean SOP."
+        ],
+        "cause": "The Boolean SOP creates entirely new polygons where intersections happen. These new faces have no UV coordinate data.",
+        "detailed_solution": "You must re-project or unwrap UVs *after* the Boolean operation. Append a UV Unwrap or UV Auto Seam node downstream.",
+        "prevention": "Perform complex topological changes before finalizing UVs."
+    },
+    {
+        "error": "ForEach loop infinite / feedback not working",
+        "symptoms": [
+            "The loop executes but only outputs the result of a single iteration",
+            "Houdini hangs in an infinite cook"
+        ],
+        "cause": "The Block Begin node is set to the wrong method for iterative processing. By default, it processes pieces in parallel. To accumulate changes iteratively (e.g., recursive subdivision), it must be set to 'Fetch Feedback'.",
+        "detailed_solution": "Select the 'For-Each Block Begin' node. Change the 'Method' parameter to 'Fetch Feedback'. Ensure the For-Each End node is set to 'Feedback Each Iteration'.",
+        "prevention": "Understand the difference between parallel processing (For-Each Piece) and iterative accumulation (For-Each Feedback)."
+    },
+    {
+        "error": "Vellum cloth exploding on frame 1",
+        "symptoms": [
+            "Cloth instantly shoots outward in a spiky mess",
+            "Simulation disappears completely"
+        ],
+        "cause": "The input geometry has intersecting polygons or points that are impossibly close together, causing the Vellum solver to apply infinite repulsive force to separate them.",
+        "detailed_solution": "1. Ensure the cloth mesh is clean (no self-intersections). 2. In the Vellum Solver, go to the 'Advanced' tab and increase 'Collision Passes'. 3. On the Vellum Configure node, slightly lower 'Thickness' so collision radii don't overlap at the start.",
+        "prevention": "Never simulate cloth that has already been extruded or has self-intersecting folds."
+    },
+    {
+        "error": "RBD pieces intersecting at start",
+        "symptoms": [
+            "Fractured pieces slowly push apart before they even hit the ground",
+            "Bullet solver is jittery"
+        ],
+        "cause": "The collision padding (shrink wrap) around the packed primitives overlaps. This usually happens if you fracture an object, then scale it down, or if the fracture created microscopic slivers.",
+        "detailed_solution": "Append an 'RBD Pack' node before the solver, or dive into the 'RBD Bullet Solver' properties and slightly increase the 'Collision Padding' or use 'Shrink Collision Geometry' to create a tiny gap between pieces.",
+        "prevention": "Ensure the object is at world-scale (1 unit = 1 meter) before fracturing."
+    },
+    {
+        "error": "Pyro volume disappearing instantly",
+        "symptoms": [
+            "Smoke emits for 1 frame and vanishes",
+            "Density field shows 0 in spreadsheet"
+        ],
+        "cause": "The source points lack the required attributes (density, temperature), or the bounding box of the Pyro Solver is not resizing to encompass the smoke.",
+        "detailed_solution": "1. Check the 'Pyro Source' node to ensure it is outputting 'density'. 2. Check the 'Volume Rasterize Attributes' node to ensure 'density' is in the attributes list. 3. In the Pyro Solver, ensure 'Closed Boundaries' is turned off on the Y axis, and 'Max Size' on the bounding box allows expansion.",
+        "prevention": "Always verify source volume data via middle-mouse click before diving into the solver."
+    },
+    {
+        "error": "PolyExtrude outputting flipped normals",
+        "symptoms": [
+            "The extruded faces look black/dark in the viewport",
+            "Render engines treat the geometry as inside-out"
+        ],
+        "cause": "Extruding an open curve, or extruding a flat plane with a negative distance value.",
+        "detailed_solution": "Check the 'Reverse Normals' option in the PolyExtrude node, or append a 'Reverse' SOP to flip the winding order of the polygons.",
+        "prevention": "Ensure base normals are pointing outward before extruding."
+    },
+    {
+        "error": "Sweep SOP twisting unexpectedly",
+        "symptoms": [
+            "The swept tube pinches, flattens, or spins wildly along the curve"
+        ],
+        "cause": "The curve lacks consistent 'up' vectors. As the curve bends, Houdini's default parallel transport algorithm gets confused about which way is 'up'.",
+        "detailed_solution": "1. On the curve, append a 'PolyFrame' SOP. Set 'Tangent Name' to `N` and 'Bitangent Name' to `up`. 2. Alternatively, in the Sweep SOP, change 'Roll/Twist' settings or check 'Compute Up Vector'.",
+        "prevention": "Always define `@up` and `@N` attributes on complex 3D paths before sweeping."
+    },
+    {
+        "error": "CopyToPoints instances not rotating correctly",
+        "symptoms": [
+            "All copied objects face the exact same direction, ignoring the surface normals"
+        ],
+        "cause": "The template points lack `@N` (Normal) and `@up` (Up Vector) attributes, or you have an `@orient` quaternion attribute overriding everything else.",
+        "detailed_solution": "Append a 'Normal' SOP to your target points. If instances spin on their axis, append an Attribute Wrangle and type `v@up = set(0,1,0);` to lock their vertical rotation.",
+        "prevention": "Understand the Copy to Points alignment hierarchy: `@orient` > `@N` and `@up` > `v@v`."
+    },
+    {
+        "error": "Boolean SOP extremely slow / hangs",
+        "symptoms": [
+            "Houdini freezes at 99% cooking the Boolean node"
+        ],
+        "cause": "Inputs have massively dense topology (e.g. millions of polygons), or inputs are heavily non-manifold/messy, causing the exact-math solver to fail.",
+        "detailed_solution": "1. Use 'PolyReduce' on the cutter object. 2. If it's a proxy/background object, use the 'VDB Boolean' workflow instead, which is resolution-independent and never hangs.",
+        "prevention": "Do not boolean raw photogrammetry or ZBrush sculpts. Remesh or VDB them first."
+    },
+    {
+        "error": "VDB from Polygons has holes or artifacts",
+        "symptoms": [
+            "The volume looks like Swiss cheese",
+            "Certain parts of the mesh refuse to voxelize"
+        ],
+        "cause": "The polygon mesh is open (not watertight), has reversed normals, or the Voxel Size is too large to capture thin walls.",
+        "detailed_solution": "1. Lower the Voxel Size. 2. Append a 'PolyFill' SOP to close open holes. 3. Append a 'Clean' SOP to fix normal directions. If it's a 2D plane, change the VDB type to 'Unsigned Distance Field'.",
+        "prevention": "Volumes require closed spaces. If you pour water into a mesh and it leaks, it will not convert to a solid VDB well."
+    }
+]

@@ -1,0 +1,604 @@
+{
+  "entries": [
+    {
+      "title": "Python: Create a Box in OBJ",
+      "category": "python",
+      "tags": ["create", "node", "obj", "geo"],
+      "content": "Create a geometry container at the object level:\nhou.node('/obj').createNode('geo', 'my_box')"
+    },
+    {
+      "title": "Python: Set Float Parameter",
+      "category": "python",
+      "tags": ["parm", "set", "float"],
+      "content": "Set the uniform scale of a box SOP:\nnode = hou.node('/obj/geo1/box1')\nnode.parm('scale').set(2.5)"
+    },
+    {
+      "title": "Python: Get World Space Position",
+      "category": "python",
+      "tags": ["world", "matrix", "position"],
+      "content": "Get the world space transform of a node:\nworld_m = hou.node('/obj/geo1').worldTransform()\npos = world_m.extractTranslation()"
+    },
+    {
+      "title": "Python: Connect Two Nodes",
+      "category": "python",
+      "tags": ["connect", "input", "output"],
+      "content": "Connect the output of 'box1' to the first input of 'null1':\nbox = hou.node('/obj/geo1/box1')\nnull = hou.node('/obj/geo1/null1')\nnull.setInput(0, box)"
+    },
+    {
+      "title": "Python: List Selected Nodes",
+      "category": "python",
+      "tags": ["selection", "selected_nodes"],
+      "content": "Get a list of all currently selected nodes in the network editor:\nselected = hou.selectedNodes()"
+    },
+    {
+      "title": "Python: Create SOP Wrangle & Set VEX",
+      "category": "python",
+      "tags": ["wrangle", "vex", "snippet"],
+      "content": "Create an attribute wrangle and set its code:\nwrangle = hou.node('/obj/geo1').createNode('attribwrangle')\nwrangle.parm('snippet').set('@P.y += 1;')"
+    },
+    {
+      "title": "Python: Iterate over points in geometry",
+      "category": "python",
+      "tags": ["geometry", "points", "iterate"],
+      "content": "Access geometry and print point positions:\ngeo = hou.node('/obj/geo1/null1').geometry()\nfor pt in geo.points():\n    print(pt.position())"
+    },
+    {
+      "title": "Python: Create Float Attribute",
+      "category": "python",
+      "tags": ["attribute", "addDistrib", "geometry"],
+      "content": "Add a new point attribute using Python:\ngeo = hou.node('/obj/geo1/null1').geometry()\ngeo.addAttrib(hou.attribType.Point, 'my_attr', 1.0)"
+    },
+    {
+      "title": "Python: Set String Parameter",
+      "category": "python",
+      "tags": ["parm", "string", "set"],
+      "content": "Update a file path on a File SOP:\nhou.node('/obj/geo1/file1').parm('file').set('C:/data/mesh.obj')"
+    },
+    {
+      "title": "Python: Press Button Programmatically",
+      "category": "python",
+      "tags": ["button", "press", "callback"],
+      "content": "Click the 'Reload' button on a File SOP:\nhou.node('/obj/geo1/file1').parm('reload').pressButton()"
+    },
+    {
+      "title": "Python: Get children with specific type",
+      "category": "python",
+      "tags": ["children", "type", "filter"],
+      "content": "Find all transform nodes in the current context:\ntransforms = [n for n in hou.node('/obj').children() if n.type().name() == 'xform']"
+    },
+    {
+      "title": "Python: Change Node Color",
+      "category": "python",
+      "tags": ["color", "ui", "node"],
+      "content": "Set the node background color in the UI:\nhou.node('/obj/geo1').setColor(hou.Color((1.0, 0.5, 0.0)))"
+    },
+    {
+      "title": "Python: Toggle Display Flag",
+      "category": "python",
+      "tags": ["flag", "display", "ui"],
+      "content": "Set the display flag on a SOP node:\nhou.node('/obj/geo1/null1').setDisplayFlag(True)"
+    },
+    {
+      "title": "Python: Save Scene reliably",
+      "category": "python",
+      "tags": ["save", "hip", "file"],
+      "content": "Save the current .hip file:\nhou.hipFile.save('C:/project/scene_v01.hip')"
+    },
+    {
+      "title": "Python: Create a Subnet and move nodes inside",
+      "category": "python",
+      "tags": ["subnet", "hierarchy", "organize"],
+      "content": "Group nodes into a subnet:\nparent = hou.node('/obj/geo1')\nsubnet = parent.createNode('subnet', 'my_group')\nhou.moveNodesTo([parent.node('box1'), parent.node('sphere1')], subnet)"
+    },
+    {
+      "title": "Python: Access HDA Parameter Definition",
+      "category": "python",
+      "tags": ["hda", "definition", "parm"],
+      "content": "Get the default value of a parameter from an HDA definition:\ndefinition = hou.nodeType(hou.sopNodeTypeCategory(), 'my_hda').definition()\nprint(definition.parmTemplate('my_parm').defaultValue())"
+    },
+    {
+      "title": "Python: Set Animation Keyframe",
+      "category": "python",
+      "tags": ["keyframe", "animation", "timeline"],
+      "content": "Animate a parameter over time:\nparm = hou.node('/obj/geo1/box1').parm('ty')\nkey = hou.Keyframe()\nkey.setFrame(1)\nkey.setValue(0)\nparm.setKeyframe(key)\nkey.setFrame(24)\nkey.setValue(10)\nparm.setKeyframe(key)"
+    },
+    {
+      "title": "Python: Layout Nodes in UI",
+      "category": "python",
+      "tags": ["layout", "ui", "network"],
+      "content": "Auto-arrange nodes in the network editor:\nhou.node('/obj/geo1').layoutChildren()"
+    },
+    {
+        "title": "Python: Add custom user data to node",
+        "category": "python",
+        "tags": ["userdata", "metadata", "dictionary"],
+        "content": "Store persistent JSON data inside a node:\nnode = hou.node('/obj/geo1')\nnode.setUserData('my_task_id', '12345')"
+    },
+    {
+        "title": "Python: Get Point Attribute Value",
+        "category": "python",
+        "tags": ["attribute", "value", "geometry"],
+        "content": "Read the Cd attribute of point 0:\ngeo = hou.node('/obj/geo1/null1').geometry()\nval = geo.point(0).attribValue('Cd')"
+    },
+    {
+        "title": "Python: Find node by path part",
+        "category": "python",
+        "tags": ["find", "path", "search"],
+        "content": "Search for nodes containing 'OUT' in their name:\noutputs = [n for n in hou.node('/').allSubChildren() if 'OUT' in n.name()]"
+    },
+    {
+        "title": "Python: Create Merge SOP for list of nodes",
+        "category": "python",
+        "tags": ["merge", "automate", "nodes"],
+        "content": "Automatically merge multiple selected nodes:\nparent = hou.selectedNodes()[0].parent()\nmerge = parent.createNode('merge')\nfor i, n in enumerate(hou.selectedNodes()):\n    merge.setInput(i, n)"
+    },
+    {
+        "title": "Python: Get Parameter Expression",
+        "category": "python",
+        "tags": ["expression", "parm", "python"],
+        "content": "Check if a parameter has an expression:\nparm = hou.node('/obj/geo1/box1').parm('tx')\nif parm.expression():\n    print(f'Expression: {parm.expression()}')"
+    },
+    {
+        "title": "Python: Change Render Flag (ROP)",
+        "category": "python",
+        "tags": ["render", "flag", "rop"],
+        "content": "Set the render node for a geometry object:\nhou.node('/obj/geo1').parm('render_node').set('/out/mantra1')"
+    },
+    {
+        "title": "Python: Message Box Dialog",
+        "category": "python",
+        "tags": ["ui", "dialog", "message"],
+        "content": "Show a popup message to the user:\nhou.ui.displayMessage('Task completed successfully!')"
+    },
+    {
+        "title": "Python: Select Points in Geometry (Masking)",
+        "category": "python",
+        "tags": ["points", "selection", "mask"],
+        "content": "Find indices of points with Cd.r > 0.5:\ngeo = hou.node('/obj/geo1/null1').geometry()\nids = [p.number() for p in geo.points() if p.attribValue('Cd')[0] > 0.5]"
+    },
+    {
+        "title": "Python: Create Null at bottom of chain",
+        "category": "python",
+        "tags": ["null", "output", "workflow"],
+        "content": "Append an OUT null to the selected node:\nsel = hou.selectedNodes()[0]\nout = sel.parent().createNode('null', f'OUT_{sel.name()}')\nout.setInput(0, sel)\nout.setDisplayFlag(True)"
+    },
+    {
+        "title": "Python: Get Scene Frame Range",
+        "category": "python",
+        "tags": ["timeline", "frame", "range"],
+        "content": "Access FPS and time settings:\nstart, end = hou.playbar.frameRange()\nfps = hou.fps()"
+    },
+    {
+        "title": "Python: Set Vector Parameter from List",
+        "category": "python",
+        "tags": ["vector", "parm", "set"],
+        "content": "Set color RGB directly:\nhou.node('/obj/geo1/color1').parmTuple('color').set((1, 0, 0))"
+    },
+    {
+        "title": "Python: Create Ramp Parameter definition",
+        "category": "python",
+        "tags": ["ramp", "ui", "definition"],
+        "content": "Define a color ramp in Python:\nramp = hou.Ramp((hou.rampBasis.Linear, hou.rampBasis.Linear), (0, 1), ((1,0,0), (0,0,1)))\nhou.node('/obj/geo1/attribwrangle1').parm('my_ramp').set(ramp)"
+    },
+    {
+        "title": "Python: Export Geometry to File",
+        "category": "python",
+        "tags": ["export", "geometry", "file"],
+        "content": "Save current SOP geometry to disk manually:\ngeo = hou.node('/obj/geo1/null1').geometry()\ngeo.saveToFile('C:/temp/export.bgeo.sc')"
+    },
+    {
+        "title": "Python: Read Prim Intrinsics",
+        "category": "python",
+        "tags": ["intrinsic", "primitive", "geometry"],
+        "content": "Get the area of each primitive:\ngeo = hou.node('/obj/geo1/null1').geometry()\nfor prim in geo.prims():\n    print(f'Area: {prim.intrinsicValue('measuredarea')}')"
+    },
+    {
+        "title": "Python: Create For-Each Loop",
+        "category": "python",
+        "tags": ["foreach", "loop", "automate"],
+        "content": "Generate a boilerplate for-each block:\nparent = hou.node('/obj/geo1')\nbegin = parent.createNode('block_begin')\nend = parent.createNode('block_end')\nend.parm('itermethod').set(1) # Pieces\nend.setInput(0, begin)"
+    },
+    {
+        "title": "Python: Check for Node Errors",
+        "category": "python",
+        "tags": ["error", "warning", "debug"],
+        "content": "Print nodes that failed to cook:\nfor n in hou.node('/').allSubChildren():\n    if n.errors():\n        print(f'{n.path()}: {n.errors()}')"
+    },
+    {
+        "title": "Python: Create Global Variable",
+        "category": "python",
+        "tags": ["variable", "global", "hscript"],
+        "content": "Set a project-level variable:\nhou.hscript('set -g MYVAR = 50.0')"
+    },
+    {
+        "title": "Python: Run HScript Command",
+        "category": "python",
+        "tags": ["hscript", "command", "legacy"],
+        "content": "Execute old hscript commands safely:\noutput = hou.hscript('opls /obj')[0]"
+    },
+    {
+        "title": "Python: Get Currently Viewing Network Pane",
+        "category": "python",
+        "tags": ["ui", "pane", "viewport"],
+        "content": "Access the network editor tab:\npane = hou.ui.paneTabOfType(hou.paneTabType.NetworkEditor)"
+    },
+    {
+        "title": "Python: Set Viewport Camera",
+        "category": "python",
+        "tags": ["viewport", "camera", "ui"],
+        "content": "Point the scene view to a camera:\nview = hou.ui.paneTabOfType(hou.paneTabType.SceneViewer)\nview.curViewport().setCamera(hou.node('/obj/cam1'))"
+    },
+    {
+        "title": "Python: Batch Rename Nodes",
+        "category": "python",
+        "tags": ["rename", "batch", "utility"],
+        "content": "Add a prefix to all selected nodes:\nprefix = 'vfx_'\nfor n in hou.selectedNodes():\n    n.setName(prefix + n.name(), unique_name=True)"
+    },
+    {
+        "title": "Python: Copy Node to Clipboard",
+        "category": "python",
+        "tags": ["copy", "clipboard", "node"],
+        "content": "Copy selected nodes for pasting elsewhere:\nhou.copyNodesToClipboard(hou.selectedNodes())"
+    },
+    {
+        "title": "Python: Check if HDA is Locked",
+        "category": "python",
+        "tags": ["hda", "lock", "permissions"],
+        "content": "Check editing permissions:\nnode = hou.node('/obj/my_hda_1')\nif node.isLocked():\n    print('Node is locked/managed by HDA definition')"
+    },
+    {
+        "title": "Python: Unlock HDA Instance",
+        "category": "python",
+        "tags": ["hda", "unlock", "allow_editing"],
+        "content": "Allow manual changes inside an HDA:\nhou.node('/obj/my_hda_1').allowEditingOfContents()"
+    },
+    {
+        "title": "Python: Get Node Input Name",
+        "category": "python",
+        "tags": ["node", "input", "label"],
+        "content": "Read the label for a node input slot:\nlabels = hou.node('/obj/geo1/merge1').inputNames()\nprint(labels[0])"
+    },
+    {
+        "title": "Python: Create File Cache",
+        "category": "python",
+        "tags": ["cache", "file", "optimization"],
+        "content": "Setup a filecache node for bgeo.sc at local path:\ncache = hou.node('/obj/geo1').createNode('filecache')\ncache.parm('file').set('$HIP/geo/cache_$F.bgeo.sc')"
+    },
+    {
+        "title": "Python: Select Points by Vertex count",
+        "category": "python",
+        "tags": ["geometry", "points", "count"],
+        "content": "Check connectivity (e.g. isolated points):\ngeo = hou.node('/obj/geo1/null1').geometry()\nbad = [p for p in geo.points() if len(p.prims()) == 0]"
+    },
+    {
+        "title": "Python: Find Object Merge Source",
+        "category": "python",
+        "tags": ["object_merge", "find", "path"],
+        "content": "Trace back where an Object Merge is looking:\nsrc = hou.node('/obj/geo_dest/merge_node').parm('objpath1').eval()"
+    },
+    {
+        "title": "Python: Change Desktop Layout",
+        "category": "python",
+        "tags": ["ui", "desktop", "workspace"],
+        "content": "Switch to 'Build' desktop:\nhou.ui.setDesktop('Build')"
+    },
+    {
+        "title": "Python: Get Point Attribute Type",
+        "category": "python",
+        "tags": ["attribute", "meta", "type"],
+        "content": "Check if an attribute is a float array or vector:\nattr = hou.node('/obj/geo1/null1').geometry().findPointAttrib('Cd')\nprint(attr.dataType())"
+    },
+    {
+        "title": "Python: Cook Node Sync",
+        "category": "python",
+        "tags": ["cook", "geometry", "sync"],
+        "content": "Force a node to update immediately:\nhou.node('/obj/geo1/null1').geometry()"
+    },
+    {
+        "title": "Python: Create Stick Transform",
+        "category": "python",
+        "tags": ["transform", "parenting", "hierarchy"],
+        "content": "Set a node as child of another in OBJ:\nchild = hou.node('/obj/geo_child')\nparent = hou.node('/obj/geo_parent')\nchild.setInput(0, parent)"
+    },
+    {
+        "title": "Python: Python Panel Popup",
+        "category": "python",
+        "tags": ["ui", "panel", "python_panel"],
+        "content": "Open a floating Python panel by name:\nhou.ui.curDesktop().createFloatingPane(hou.paneTabType.PythonPanel)"
+    },
+    {
+        "title": "Python: List available HDA definitions",
+        "category": "python",
+        "tags": ["hda", "library", "otl"],
+        "content": "Find all definitions in an .otl file:\ndefs = hou.hda.definitionsInFile('C:/project/my_lib.otl')"
+    },
+    {
+        "title": "Python: Clear All Node Flags",
+        "category": "python",
+        "tags": ["ui", "flag", "batch"],
+        "content": "Helpful for cleaning up a mess:\nfor n in hou.node('/obj/geo1').children():\n    n.setSelectableInViewport(True)"
+    },
+    {
+        "title": "Python: Create Keyframe Interpolation",
+        "category": "python",
+        "tags": ["animation", "easing", "interpolation"],
+        "content": "Set ease-in/ease-out on a key frame:\nkey = hou.Keyframe(1.0, 10)\nkey.setExpression('ease()', hou.exprLanguage.Hscript)"
+    },
+    {
+        "title": "Python: Delete all nodes in a network",
+        "category": "python",
+        "tags": ["delete", "clear", "automate"],
+        "content": "Purge a container node:\nfor n in hou.node('/obj/geo1').children():\n    n.destroy()"
+    },
+    {
+        "title": "Python: Create Comment on node",
+        "category": "python",
+        "tags": ["comment", "documentation", "note"],
+        "content": "Add a stickynote comment above a node:\nnode = hou.node('/obj/geo1/null1')\nnode.setComment('DO NOT DELETE - Used for export')"
+    },
+    {
+        "title": "Python: Create Camera from View",
+        "category": "python",
+        "tags": ["camera", "ui", "view"],
+        "content": "Create a camera matching the current viewport:\nviewer = hou.ui.paneTabOfType(hou.paneTabType.SceneViewer)\nviewer.saveViewToCamera()"
+    },
+    {
+        "title": "Python: Get Bounding Box Area",
+        "category": "python",
+        "tags": ["bbox", "geometry", "size"],
+        "content": "Calculate volume of the bbox:\nbox = hou.node('/obj/geo1/null1').geometry().boundingBox()\nprint(box.size().x() * box.size().y() * box.size().z())"
+    },
+    {
+        "title": "Python: Identify VEX Errors",
+        "category": "python",
+        "tags": ["wrangle", "vex", "error"],
+        "content": "Check if a wrangle is failing due to syntax:\nwrangle = hou.node('/obj/geo1/attribwrangle1')\nif wrangle.errors():\n    print(f'VEX Syntax Error: {wrangle.errors()}')"
+    },
+    {
+        "title": "Python: Create Node via Alias/Internal Name",
+        "category": "python",
+        "tags": ["create", "internal", "node"],
+        "content": "Always use internal name, not label:\nhou.node('/obj/geo1').createNode('xform', 'my_transform')"
+    },
+    {
+        "title": "Python: Select Nodes by Color",
+        "category": "python",
+        "tags": ["find", "color", "search"],
+        "content": "Find all nodes marked red:\nred_nodes = [n for n in hou.node('/obj').allSubChildren() if n.color().rgb() == (1,0,0)]"
+    },
+    {
+        "title": "Python: Check for User Interrupt",
+        "category": "python",
+        "tags": ["interrupt", "progress", "long_task"],
+        "content": "Abort a long Python loop if ESC is pressed:\nwith hou.InterruptableOperation('Running task...', open_interrupt_dialog=True) as operation:\n    for i in range(1000):\n        operation.updateProgress(i/1000)\n        # do work"
+    },
+    {
+        "title": "Python: Create Python SOP Example",
+        "category": "python",
+        "tags": ["python_sop", "geometry", "code"],
+        "content": "Setup a Python SOP with built-in code:\nnode = hou.node('/obj/geo1').createNode('python')\nnode.parm('python').set('geo = hou.pwd().geometry()\\ngeo.addAttrib(hou.attribType.Global, \"done\", 1)')"
+    },
+    {
+        "title": "Python: Get Node by UUID",
+        "category": "python",
+        "tags": ["uuid", "session", "node"],
+        "content": "Retrieve a node using its unique session ID:\nuuid = node.sessionId()\nhou.nodeBySessionId(uuid)"
+    },
+    {
+        "title": "Python: Set Global FPS",
+        "category": "python",
+        "tags": ["timeline", "fps", "config"],
+        "content": "Change scene playback speed:\nhou.setFps(30.0)"
+    },
+    {
+        "title": "Python: List all ROPs in the scene",
+        "category": "python",
+        "tags": ["rop", "render", "find"],
+        "content": "Find render drivers across all contexts:\nrops = [n for n in hou.node('/').allSubChildren() if isinstance(n, hou.RopNode)]"
+    },
+    {
+        "title": "Python: Check if Geometry has valid VDB",
+        "category": "python",
+        "tags": ["vdb", "volume", "check"],
+        "content": "Verify VDB primitive existence:\ngeo = hou.node('/obj/geo1/vdbnode').geometry()\nvdbs = [p for p in geo.prims() if isinstance(p, hou.VDB)]"
+    },
+    {
+        "title": "Python: Open File Browser UI",
+        "category": "python",
+        "tags": ["ui", "file", "browser"],
+        "content": "Ask the user to pick an image:\npath = hou.ui.selectFile(title='Pick Texture', pattern='*.jpg,*.png')"
+    },
+    {
+        "title": "Python: Create Take",
+        "category": "python",
+        "tags": ["take", "variation", "config"],
+        "content": "Add a new scene variation:\ntake = hou.takes.createTake('v01_render')"
+    },
+    {
+        "title": "Python: Toggle Snap Settings",
+        "category": "python",
+        "tags": ["ui", "snapping", "grid"],
+        "content": "Change viewport snapping via Python:\nhou.hscript('viewsnap -g on')"
+    },
+    {
+        "title": "Python: Identify Node Inputs count",
+        "category": "python",
+        "tags": ["node", "input", "validation"],
+        "content": "Check if a node has enough inputs linked:\nif len(hou.node('/obj/geo1/merge1').inputs()) < 1:\n    print('Warning: Merge has no inputs')"
+    },
+    {
+        "title": "Python: Create Group SOP and set group type",
+        "category": "python",
+        "tags": ["group", "sop", "config"],
+        "content": "Setup a group node for primitives:\ngrp = hou.node('/obj/geo1').createNode('groupcreate')\ngrp.parm('groupmode').set('prim') # Primitive mode"
+    },
+    {
+        "title": "Python: Trigger Shelf Tool by ID",
+        "category": "python",
+        "tags": ["shelf", "tool", "execute"],
+        "content": "Run a standard Houdini shelf tool:\nhou.shelves.tools()['vfx_box_generator'].retrace()"
+    },
+    {
+        "title": "Python: Access Global Scene Metadata",
+        "category": "python",
+        "tags": ["scene", "metadata", "id"],
+        "content": "Get the file path and local OS info:\nprint(hou.hipFile.path())"
+    },
+    {
+        "title": "Python: Batch Toggle Ghost Mode",
+        "category": "python",
+        "tags": ["ui", "display", "ghost"],
+        "content": "Mute/ghost selected nodes:\nfor n in hou.selectedNodes():\n    n.setGenericFlag(hou.nodeFlag.Display, False)"
+    },
+    {
+        "title": "Python: Add custom float slider UI to node",
+        "category": "python",
+        "tags": ["ui", "parameter", "template"],
+        "content": "Dynamically add a slider to any node:\ngrp = node.parmTemplateGroup()\ntemp = hou.FloatParmTemplate('my_slider', 'Strength', 1, (0.0,), 0.0, 1.0)\ngrp.append(temp)\nnode.setParmTemplateGroup(grp)"
+    },
+    {
+        "title": "Python: Create Null Proxy at OBJ from SOP",
+        "category": "python",
+        "tags": ["null", "proxy", "workflow"],
+        "content": "Create a placeholder object level link:\nobj = hou.node('/obj').createNode('geo')\nobj_merge = obj.createNode('object_merge')\nobj_merge.parm('objpath1').set('/obj/geo_source/OUT_node')"
+    },
+    {
+        "title": "Python: Check for Duplicate Node Names",
+        "category": "python",
+        "tags": ["validate", "name", "duplicate"],
+        "content": "Verify name uniqueness within a context:\nnames = [n.name() for n in hou.node('/obj/geo1').children()]\nif len(names) != len(set(names)):\n    print('Duplicates detected')"
+    },
+    {
+        "title": "Python: Set Viewport Render Mode",
+        "category": "python",
+        "tags": ["viewport", "display", "wireframe"],
+        "content": "Switch to wireframe mode:\nviewer = hou.ui.paneTabOfType(hou.paneTabType.SceneViewer)\nviewer.curViewport().viewPortDisplayModel().setShadingMode(hou.shadingMode.Wireframe)"
+    },
+    {
+        "title": "Python: Access Active Layer (USD/LOP)",
+        "category": "python",
+        "tags": ["usd", "lop", "layer"],
+        "content": "Get the working USD layer:\nlop = hou.node('/stage/layer1')\nlayer = lop.editableLayer()"
+    },
+    {
+        "title": "Python: Create New Desktop",
+        "category": "python",
+        "tags": ["ui", "desktop", "create"],
+        "content": "Generate a custom workspace layout:\nhou.ui.createDesktop('HoudiniMind_VFX')"
+    },
+    {
+        "title": "Python: Get User Preference for Dir",
+        "category": "python",
+        "tags": ["config", "path", "preference"],
+        "content": "Read global setting for project path:\nprint(hou.getenv('JOB'))"
+    },
+    {
+        "title": "Python: Create Null in LOP layer",
+        "category": "python",
+        "tags": ["usd", "lop", "node"],
+        "content": "Workflow for USDP: \nhou.node('/stage').createNode('null')"
+    },
+    {
+        "title": "Python: Check if Point has any neighbors",
+        "category": "python",
+        "tags": ["geometry", "point", "isolation"],
+        "content": "Find isolated points:\ngeo = node.geometry()\nif len(geo.point(0).neighbours()) == 0:\n    print('Point is isolated')"
+    },
+    {
+        "title": "Python: Set Background Image for viewport",
+        "category": "python",
+        "tags": ["viewport", "reference", "ui"],
+        "content": "Add a reference image to the backend:\nhou.hscript('viewbackground -i reference.jpg obj/cam1')"
+    },
+    {
+        "title": "Python: Force Geometry Cache Refresh",
+        "category": "python",
+        "tags": ["cache", "cook", "reset"],
+        "content": "Clear memory and re-cook scene:\nhou.hscript('oppurge')"
+    },
+    {
+        "title": "Python: Create Camera path animation with Python",
+        "category": "python",
+        "tags": ["animation", "camera", "path"],
+        "content": "Move camera along X axis over frame range:\ncam = hou.node('/obj/cam1')\nfor f in range(1, 101):\n    cam.parm('tx').setAtFrame(f * 0.1, f)"
+    },
+    {
+        "title": "Python: Check for Invalid Attributes",
+        "category": "python",
+        "tags": ["validate", "attribute", "geometry"],
+        "content": "Detect null/invalid floats in a custom attribute:\ngeo = node.geometry()\nbad = [p for p in geo.points() if p.attribValue('my_attr') > 1e10]"
+    },
+    {
+        "title": "Python: Set User UI Theme",
+        "category": "python",
+        "tags": ["ui", "theme", "config"],
+        "content": "Switch to dark mode:\nhou.ui.setUIColorValue(hou.uiColor.MenuBG, hou.Color(0.1, 0.1, 0.1))"
+    },
+    {
+        "title": "Python: List all VEX includes accessible",
+        "category": "python",
+        "tags": ["vex", "include", "paths"],
+        "content": "Find where wrangle includes are being searched:\nprint(hou.getenv('HOUDINI_VEX_PATH'))"
+    },
+    {
+        "title": "Python: Create Keyframe Interpolation Ease In",
+        "category": "python",
+        "tags": ["animation", "ease", "keyframe"],
+        "content": "k = hou.Keyframe(1, 0)\nk.setExpression('easein()', hou.exprLanguage.Hscript)\nnode.parm('tx').setKeyframe(k)"
+    },
+    {
+        "title": "Python: Add Points to group by volume mask",
+        "category": "python",
+        "tags": ["volume", "group", "selection"],
+        "content": "Python bridge to select points inside dense volume region:\ngeo = node.geometry()\nfor p in geo.points():\n    if geo.sampleVolume('density', p.position()) > 0.5:\n        # add to group logic"
+    },
+    {
+        "title": "Python: Lock specific parameters from UI editing",
+        "category": "python",
+        "tags": ["ui", "lock", "permissions"],
+        "content": "Prevent changes to some values:\nhou.node('/obj/geo1/box1').parm('scale').lock(True)"
+    },
+    {
+        "title": "Python: Create Proxy Geometry node",
+        "category": "python",
+        "tags": ["proxy", "optimization", "display"],
+        "content": "Use Switch SOP to swap heavy/light versions:\nswitch = parent.createNode('switch', 'LOD_Control')\nswitch.setInput(0, heavy_geo)\nswitch.setInput(1, light_geo)"
+    },
+    {
+        "title": "Python: Check if current frame is first frame",
+        "category": "python",
+        "tags": ["timeline", "logic", "start"],
+        "content": "Scripting logic for sim start:\nif hou.frame() == hou.playbar.frameRange()[0]:\n    # reset trigger"
+    },
+    {
+        "title": "Python: List all available Sop types",
+        "category": "python",
+        "tags": ["debug", "nodes", "inventory"],
+        "content": "Get all node names for creation:\nprint([t.name() for t in hou.sopNodeTypeCategory().nodeTypes().values()])"
+    },
+    {
+        "title": "Python: Set multiple parameters at once",
+        "category": "python",
+        "tags": ["batch", "parameter", "optimization"],
+        "content": "Faster than multiple .set() calls:\nnode.setParms({'sizex': 10, 'sizey': 20, 'sizez': 5})"
+    },
+    {
+        "title": "Python: Set Color attribute per-point randomly",
+        "category": "python",
+        "tags": ["geometry", "color", "random"],
+        "content": "Native python color assignment (slow for many points!):\nimport random\ngeo = node.geometry()\nfor p in geo.points():\n    p.setAttribValue('Cd', (random.random(), 0.1, 0.1))"
+    },
+    {
+        "title": "Python: Create Script Button Callback",
+        "category": "python",
+        "tags": ["ui", "callback", "button"],
+        "content": "Define what happens when a button is clicked:\nhou.node('/obj/geo1/attribwrangle1').parm('python_btn').set('hou.ui.displayMessage(\"Hi\")')"
+    },
+    {
+        "title": "Python: Get Node Creation Date",
+        "category": "python",
+        "tags": ["metadata", "audit", "node"],
+        "content": "Check when a node was built:\nimport datetime\ntime = node.modificationTime()\nprint(datetime.datetime.fromtimestamp(time))"
+    }
+  ]
+}

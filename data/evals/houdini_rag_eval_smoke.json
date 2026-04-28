@@ -1,0 +1,65 @@
+{
+  "name": "houdini_rag_eval_smoke",
+  "cases": [
+    {
+      "id": "fit_error",
+      "query": "How do I fix the VEX error Call to undefined function fit?",
+      "expected_any": [
+        {
+          "title": "Troubleshooting: Call to undefined function 'fit'"
+        }
+      ],
+      "expected_categories": ["errors", "vex"]
+    },
+    {
+      "id": "adaptiveprune_sop",
+      "query": "What does the adaptiveprune SOP node do and what parameters does it have?",
+      "expected_any": [
+        {
+          "title": "SOP Node: adaptiveprune"
+        }
+      ],
+      "expected_categories": ["nodes"]
+    },
+    {
+      "id": "du_function",
+      "query": "What contexts is the VEX function Du available in?",
+      "expected_any": [
+        {
+          "title": "VEX Function: Du"
+        }
+      ],
+      "expected_categories": ["vex"]
+    },
+    {
+      "id": "oplightmask_expression",
+      "query": "What does the HScript expression oplightmask do?",
+      "expected_any": [
+        {
+          "title": "HScript Expression: oplightmask"
+        }
+      ],
+      "expected_categories": ["general"]
+    },
+    {
+      "id": "measuredarea_intrinsic",
+      "query": "What is the measuredarea intrinsic in Houdini?",
+      "expected_any": [
+        {
+          "title": "Intrinsic Definition: measuredarea"
+        }
+      ],
+      "expected_categories": ["general"]
+    },
+    {
+      "id": "add_to_y_vex_example",
+      "query": "Give me a simple VEX snippet to move points upward in Y.",
+      "expected_any": [
+        {
+          "title": "VEX Example: Add to Y"
+        }
+      ],
+      "expected_categories": ["vex"]
+    }
+  ]
+}

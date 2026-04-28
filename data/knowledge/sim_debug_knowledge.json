@@ -1,0 +1,524 @@
+[
+  {
+    "title": "Troubleshooting: FLIP solver NaN velocity divergence",
+    "category": "errors",
+    "tags": ["flip", "nan", "velocity", "divergence", "substep", "cfl", "solver", "debug"],
+    "content": "Context: FLIP simulation\nError: NaN velocities appearing, simulation explodes after N frames\nSymptoms: Particles scatter to infinity, velocity attribute contains NaN or Inf, sim becomes unusable\nCauses:\n1. CFL condition too loose — particles travel more than one voxel per substep\n2. Emission velocity too high — source SOP emitting particles with extreme speed\n3. Collision geometry not watertight — particles escape through gaps in the collider VDB\n4. Grid resolution too coarse relative to particle separation — velocity transfer unstable\n5. Viscosity enabled with incompatible substep settings\nDiagnostic steps:\n1. Reduce Max Substeps to 1 and check frame 1 for NaN\n2. Check source emitter velocity (zero it temporarily to isolate)\n3. Measure collision VDB for holes: Measure SOP → Polygon Mesh Analysis\n4. Lower CFL Condition from 1.0 to 0.5 in flipsolver > Advanced\nFix: flipsolver parms: cflcond=0.5, minimumsubsteps=2, substeps=4. If emitter velocity > 20 units, cap it or increase resolution."
+  },
+  {
+    "title": "Troubleshooting: FLIP fluid leaking through collision geometry",
+    "category": "errors",
+    "tags": ["flip", "collision", "leak", "vdb", "sdf", "collider", "boundary"],
+    "content": "Context: FLIP simulation\nError: Fluid passes through static or animated collision objects\nSymptoms: Fluid ignores walls, passes through floor or collider mesh\nCauses:\n1. Collider VDB not closed (open mesh = holes in SDF)\n2. VDB voxel size too large relative to thin geometry — thin walls vanish in the SDF\n3. Missing staticobject or collider DOP node\n4. Collision padding (Volume Offset) set to 0 — fluid has no boundary clearance\n5. Fast-moving collider needs Geometry Velocity Blur enabled\nFix:\n1. Add PolyFill or Cap SOP before VDB conversion to close open meshes\n2. Set VDB voxel size to at least 1/2 the thinnest wall thickness\n3. In staticobject DOP: Volume Offset = 0.05 (or 1–2× particle separation)\n4. For animated colliders: enable Geometry Velocity Blur in staticobject > Collision tab"
+  },
+  {
+    "title": "Troubleshooting: FLIP simulation running extremely slow",
+    "category": "errors",
+    "tags": ["flip", "performance", "slow", "substep", "particle", "resolution", "optimise"],
+    "content": "Context: FLIP simulation\nError: Simulation takes hours per frame or hangs\nCauses:\n1. Resolution too high — particle separation too small (e.g., 0.01 for a large scene)\n2. Too many substeps — CFL condition causing 20+ substeps per frame\n3. Viscosity enabled with high viscosity value — requires many CG iterations\n4. Surface tracking enabled with high resolution\n5. Microsolvers (curvature, surface tension) set to high iteration count\nFix:\n1. Increase particle separation to at least 1/20 of the feature size\n2. Set Max Substeps = 4, CFL Condition = 1.5 for initial tests\n3. Disable viscosity during lookdev; re-enable for final\n4. Use flipfluidcache SOP to write to disk and review frame-by-frame\n5. Cache at reduced resolution first, then upres with FLIP upresing workflow"
+  },
+  {
+    "title": "Troubleshooting: FLIP surface meshing artifacts (holes, spikes, noise)",
+    "category": "errors",
+    "tags": ["flip", "surface", "mesh", "artifact", "spike", "hole", "particlefluidsurf"],
+    "content": "Context: FLIP simulation → surface meshing\nError: Rendered fluid surface has holes, spikes, or excessive noise\nCauses:\n1. Particle Fluid Surface SOP: particle radius too small → holes\n2. Smoothing iterations too low → noisy surface\n3. VDB Smooth SOP not applied after particlefluidsurf\n4. Isolated particles (foam, spray) creating surface spikes far from main body\n5. Adaptive meshing enabled with too-large minimum polygon size\nFix:\n1. particlefluidsurf: Particle Radius Scale = 1.5–2.5 (not 1.0)\n2. Add VDB Smooth SOP after particlefluidsurf: Mode=Gaussian, Iterations=3–5\n3. Separate whitewater particles (foam tag) before meshing: Blast SOP on group 'foam'\n4. Enable 'Kill Outside' to remove stray isolated particles before meshing"
+  },
+  {
+    "title": "Troubleshooting: Pyro simulation not emitting / density is zero",
+    "category": "errors",
+    "tags": ["pyro", "smoke", "emission", "density", "sourcevolume", "dopnet", "debug"],
+    "content": "Context: Pyro (smoke/fire) simulation\nError: Nothing appears in viewport, density attribute is 0 after multiple frames\nCauses:\n1. Source SOP is inside a geo node but the pyrosolver is looking at the wrong path\n2. SOP path in sourcevolume DOP is incorrect — node not found\n3. VDB volume not bound to 'density' field name — custom field name mismatch\n4. pyrosolver time step too large — source volume sampled at wrong time\n5. Emission amount set to 0 or source SOP has no active voxels\nDiagnostic:\n1. Middle-click the pyrosolver DOP — check 'density' field range in Info panel\n2. Check sourcevolume DOP > SOP Path — verify the node exists and has output\n3. In source SOP: add VDB Visualize SOP to confirm voxels have values\nFix:\n1. sourcevolume DOP: set Volume Path to the correct VDB primitive name ('density')\n2. Ensure pyrosolver is wired AFTER sourcevolume in the DOP network\n3. Pyrosolver > Substeps: min=1, max=2 for initial debug"
+  },
+  {
+    "title": "Troubleshooting: Pyro simulation dissipates too fast",
+    "category": "errors",
+    "tags": ["pyro", "smoke", "dissipate", "density", "lifespan", "decay"],
+    "content": "Context: Pyro simulation\nError: Smoke disappears within a few frames; density decays to zero too quickly\nCauses:\n1. Dissipation rate too high in pyrosolver > Shape tab\n2. Cooling rate too high causing early velocity stop\n3. Source emission volume too sparse (low density values)\nFix:\n1. pyrosolver > Shape > Dissipation: lower from default (0.05–0.1) to 0.005–0.02\n2. Increase source SOP emission density multiplier\n3. pyrosolver > Combustion > Cooling Rate: reduce if fire goes cold too fast\n4. Check pyrosolver > Time Scale = 1.0 (not accidentally set to 0.1)"
+  },
+  {
+    "title": "Troubleshooting: Pyro simulation jittering / flickering",
+    "category": "errors",
+    "tags": ["pyro", "jitter", "flicker", "noise", "velocity", "substep"],
+    "content": "Context: Pyro simulation\nError: Smoke/fire jitters or flickers between frames\nCauses:\n1. Too few substeps — velocity field is under-resolved per frame\n2. Noise field turbulence too strong relative to base velocity\n3. Temperature field oscillating around combustion threshold\n4. Volume motion blur not enabled in render settings\nFix:\n1. pyrosolver: Min Substeps = 2, Max Substeps = 4\n2. Reduce turbulence scale or amplitude in Gas Turbulence microsolver\n3. For fire: increase Ignition Temperature threshold slightly to stabilize combustion zone\n4. Add Gas Calculate SOP to clamp density to [0, max] to prevent sign oscillation"
+  },
+  {
+    "title": "Troubleshooting: RBD simulation objects not breaking / constraints not releasing",
+    "category": "errors",
+    "tags": ["rbd", "constraint", "glue", "fracture", "bullet", "not breaking", "rigid body"],
+    "content": "Context: RBD / Bullet simulation\nError: Fractured pieces do not break apart; glue constraints never release\nCauses:\n1. Glue constraint strength too high — impact force never exceeds threshold\n2. Constraint network not properly wired to the RBD solver\n3. Voronoi fracture pieces merged back into one object (Check 'Pack Geometry' in voronoifracture)\n4. Impact data not sent to the constraint network — missing apply_rel_impulse\n5. Initial velocity too low to trigger fracture\nFix:\n1. constraintnetwork DOP: Strength = 0 for unconditional break, or lower from 1e9 to 1e4\n2. Wire: rigidBodyObject → rbdsolver; constraintnetwork → rbdsolver input 2\n3. voronoifracture SOP: ensure 'Create Packed Geometry' is enabled\n4. Enable 'Use Impact Data' in constraintnetwork DOP > Constraints tab\n5. Kick the object with an initial velocity on frame 1 using an expression"
+  },
+  {
+    "title": "Troubleshooting: RBD objects tunneling through floor/walls",
+    "category": "errors",
+    "tags": ["rbd", "bullet", "tunneling", "collision", "substep", "thin"],
+    "content": "Context: RBD Bullet simulation\nError: Rigid body objects pass through collision geometry (floor, walls)\nCauses:\n1. Too few substeps — fast objects travel more than one body-width per step\n2. Collision geometry too thin relative to substep size\n3. Static body collision shape not set to 'Convex Hull' or 'Concave' for complex shapes\n4. Object moving too fast on frame 1 before solver takes over\nFix:\n1. rbdsolver DOP: Bullet Substeps = 10–20 (default 1 is too low for fast objects)\n2. staticobject DOP: Collision Shape = Concave for non-convex geometry\n3. Add a Collision Offset in staticobject > Volume tab to inflate the collision shape\n4. Use Position Constraint DOP to gradually release the object rather than dropping it immediately"
+  },
+  {
+    "title": "Troubleshooting: RBD simulation explodes on first frame",
+    "category": "errors",
+    "tags": ["rbd", "explosion", "overlap", "interpenetration", "bullet", "first frame"],
+    "content": "Context: RBD / Bullet simulation\nError: All objects fly apart violently on the first simulation frame\nCauses:\n1. Objects are interpenetrating at rest state — Bullet resolves overlap with extreme force\n2. Glue strength set too high causing snap-back forces\n3. Gravity too strong relative to object mass (check Units)\n4. Incorrect initial velocity values\nFix:\n1. Check for overlapping geometry in SOP level before entering DOPs\n2. Add Rest Constraint DOP for the first 5–10 frames to let the solver settle\n3. Enable 'Shock Propagation' in rbdsolver > Advanced to damp initial jitter\n4. Reduce initial velocity: set to 0 on frame 1 and use keyframes to ramp up"
+  },
+  {
+    "title": "Troubleshooting: Vellum cloth falling through floor",
+    "category": "errors",
+    "tags": ["vellum", "cloth", "collision", "floor", "gap", "constraint"],
+    "content": "Context: Vellum cloth simulation\nError: Cloth passes through or clips into the collision ground plane or objects\nCauses:\n1. Collision layer thickness too thin relative to triangle size\n2. Substeps too low for fast-moving cloth\n3. Collision geometry not set as vellum collision input\nFix:\n1. vellumconstraintproperty SOP (Collision type): increase Thickness to 0.01–0.05\n2. vellumsolver DOP: Substeps = 5–10 for clothing on character\n3. In DOPnet: wire ground geometry into vellumsolver input 3 (collision geometry)\n4. On the collision geo: add Vellum Pack SOP and set to 'Static' type"
+  },
+  {
+    "title": "Troubleshooting: Vellum cloth stretching too much / not holding shape",
+    "category": "errors",
+    "tags": ["vellum", "cloth", "stretch", "stiffness", "constraint", "deform"],
+    "content": "Context: Vellum cloth simulation\nError: Cloth stretches unrealistically, fabric looks like rubber\nCauses:\n1. Stretch stiffness too low in vellumconstraints (Stretch type)\n2. Too few iterations — solver not converging on stiff constraints\n3. Bend stiffness too low — fabric folds with no resistance\nFix:\n1. vellumconstraints SOP (Stretch): Stiffness = 1e6–1e8 (default 1e5 is too low for cotton/denim)\n2. vellumsolver DOP: Constraint Iterations = 500–1000 (not the default 100)\n3. vellumconstraints SOP (Bend): Stiffness = 1e4–1e6 depending on fabric stiffness\n4. Use vellumconstraintproperty SOP after the constraint node to override per-group"
+  },
+  {
+    "title": "Troubleshooting: Vellum simulation running slowly",
+    "category": "errors",
+    "tags": ["vellum", "performance", "slow", "substep", "iteration", "points"],
+    "content": "Context: Vellum simulation\nError: Vellum simulation takes many minutes per frame\nCauses:\n1. Too many constraint iterations (>1000) with stiff constraints\n2. High-resolution mesh with many points — O(n) per iteration\n3. Collision geometry too dense (reduce to a proxy mesh)\n4. Self-collision enabled on every face (very expensive)\nFix:\n1. vellumsolver: reduce Constraint Iterations to 50–200 and compensate with Substeps=3–5\n2. Use a lower-resolution proxy mesh for simulation; transfer result to high-res with Point Deform\n3. Self-collision: use Layer Shock with Layer Offset = 0 to limit self-collision pairs\n4. Add a Point Reduce SOP to the collision geometry"
+  },
+  {
+    "title": "Troubleshooting: Vellum hair/strand simulation exploding",
+    "category": "errors",
+    "tags": ["vellum", "hair", "strand", "explosion", "nan", "bend", "stiffness"],
+    "content": "Context: Vellum hair simulation\nError: Hair strands shoot off to infinity or explode on frame 1\nCauses:\n1. Root points not constrained (attach to geometry constraint missing)\n2. Bend stiffness too high relative to substeps — energy accumulates\n3. Guide curves self-intersecting in rest pose\n4. Damping too low — energy does not dissipate\nFix:\n1. Add vellumconstraints SOP (type: Attach to Geometry) for root points\n2. Reduce Bend Stiffness from 1e8 to 1e5; add damping 0.01–0.1\n3. vellumsolver: Substeps = 5–10 for stiff hair\n4. Constrain root points to animated geometry using 'Pin to Target'"
+  },
+  {
+    "title": "Troubleshooting: DOP network not cooking / frozen at frame 1",
+    "category": "errors",
+    "tags": ["dop", "dopnet", "cook", "frozen", "timestep", "initialize"],
+    "content": "Context: DOP network\nError: Simulation doesn't advance; viewport shows same state at all frames\nCauses:\n1. DOP network timestep set to 0 or a negative value\n2. Auto Resize enabled and source geo returns empty at frame 1\n3. Simulation flagged as 'Load from Disk' but no cache exists\n4. Error in a SOP driving the simulation (upstream cook error)\nFix:\n1. dopnet node parm: Timestep = 1/$FPS (the expression must evaluate correctly)\n2. Disable 'Load from Disk' in dopnet > Simulation tab\n3. Middle-click the dopnet node to see the simulation info and check for error messages\n4. Press Escape and manually step through frames using Alt+Right to find the first bad frame"
+  },
+  {
+    "title": "Troubleshooting: Pyro fire not appearing / combustion not igniting",
+    "category": "errors",
+    "tags": ["pyro", "fire", "combustion", "ignition", "temperature", "burn", "fuel"],
+    "content": "Context: Pyro fire / combustion simulation\nError: Fuel burns but no visible fire; temperature field stays near zero\nCauses:\n1. Ignition temperature threshold too high — temperature never reaches it\n2. Fuel concentration too low — not enough fuel to sustain combustion\n3. Burn rate too low in pyrosolver > Combustion tab\n4. Temperature visualization disabled in viewport smoke object\nFix:\n1. pyrosolver > Combustion > Ignition Temperature: lower from 0.5 to 0.1\n2. Increase fuel emission: source SOP density field mapped to 'fuel' field\n3. pyrosolver > Combustion > Burn Rate: increase from 0.5 to 1.0–2.0\n4. smokeobject DOP: ensure Temperature Scale > 0 in Display tab"
+  },
+  {
+    "title": "Troubleshooting: RBD pieces not separating after fracture",
+    "category": "errors",
+    "tags": ["rbd", "voronoi", "fracture", "pack", "pieces", "rigid", "not separating"],
+    "content": "Context: RBD destruction workflow\nError: After voronoifracture SOP, all pieces simulate as one rigid body\nCauses:\n1. voronoifracture not using 'Create Packed Geometry' — pieces merged into one mesh\n2. assemble SOP missing — needed to pack pieces into separate rigid bodies\n3. RBD Material Fracture not enabled in the DOP object\nFix:\n1. voronoifracture SOP: enable 'Create Packed Geometry'\n2. Add assemble SOP after fracture: 'Create Name Attribute' enabled, 'Create Packed Primitives'\n3. In DOP: use rbd packed object (not rigid body object) to simulate packed prims\n4. Wire: [geo → voronoifracture → assemble] → rbdpackedobject DOP"
+  },
+  {
+    "title": "Troubleshooting: FLIP whitewater not generating foam/spray",
+    "category": "errors",
+    "tags": ["flip", "whitewater", "foam", "spray", "bubble", "ww_source", "particles"],
+    "content": "Context: FLIP + whitewater simulation\nError: Whitewater solver runs but no foam or spray particles appear\nCauses:\n1. Emit from surface threshold too high — no regions qualify for emission\n2. FLIP simulation not cached to disk yet — whitewater needs FLIP cache\n3. whitewater source SOP not wired correctly\n4. Speed emission threshold too high relative to fluid velocity\nFix:\n1. whitewaterSource SOP: lower 'Curvature' and 'Speed' thresholds (try 0.5 and 0.5)\n2. Ensure FLIP simulation is simulated to disk cache before running whitewater\n3. In whitewater DOP: Source SOP Path must point to the whitewaterSource SOP output\n4. Visualize the whitewaterSource output — it should show colored points where emission occurs"
+  },
+  {
+    "title": "Troubleshooting: Smoke simulation not affected by velocity / advection broken",
+    "category": "errors",
+    "tags": ["pyro", "smoke", "advection", "velocity", "gasadvect", "microsolver"],
+    "content": "Context: Pyro / smoke simulation\nError: Density field does not move; velocity field appears to have no effect\nCauses:\n1. Gas Advect microsolver not wired into the pyrosolver chain\n2. Velocity field name mismatch ('vel' vs 'velocity')\n3. Advection method set to 'None' in pyrosolver > Advection tab\n4. Gas Resize Fluid Dynamic node resizing to zero (source gone, empty bbox)\nFix:\n1. pyrosolver > Microsolver: ensure Gas Advect is present and enabled\n2. pyrosolver > Fields: verify Velocity Field Name = 'vel'\n3. pyrosolver > Advection: Advection Type = 'BFECC' or 'MacCormack'\n4. Disable Auto Resize to debug — set a fixed resolution to rule out resize issues"
+  },
+  {
+    "title": "Troubleshooting: RBD glue network creating wrong constraint topology",
+    "category": "errors",
+    "tags": ["rbd", "glue", "constraint", "network", "adjacency", "proximity"],
+    "content": "Context: RBD constraint network / glue network\nError: Glue constraints connect wrong pieces or too many/few pieces connect\nCauses:\n1. constraintnetwork SOP using wrong adjacency method ('proximity' vs 'surface contact')\n2. Adjacency threshold too large — connects distant, non-touching pieces\n3. Duplicate pieces in geometry causing double constraints\nFix:\n1. constraintnetwork SOP: Constraint Type = 'Glue'; Adjacency Method = 'Adjacent Primitives'\n2. Lower adjacency Distance threshold so only touching pieces get constraints\n3. View the constraint network with Geometry Spreadsheet — verify pt count matches piece count\n4. Use 'Surface Contact' method for convex packed pieces in Bullet workflow"
+  },
+  {
+    "title": "Troubleshooting: FLIP particles losing energy too fast / fluid dampens immediately",
+    "category": "errors",
+    "tags": ["flip", "damp", "energy", "viscosity", "velocity", "decay"],
+    "content": "Context: FLIP simulation\nError: Fluid slows down and stops too early, no dynamic splashing\nCauses:\n1. Viscosity accidentally enabled with high value\n2. Damping field active in the DOP network\n3. Time scale too low (0.1 instead of 1.0)\nFix:\n1. flipsolver > Viscosity: disable or set Viscosity = 0\n2. Check for Gas Damp microsolver wired into pyrosolver chain; remove or zero it\n3. flipsolver > Advanced: Time Scale = 1.0\n4. If using FLIP upresing: check that the upres solver inherits velocity correctly"
+  },
+  {
+    "title": "Troubleshooting: Pyro simulation resolution too coarse / blocky result",
+    "category": "errors",
+    "tags": ["pyro", "resolution", "voxel", "coarse", "upres", "detail"],
+    "content": "Context: Pyro simulation\nError: Smoke/fire looks blocky or has low detail at render time\nCauses:\n1. Volume resolution too coarse — division size too large\n2. Gas Turbulence microsolver not present or amplitude too low\n3. High-frequency noise not applied in post\nFix:\n1. smokeobject DOP > Divisions: reduce Division Size (e.g., 0.05 → 0.02) or increase Resolution\n2. Add Gas Turbulence microsolver: Amplitude = 0.1–0.3, Scale = 0.5–1.0\n3. Use pyro upresing: low-res base sim + high-res noise via pyro upres SOP workflow\n4. At render time: add Volume VOP noise in the shader for high-frequency detail"
+  },
+  {
+    "title": "Troubleshooting: Bullet solver ignoring collision with deforming/animated geometry",
+    "category": "errors",
+    "tags": ["rbd", "bullet", "animated", "deform", "collision", "velocityblur"],
+    "content": "Context: RBD Bullet with animated collision geometry\nError: Moving collision objects don't push RBD pieces; pieces fall through animated geo\nCauses:\n1. Animated collider not using 'Deforming Object' DOP node (staticobject used instead)\n2. Geometry Velocity Blur not enabled on the collider DOP\n3. Collision cache not updated each frame\nFix:\n1. Use staticobject DOP for slow-moving objects; use rbdpackedobject set to 'Animated Static'\n2. staticobject DOP > Collision tab: enable 'Use Deforming Geometry' and 'Rebuild Collision'\n3. Increase Bullet substeps to 5–10 to capture fast-moving collider motion"
+  },
+  {
+    "title": "Troubleshooting: Vellum constraints popping / releasing incorrectly",
+    "category": "errors",
+    "tags": ["vellum", "constraint", "pop", "break", "release", "threshold"],
+    "content": "Context: Vellum simulation\nError: Cloth or soft body constraints break unexpectedly or spring apart\nCauses:\n1. Maximum stretch ratio too low — constraints break at small deformations\n2. Plasticity enabled — geometry permanently deforms and loses rest shape\n3. Damping too low allowing oscillation that exceeds break threshold\nFix:\n1. vellumconstraintproperty SOP: Maximum Stretch Ratio = 2.0–10.0 (default 1.5 breaks too early)\n2. Disable Plasticity unless intentional permanent deformation is needed\n3. Increase Damping Stiffness: 0.01 → 0.1 to absorb oscillation energy"
+  },
+  {
+    "title": "Troubleshooting: FLIP simulation has particle separation artifacts (holes in surface)",
+    "category": "errors",
+    "tags": ["flip", "particle", "separation", "surface", "artifact", "reseeding"],
+    "content": "Context: FLIP simulation\nError: Visible holes or voids appear inside the fluid body\nCauses:\n1. Particle Radius Scale too small in particlefluidsurf — particles don't overlap enough\n2. Particle reseeding disabled — thin regions lose particles over time\n3. Particle separation too large relative to scene scale\nFix:\n1. flipsolver > Particle Motion > Reseeding: enable and set Min Particles = 4, Max Particles = 16\n2. particlefluidsurf SOP: Particle Radius Scale = 2.0–3.0\n3. Reduce Particle Separation in flipsource SOP by half and re-simulate\n4. Increase 'Particle Birth' rate in the source SOP to maintain density"
+  },
+  {
+    "title": "Troubleshooting: Pyro not interacting with moving objects",
+    "category": "errors",
+    "tags": ["pyro", "collision", "interaction", "moving", "obstacle", "gaswindpush"],
+    "content": "Context: Pyro simulation with dynamic obstacles\nError: Smoke/fire does not react to moving geometry; passes through moving colliders\nCauses:\n1. staticobject DOP used instead of rbdpackedobject or deforming object\n2. Collision geometry not converted to VDB fields in the DOP\n3. Gas Wind Push microsolver not present (needed for velocity-from-geometry)\nFix:\n1. pyroobject DOP: enable 'Obstacle' and connect the animated geo to the collision input\n2. Use Gas Resize + collision VDB rebuild each frame (enable 'Rebuild SDF' in collision DOP)\n3. Add Gas Wind Push microsolver to drive smoke velocity from the moving object's surface velocity"
+  },
+  {
+    "title": "Troubleshooting: FLIP simulation memory usage too high",
+    "category": "errors",
+    "tags": ["flip", "memory", "ram", "particles", "cache", "out of memory"],
+    "content": "Context: FLIP simulation\nError: Houdini crashes or runs out of RAM during FLIP simulation\nCauses:\n1. Too many particles — particle separation too small for scene scale\n2. No disk caching — all frames held in RAM\n3. Whitewater + FLIP + scene geometry all loaded simultaneously\nFix:\n1. Increase particle separation by 2× and check if detail is acceptable\n2. Enable Write Simulation to Disk in dopnet > Simulation tab; set cache directory\n3. Use $HIP/cache/flip.$F4.bgeo.sc format for compressed cache files\n4. Check particle count: in Geometry Spreadsheet, monitor point count across frames"
+  },
+  {
+    "title": "Troubleshooting: Vellum cloth intersecting/clipping into itself",
+    "category": "errors",
+    "tags": ["vellum", "cloth", "self-collision", "intersection", "clipping"],
+    "content": "Context: Vellum cloth simulation\nError: Cloth folds clip through themselves; fabric layers intersect\nCauses:\n1. Self-collision disabled\n2. Collision thickness too thin\n3. Too few substeps to resolve self-contact\nFix:\n1. vellumconstraints SOP: Collision Type = Self (not just External)\n2. vellumconstraintproperty SOP: Thickness = 0.01–0.05 (must be larger than self-collision gap)\n3. vellumsolver DOP: Substeps = 5–10 for cloth-on-cloth\n4. Use Layer Shock: enable in vellumsolver to separate layers automatically"
+  },
+  {
+    "title": "Troubleshooting: DOP network resetting unexpectedly mid-simulation",
+    "category": "errors",
+    "tags": ["dop", "reset", "restart", "cook", "dependency", "sop", "upstream"],
+    "content": "Context: DOP network\nError: Simulation resets to frame 1 partway through playback\nCauses:\n1. An upstream SOP node is time-dependent and cooks at every frame, making DOP treat it as changed geometry\n2. An expression in the DOP network references a channel that changes per-frame\n3. Manual 'Reset Simulation' accidentally triggered\nFix:\n1. Freeze time-dependent SOPs: use File SOP to cache the geometry or enable 'Pre-roll' cache\n2. Use stiff expressions: replace $T with a constant for non-animated inputs\n3. Check if any SOP in the DOP's geometry path has per-frame time stamps\n4. Middle-click DOP network — 'Simulation Age' should increase monotonically during playback"
+  },
+  {
+    "title": "Troubleshooting: RBD active object not becoming active at the right frame",
+    "category": "errors",
+    "tags": ["rbd", "active", "keyframe", "switch", "activation", "constraint", "bullet"],
+    "content": "Context: RBD simulation — delayed activation\nError: Packed object stays static and never becomes an active rigid body, or activates too early\nCauses:\n1. active prim attribute set to 0 but never keyed to 1\n2. activationframe SOP attribute expression is wrong\n3. Constraint keeping the object frozen is never removed\nFix:\n1. In the SOP: add Attribute Wrangle to set i@active = $F >= <activation_frame> ? 1 : 0\n2. Or: use Animation DOP with a keyed channel expression on the 'Active' parameter\n3. Alternatively: use SOP Solver DOP to switch i@active attribute per-frame"
+  },
+  {
+    "title": "Troubleshooting: Pyro sourcing from animated geometry produces flickering emission",
+    "category": "errors",
+    "tags": ["pyro", "source", "animated", "flicker", "emission", "sop", "time"],
+    "content": "Context: Pyro simulation with animated emission geometry\nError: Emission point/volume flickers or disappears between frames\nCauses:\n1. Source SOP is time-dependent and resamples at each substep inconsistently\n2. Fast-moving emitter producing gaps between substep positions\n3. VDB conversion resolution too coarse to capture thin moving geometry\nFix:\n1. Enable 'Geometry Velocity Blur' on the sourcevolume DOP to smear emission over the substep\n2. Use Trail SOP before VDB conversion to create a tube along the path of motion\n3. Lower the VDB voxel size for the emitter geometry\n4. Source from the Trail-based geometry so emission fills the entire motion path"
+  },
+  {
+    "title": "Troubleshooting: FLIP viscosity making simulation unstable",
+    "category": "errors",
+    "tags": ["flip", "viscosity", "instability", "nan", "cg", "solver", "iterations"],
+    "content": "Context: FLIP simulation with viscosity\nError: Enabling viscosity causes NaN or simulation explosion\nCauses:\n1. Viscosity value too high relative to resolution — CG solver diverges\n2. Too few CG iterations for the viscosity solver\n3. Viscosity combined with very high velocity source\nFix:\n1. Start with Viscosity = 100 and increase gradually, not 1e6\n2. flipsolver > Viscosity: increase CG Iterations from 50 to 200\n3. Increase substeps to 4–8 when viscosity is enabled\n4. Verify temperature field is not driving viscosity via a VOP expression with division by near-zero"
+  },
+  {
+    "title": "Troubleshooting: RBD packed objects deforming instead of staying rigid",
+    "category": "errors",
+    "tags": ["rbd", "deform", "pack", "rigid", "soft", "unpack"],
+    "content": "Context: RBD simulation\nError: Packed objects appear to deform or morph during simulation instead of staying rigid\nCauses:\n1. Geometry is not packed — simulating as a deforming mesh\n2. Wrong DOP node type (rigidBodyObject instead of rbdpackedobject for packed prims)\n3. Point positions being overwritten by a SOP Solver\nFix:\n1. Add Pack SOP before the DOP import to ensure geometry is packed\n2. Use rbdpackedobject DOP for packed primitives (not rigidBodyObject)\n3. Check for SOP Solver DOP that may be modifying point positions\n4. In rbdpackedobject: Geometry Representation = 'Convex Hull' or 'Box' for simple shapes"
+  },
+  {
+    "title": "Troubleshooting: Whitewater spray not following FLIP fluid surface",
+    "category": "errors",
+    "tags": ["flip", "whitewater", "spray", "follow", "advect", "velocity"],
+    "content": "Context: FLIP + whitewater\nError: Foam/spray particles do not follow the fluid; they float away or sink independently\nCauses:\n1. Whitewater solver not using FLIP velocity field for advection\n2. Foam buoyancy and drag values not set\n3. Whitewater aging too fast — particles die before following the surface\nFix:\n1. whitewaterdop: Velocity Field = 'vel' pointing to FLIP simulation\n2. Enable Foam Density: buoyancy = 0.0, drag = 0.3–0.5\n3. Increase Lifetime: min=5, max=15 frames to keep foam alive longer\n4. Enable 'Kill when outside volume' — link to FLIP SDF to remove particles that escape"
+  },
+  {
+    "title": "Troubleshooting: FLIP source not emitting from the right location",
+    "category": "errors",
+    "tags": ["flip", "source", "position", "origin", "world", "sop", "path"],
+    "content": "Context: FLIP simulation\nError: Fluid emits from the wrong position in world space, or from origin instead of intended location\nCauses:\n1. flipsource SOP inside a geo node with a non-identity transform — world space offset not applied\n2. flipsource SOP using Local not World space for velocity\n3. Object-level transform on the geo node not frozen into point positions\nFix:\n1. Ensure the geo node containing the source geometry has no transform (or freeze with Match Size SOP)\n2. In flipsource SOP: Velocity Type = 'World'\n3. Use Object Merge SOP with Transform = 'Into This Object' to bring geo into a neutral context\n4. Add a Trail SOP and inspect point positions in Geometry Spreadsheet to verify world positions"
+  },
+  {
+    "title": "Troubleshooting: Simulation cooking very slowly after frame 50+",
+    "category": "errors",
+    "tags": ["performance", "slow", "cache", "particles", "memory", "cook time"],
+    "content": "Context: Any DOP simulation\nError: Early frames cook in seconds but later frames take minutes; performance degrades over time\nCauses:\n1. Particle count increasing unboundedly — no death/culling mechanism\n2. Constraint network growing every frame without removing broken constraints\n3. Cache path not configured — simulation data accumulates in RAM\nFix:\n1. Add a popkill SOP / Gas Field VOP to cull particles that are out of bounds\n2. Enable 'Remove Broken Constraints' in constraintnetwork DOP > Constraint Network Options\n3. Configure disk cache in dopnet > Simulation > Cache: set $HIP/cache directory\n4. Monitor particle count in Geometry Spreadsheet across frames"
+  },
+  {
+    "title": "Troubleshooting: Pyro upres simulation not matching low-res base",
+    "category": "errors",
+    "tags": ["pyro", "upres", "upresolver", "mismatch", "base", "detail"],
+    "content": "Context: Pyro upresing workflow\nError: High-res upres simulation looks completely different from the low-res base\nCauses:\n1. Upres solver using different timestep than the base\n2. Low-res cache loaded from different path than what upres expects\n3. Upres divergence too high — detail overwrites the base shape\nFix:\n1. Ensure pyro upres DOP timestep = low-res timestep\n2. pyroupres SOP: point 'Base Simulation' to the exact same low-res .bgeo.sc cache files\n3. Reduce Upres Detail Amount: start at 0.3–0.5 before going to 1.0\n4. The low-res sim must be fully cached to disk before running upres"
+  },
+  {
+    "title": "Troubleshooting: Fluid simulation not reading initial velocity from SOP geometry",
+    "category": "errors",
+    "tags": ["flip", "initial", "velocity", "v", "attribute", "source", "sop"],
+    "content": "Context: FLIP simulation\nError: Emitted particles have no initial velocity; they drop straight down from the source\nCauses:\n1. 'v' attribute not present on source geometry (missing or named differently)\n2. flipsource SOP not transferring velocity from SOP to particles\n3. flipsource > Emission type set to 'Volume' without a velocity field\nFix:\n1. Add Attribute Wrangle on source geo: v@v = {0, 5, 0}; (or desired velocity)\n2. flipsource SOP > Velocity > Initial Velocity = 'Attribute' and set Velocity Attribute = 'v'\n3. Verify with Geometry Spreadsheet that 'v' attribute exists on source points before DOP"
+  },
+  {
+    "title": "Troubleshooting: RBD glue constraints not transferring impact to adjacent pieces",
+    "category": "errors",
+    "tags": ["rbd", "glue", "propagate", "fracture", "wave", "impact", "rigid body"],
+    "content": "Context: RBD destruction — impact propagation\nError: Only directly hit pieces break; surrounding pieces are unaffected even with low glue strength\nCauses:\n1. Impact data not flowing through the constraint network\n2. 'Propagate Impact' disabled in constraintnetwork DOP\n3. Impact scale too low — impulse is not amplified for propagation\nFix:\n1. constraintnetwork DOP: enable 'Override Impact' and set Impact Scale = 1.5–3.0\n2. Enable Propagate Impacts: ON\n3. For sequential breaking (wave fracture): add a Gas Field VOP that reads neighbor constraint strength and applies a wave equation\n4. Alternatively: use a Pre-fracture workflow with radial strength variation via an Attribute Wrangle"
+  },
+  {
+    "title": "Troubleshooting: Vellum softbody not maintaining volume (deflating)",
+    "category": "errors",
+    "tags": ["vellum", "softbody", "volume", "pressure", "deflate", "inflate"],
+    "content": "Context: Vellum soft body simulation\nError: Soft body deflates or collapses under gravity instead of holding volume\nCauses:\n1. Pressure constraint stiffness too low\n2. Pressure target volume not set to rest volume\n3. Not enough constraint iterations to maintain pressure\nFix:\n1. vellumconstraints SOP: type = Pressure; Stiffness = 1e5–1e7 depending on size\n2. Pressure Attribute = 'pressure' set to 1.0 in rest state\n3. vellumsolver: Constraint Iterations = 200–500 minimum for pressure constraints\n4. Check that the mesh is closed (watertight) — pressure constraint requires closed geometry"
+  },
+  {
+    "title": "Troubleshooting: Pyro temperature field not persisting between frames",
+    "category": "errors",
+    "tags": ["pyro", "temperature", "field", "persist", "decay", "cooling"],
+    "content": "Context: Pyro simulation\nError: Temperature field drops to zero every frame; no persistent heat\nCauses:\n1. Cooling rate too high in pyrosolver\n2. Source not re-emitting temperature each frame (source type = once, not continuous)\n3. Advection not applying to temperature field\nFix:\n1. pyrosolver > Combustion > Cooling Rate: reduce from default 0.8 to 0.1–0.3\n2. sourcevolume DOP: Operation = 'Maximum' or 'Add' (not 'Set') to accumulate temperature\n3. Ensure sourcevolume maps the source temperature field to the sim 'temperature' field each frame"
+  },
+  {
+    "title": "Troubleshooting: Constraint breaking too uniformly / not breaking in pattern",
+    "category": "errors",
+    "tags": ["rbd", "constraint", "uniform", "break", "pattern", "strength", "attribute"],
+    "content": "Context: RBD destruction with constraint variation\nError: All constraints break at exactly the same frame; no cascade or wave effect\nCauses:\n1. All constraints have identical strength values — no variation\n2. Impact data not varying per constraint\nFix:\n1. In the constraintnetwork SOP: add Attribute Wrangle to vary strength by position, random, or proximity to impact point\n   Example: f@strength = fit(rand(@ptnum), 0, 1, 500, 5000);\n2. Use a Attribute VOP to drive strength from a distance-to-impact field\n3. Consider a 'soft' constraint strength that linearly decreases toward zero near the impact zone"
+  },
+  {
+    "title": "Troubleshooting: FLIP solver very slow with large container",
+    "category": "errors",
+    "tags": ["flip", "slow", "performance", "container", "resize", "adaptive"],
+    "content": "Context: FLIP simulation\nError: Large bounding box causes simulation to crawl even with coarse resolution\nCauses:\n1. 'Auto Resize' disabled — solver solving an unnecessarily large domain\n2. Max Bounds set too large\nFix:\n1. Enable 'Use Particle Fluid Surface' for auto-resizing the simulation domain\n2. gasdopresizefluid DOP: enable and link to particle fluid surface; set padding = 2–5 voxels\n3. Limit domain with Max Bounds parms: match the scene bounding box, not world space\n4. Use flipfluidcache to compare domain size at different frames"
+  },
+  {
+    "title": "Troubleshooting: Vellum constraint network becoming invalid after topology changes",
+    "category": "errors",
+    "tags": ["vellum", "topology", "constraint", "rebuild", "invalid", "error"],
+    "content": "Context: Vellum simulation\nError: Vellum errors about invalid constraint network; simulation fails with constraint topology mismatch\nCauses:\n1. Point count changes between frames (time-dependent SOP feeding vellum)\n2. Primitive topology changing mid-simulation (dissolve, remesh in SOP chain)\n3. Constraint network built at rest-pose but geometry deforms point ordering\nFix:\n1. Cache the rest-pose geometry to a file: File SOP (Write + Read) before vellum constraints\n2. Ensure the geometry feeding vellum has constant topology: no time-dependent operations that change point or primitive count\n3. Build constraints on the static rest pose, NOT on an animated geometry"
+  },
+  {
+    "title": "Troubleshooting: DOP simulation ignoring SOP changes after initial import",
+    "category": "errors",
+    "tags": ["dop", "sop", "import", "update", "cache", "static", "reload"],
+    "content": "Context: DOP simulation\nError: Changes made to input SOP geometry are not reflected in the simulation\nCauses:\n1. dopnet in 'Load from Disk' mode — ignores live SOP changes\n2. Simulation initialized from frame 1 cache; re-simulation needed after SOP edit\n3. SOP path in object DOP is stale\nFix:\n1. dopnet > Simulation: disable 'Load from Disk'\n2. Select the dopnet, press R to Reset Simulation after changing SOP inputs\n3. Verify Object SOP Path in the DOP node points to the correct node\n4. After any SOP change upstream, always Reset Simulation before replaying"
+  },
+  {
+    "title": "Troubleshooting: Pyro simulation has wrong scale (too big or too small)",
+    "category": "errors",
+    "tags": ["pyro", "scale", "units", "size", "resolution", "world"],
+    "content": "Context: Pyro simulation\nError: Smoke/fire looks physically wrong — rises too fast, too slowly, dissipates oddly\nCauses:\n1. Scene not in meters (Houdini default) — pyro gravity and buoyancy assume meter scale\n2. Geometry scale inconsistent — 1 unit = 1 cm in the source geometry\nFix:\n1. Check Edit > Preferences > Hip File Options > Unit Length. Pyro defaults assume 1 unit = 1 meter\n2. For centimeter-scale scenes: scale the source geometry up 100× before entering DOPs, simulate, then scale result back\n3. pyrosolver > Buoyancy > Buoyancy Scale: adjust to compensate for non-metric scenes"
+  },
+  {
+    "title": "Troubleshooting: Vellum wires/rods not bending correctly",
+    "category": "errors",
+    "tags": ["vellum", "wire", "rod", "bend", "stiffness", "orient", "twist"],
+    "content": "Context: Vellum wire / rod simulation\nError: Vellum wires collapse flat or don't bend with the correct stiffness profile\nCauses:\n1. Orient attribute missing on wire curves — rod constraint cannot compute bend reference frame\n2. Bend/twist stiffness too low or too high\n3. Rest length not computed from actual curve arc length\nFix:\n1. Add Orient attribute to wire curve before vellumconstraints: use Attribute Wrangle or Orient Along Curve SOP\n2. vellumconstraints SOP (Rod type): Bend Stiffness = 1e5 for flexible, 1e8 for stiff rods\n3. Enable 'Use Rest Shape' in constraint properties to use the curve's rest pose as the bend reference"
+  },
+  {
+    "title": "Troubleshooting: RBD simulation interpenetrating on first frame despite separation",
+    "category": "errors",
+    "tags": ["rbd", "interpenetrate", "overlap", "gap", "first frame", "collision"],
+    "content": "Context: RBD simulation\nError: Despite visible gaps between objects in SOP, Bullet reports overlapping bodies on frame 1\nCauses:\n1. Collision shapes inflated — convex hull includes more volume than the visual mesh\n2. Object-level transform scaling not accounted for in collision shape\n3. Collision padding (Collision Offset) too large\nFix:\n1. rbdpackedobject: Geometry Representation = Concave (not Convex Hull) for non-convex pieces\n2. Set Collision Offset = 0 and check; increase gradually to needed clearance\n3. Freeze object-level transforms with Match Size SOP before entering DOPs\n4. Use Bullet data visualization in viewport: select dopnet, choose 'View Collision Geometry' option"
+  },
+  {
+    "title": "Troubleshooting: Smoke/pyro simulation rendering black or invisible",
+    "category": "errors",
+    "tags": ["pyro", "render", "black", "invisible", "mantra", "karma", "volume"],
+    "content": "Context: Pyro simulation rendering\nError: Smoke appears in the viewport but renders as completely black or invisible\nCauses:\n1. Volume shader not assigned to the pyro dopnet container\n2. Camera clipping plane cutting through the volume object\n3. Volume step size too large — sampler misses thin volumes\n4. Density scale set to 0 in the shader\nFix:\n1. pyro dopnet: assign a pyro shader (e.g., pyro baked or volume shader) in the Material parameter\n2. Karma/Mantra: ensure volume step size matches voxel size or smaller\n3. Shader: Volume > Density multiplier should be > 0 (often reset to 0 accidentally)\n4. Check render camera frustum contains the entire volume bounding box"
+  },
+  {
+    "title": "Troubleshooting: FLIP simulation not interacting with RBD pieces",
+    "category": "errors",
+    "tags": ["flip", "rbd", "interaction", "two-way", "coupling", "collision"],
+    "content": "Context: FLIP + RBD two-way coupling\nError: FLIP fluid does not push RBD pieces; or RBD pieces don't displace fluid\nCauses:\n1. Two-way coupling not enabled in the FLIP solver\n2. RBD and FLIP solvers not in the same dopnet\n3. RBD objects not treated as deforming colliders in FLIP\nFix:\n1. flipsolver > Volume Motion: enable 'Two-Way Coupling'\n2. Wire both the RBD solver and FLIP solver into the same DOP network with merge nodes\n3. In dopnet: rbdpackedobject must wire into flipsolver as a collision input\n4. Enable 'Feedback Scale' in flipsolver > Volume Motion: 1.0 for full coupling"
+  },
+  {
+    "title": "Troubleshooting: Constraint network points not matching simulated geometry",
+    "category": "errors",
+    "tags": ["rbd", "constraint", "mismatch", "point", "topology", "anchor"],
+    "content": "Context: RBD constraint network\nError: Constraints connect to wrong geometry points; visible tearing or wrong anchors\nCauses:\n1. constraintnetwork SOP references primitive/point numbers that change between frames\n2. name attribute differs between the fracture SOP and the constraint SOP\n3. Constraint built before the assemble SOP — packed prim numbering incorrect\nFix:\n1. Always build constraintnetwork AFTER voronoifracture AND assemble SOP\n2. Verify 'name' prim attribute matches between packed geo and constraint anchor points\n3. Use 'Surface Contact' adjacency so constraints use the actual touching surface, not raw point indices\n4. View the constraint geo with a null SOP and check Geometry Spreadsheet for 'name' prim attrib"
+  },
+  {
+    "title": "Troubleshooting: Vellum cloth missing collision response with character geometry",
+    "category": "errors",
+    "tags": ["vellum", "cloth", "character", "collision", "skin", "penetration"],
+    "content": "Context: Vellum cloth on character simulation\nError: Clothing clips into character skin; no collision response between cloth and body\nCauses:\n1. Character geometry not added as a vellum collision object\n2. Cloth thickness too thin relative to character mesh resolution\n3. Character animated via transform — SOP-level geometry doesn't update\nFix:\n1. Wire character deformed mesh into vellumsolver DOP input 3 (collision geometry)\n2. Pack character mesh and set type = 'Static Collider' in vellumpack SOP\n3. vellumconstraintproperty: Thickness = 0.02–0.05 (bigger than character skin poly size)\n4. Ensure character geometry cooks from SOP every frame (no file cache bypass)"
+  },
+  {
+    "title": "Troubleshooting: Pyro field visualization missing in viewport",
+    "category": "errors",
+    "tags": ["pyro", "viewport", "visualization", "field", "display", "smoke object"],
+    "content": "Context: Pyro simulation\nError: DOP network cooks correctly but nothing visible in the viewport\nCauses:\n1. smokeobject DOP's Display flag not enabled\n2. Viewport > Volume display turned off\n3. pyrosolver outputting to wrong field name (typo in field configuration)\nFix:\n1. Select the smokeobject DOP and press D for the Display flag\n2. Viewport settings: View > Display Options > Volume > enable Volume Display\n3. Middle-click the dopnet and inspect the output volume fields — confirm 'density' field exists\n4. Check pyrosolver > Output tab: Output Fields list should include 'density'"
+  },
+  {
+    "title": "Troubleshooting: RBD active/static switch not working via attribute",
+    "category": "errors",
+    "tags": ["rbd", "active", "static", "attribute", "animated", "sop solver"],
+    "content": "Context: RBD simulation — mixed active/static objects\nError: Objects driven by i@active attribute don't switch between active and static correctly\nCauses:\n1. i@active changes not propagated to the DOP network (SOP Solver needed)\n2. Constraint pinning the object overrides the active attribute\n3. Active flag set to 1 for a static collider (wrong intent)\nFix:\n1. Use a SOP Solver DOP: inside it, an Attribute Wrangle sets i@active based on frame number\n2. Remove constraints on objects that should freely activate\n3. For animated objects: use 'Animated Static' mode in rbdpackedobject, not i@active toggle"
+  },
+  {
+    "title": "Troubleshooting: FLIP fluid not respecting viscosity spatially",
+    "category": "errors",
+    "tags": ["flip", "viscosity", "spatial", "attribute", "variable", "vop"],
+    "content": "Context: FLIP simulation with variable viscosity\nError: Attempting spatially-varying viscosity (e.g., honey thicker at base) has no effect\nCauses:\n1. Viscosity not driven by a VOP field — uniform value used everywhere\n2. viscosity field not present in the simulation\nFix:\n1. Add a Gas Field VOP microsolver in the pyrosolver/flipsolver chain: evaluate position-based viscosity expression and write to 'viscosity' field\n2. flipsolver > Viscosity: enable 'Use Viscosity Field' (not just scalar value)\n3. Source the viscosity field from temperature or density using a Gas Copy DOP\nExample VOP logic: fit(@P.y, -1, 1, 1000, 100) — thicker at the bottom"
+  },
+  {
+    "title": "Troubleshooting: Vellum grain/sand not settling — perpetual jitter",
+    "category": "errors",
+    "tags": ["vellum", "grain", "sand", "jitter", "settle", "rest", "damping"],
+    "content": "Context: Vellum grain simulation\nError: Grain particles never stop jittering even after many frames; never reach a stable pile\nCauses:\n1. Damping too low — kinetic energy not removed\n2. Friction too low — grains slide indefinitely\n3. External forces (gravity scale) too large for grain stiffness\nFix:\n1. vellumsolver DOP: enable 'Use Shock Propagation'\n2. vellumconstraintproperty SOP (Grain type): Friction Coefficient = 0.5–1.0, Damping = 0.1–0.3\n3. Add Gas Damp microsolver: Damping = 0.05 to gradually kill velocity\n4. Reduce Gravity in vellumsolver to 9.8 (default is fine but verify no accidental multiplier)"
+  },
+  {
+    "title": "Troubleshooting: FLIP surface tracking / narrowband missing particles",
+    "category": "errors",
+    "tags": ["flip", "narrowband", "surface tracking", "missing", "particles"],
+    "content": "Context: FLIP simulation with surface tracking\nError: Narrowband tracking causes holes or missing fluid at the surface\nCauses:\n1. Narrowband width too small — surface particles reseed in wrong region\n2. Volume particle seeding disabled — interior particles not present\n3. Surface tension enabled without sufficient resolution\nFix:\n1. flipsolver > Particle Motion > Reseeding: Narrowband Cells = 3–5 (increase from default 2)\n2. Enable 'Interior Particles' as a fallback for regions outside the narrowband\n3. Surface tracking requires resolution ≤ 0.025 particle separation for stable results\n4. Disable Narrowband temporarily to diagnose: compare with full-particle simulation"
+  },
+  {
+    "title": "Troubleshooting: Pop grains simulation exploding with high stiffness",
+    "category": "errors",
+    "tags": ["pop", "grain", "stiffness", "explosion", "nan", "collision", "substep"],
+    "content": "Context: POP grain simulation\nError: Grains explode when stiffness is raised above a threshold\nCauses:\n1. Stiffness too high relative to substep size — Hooke's law exceeds stability limit\n2. Grains overlapping at initialization — spring force resolves with extreme impulse\nFix:\n1. popgrains SOP: Stiffness = 3000–5000 (not 50000)\n2. popnet DOP: Substeps = 5–10 to handle stiff grain springs\n3. Spread initial grains with a small jitter (add noise to P before DOPs): @P += rand(@ptnum)*0.01;\n4. Enable 'Max Acceleration' in popgrains: caps per-frame velocity change to prevent explosion"
+  },
+  {
+    "title": "Troubleshooting: Vellum constraint self-collision too computationally expensive",
+    "category": "errors",
+    "tags": ["vellum", "self-collision", "performance", "expensive", "slow"],
+    "content": "Context: Vellum simulation\nError: Self-collision enabled but simulation takes 10× longer per frame\nCauses:\n1. Self-collision checking every primitive pair — O(n²) complexity\n2. Resolution too high for self-collision — too many point pairs\nFix:\n1. Use Layer Shock instead of full self-collision when possible (layered cloth)\n2. Limit self-collision to specific groups: add vellumconstraintproperty with group mask\n3. Reduce mesh resolution for simulation; use Point Deform to transfer to high-res for render\n4. vellumsolver: Self Collision Iterations = 5 (not 20) with higher Thickness to compensate"
+  },
+  {
+    "title": "Troubleshooting: FLIP simulation has wrong gravity direction",
+    "category": "errors",
+    "tags": ["flip", "gravity", "direction", "down", "Y", "axis", "force"],
+    "content": "Context: FLIP simulation\nError: Fluid falls sideways or upward instead of downward\nCauses:\n1. Gravity force DOP has wrong direction vector\n2. Scene using Z-up convention but force DOP uses Y-down\n3. gravity microsolver parameters edited accidentally\nFix:\n1. gravityforum or gravityforce DOP: Direction = (0, -1, 0) for Y-up (Houdini default)\n2. For Z-up scenes: Direction = (0, 0, -1), Magnitude = 9.8\n3. Check flipsolver > Gravity: Acceleration = (0, -9.8, 0) (not (0, 0, 0))"
+  },
+  {
+    "title": "Troubleshooting: Pyro buoyancy not working (smoke not rising)",
+    "category": "errors",
+    "tags": ["pyro", "buoyancy", "rise", "temperature", "smoke", "float"],
+    "content": "Context: Pyro simulation\nError: Smoke/fire does not rise; hangs in place or falls\nCauses:\n1. Temperature field not present or near zero — buoyancy force requires temperature gradient\n2. Buoyancy scale set to 0\n3. Source not emitting temperature (only density sourced)\nFix:\n1. pyrosolver > Buoyancy: enable Buoyancy and set Buoyancy Scale = 10–30 for visible rise\n2. sourcevolume DOP: add a second volume source mapping source field 'temperature' to sim 'temperature'\n3. Verify temperature field exists: middle-click DOP, check field list for 'temperature'\n4. Emit initial temperature with value 1.0–2.0 from the emission SOP"
+  },
+  {
+    "title": "Troubleshooting: RBD objects tunneling when using Voronoi fracture with many pieces",
+    "category": "errors",
+    "tags": ["rbd", "voronoi", "tunnel", "bullet", "many pieces", "performance"],
+    "content": "Context: RBD Voronoi fracture with high piece count\nError: With 200+ pieces, Bullet simulation has tunneling artifacts and severe slowdown\nCauses:\n1. Too many active bodies — Bullet scales poorly past ~500 active objects\n2. All objects active immediately — should start as sleeping\n3. Convex hull computation for many irregular pieces is slow\nFix:\n1. Keep only the directly-impacted pieces active; freeze distant pieces as sleeping with i@deforming=0\n2. Use Voronoi Fracture Cachepoints to pre-compute and store the fracture geometry\n3. rbdpackedobject: Initial State = 'Sleeping' for pieces far from the impact point\n4. Limit to ~300 active pieces per frame; use LOD fracturing for distant debris"
+  },
+  {
+    "title": "Troubleshooting: Smoke simulation blowing through walls",
+    "category": "errors",
+    "tags": ["pyro", "smoke", "wall", "collision", "sdf", "obstacle"],
+    "content": "Context: Pyro smoke simulation with static obstacles\nError: Smoke passes through or ignores static obstacle geometry\nCauses:\n1. Obstacle SDF not generated at the correct voxel resolution\n2. staticobject DOP not connected to the pyrosolver\n3. Volume Offset = 0 — no clearance buffer between smoke and geometry\nFix:\n1. gasdopresizefluid / Obstacle DOP: verify SDF voxel size matches pyro resolution\n2. Wire staticobject DOP into pyroobject or merge it into the pyrosolver correctly\n3. staticobject: Volume Offset = 0.02–0.05 (one or two voxels of padding)\n4. Enable 'Collision Feedback' to visualize the obstacle SDF in the viewport"
+  },
+  {
+    "title": "Troubleshooting: FLIP simulation takes too long to cache to disk",
+    "category": "errors",
+    "tags": ["flip", "cache", "disk", "bgeo", "write", "performance"],
+    "content": "Context: FLIP simulation caching\nError: Writing cache files takes as long as the simulation itself; disk cache is very large\nCauses:\n1. Caching all particle attributes including large VDB velocity field per frame\n2. Caching in uncompressed .bgeo format instead of .bgeo.sc\n3. Unnecessary attributes being cached (debug attributes, temp fields)\nFix:\n1. Use .bgeo.sc extension (Blosc-compressed): 5–10× smaller than .bgeo\n2. In File SOP / rop_geometry: write only required attributes (P, v, id, age)\n3. Cache the particle data and VDB separately: particles as .bgeo.sc, VDB as .vdb\n4. Use ROP Output Driver set to 'Save to Disk in Background' to avoid blocking UI"
+  },
+  {
+    "title": "Troubleshooting: Pyro Gas Turbulence causing simulation to explode",
+    "category": "errors",
+    "tags": ["pyro", "turbulence", "explosion", "gas turbulence", "amplitude", "instability"],
+    "content": "Context: Pyro simulation with Gas Turbulence microsolver\nError: Adding Gas Turbulence microsolver causes simulation to become unstable\nCauses:\n1. Turbulence amplitude too high relative to substep dt\n2. Turbulence applied in world space at wrong scale\n3. Feedback loop: turbulence drives velocity → velocity drives turbulence\nFix:\n1. Gas Turbulence: Amplitude = 0.05–0.2 (not 1.0+)\n2. Scale = 0.5–2.0 in world units (match the feature size of the smoke)\n3. Apply turbulence to velocity field only — do not feed back into density\n4. Increase pyrosolver substeps to 2–4 when turbulence is active"
+  },
+  {
+    "title": "Troubleshooting: Constraint network imported into DOP has wrong geometry",
+    "category": "errors",
+    "tags": ["rbd", "constraint", "import", "sop path", "dopimport", "wrong"],
+    "content": "Context: RBD constraint network import\nError: Constraint network DOP shows wrong connections or zero constraints\nCauses:\n1. SOP path in constraintnetwork DOP points to wrong node\n2. Constraint geometry has no 'constraint_name' primitive attribute\n3. Constraint SOP produces empty geometry when fracture count = 0\nFix:\n1. constraintnetwork DOP > Geometry: set SOP Path to the exact full path of the constraint SOP\n2. Verify: middle-click constraintnetwork DOP and check primitive count > 0\n3. Inspect constraint SOP output in Geometry Spreadsheet — must have prim attrib 'name', 'constraint_name' or equivalent\n4. Press D on constraintnetwork DOP to confirm Display flag is on for debugging"
+  },
+  {
+    "title": "Troubleshooting: Pyro fire rendering without glow / fire looks flat",
+    "category": "errors",
+    "tags": ["pyro", "fire", "render", "glow", "emission", "mantra", "karma", "shader"],
+    "content": "Context: Pyro fire rendering\nError: Fire renders as a solid colored volume with no emission/glow effect\nCauses:\n1. Volume shader not using emission from the temperature/heat field\n2. Emission multiplier set to 0 in the shader\n3. Render engine bloom/glow post-processing disabled\nFix:\n1. Assign a pyro fire/explosion shader (pyro_basic_fire) not a generic volume shader\n2. Shader: Ce (Emission) = temperature field × color ramp × emission multiplier > 0\n3. In Karma: enable 'Emission' in the volume object properties\n4. For Mantra: set the 'Fire Intensity' parameter in the pyro shader to 2.0–5.0"
+  },
+  {
+    "title": "Troubleshooting: Vellum simulation has constraint drift over time",
+    "category": "errors",
+    "tags": ["vellum", "drift", "rest", "shape", "plasticity", "constraint"],
+    "content": "Context: Vellum simulation\nError: Vellum cloth or soft body gradually changes shape over many frames even without external forces\nCauses:\n1. Plasticity accidentally enabled — rest shape updates toward deformed shape\n2. Too few constraint iterations causing residual error that accumulates\n3. Numerical integration error building up over long simulations\nFix:\n1. vellumconstraintproperty SOP: ensure Plasticity is disabled (Yield Ratio = 0)\n2. Increase Constraint Iterations in vellumsolver: 200–500 for long-running sims\n3. Enable 'Shape Stiffness' instead of only stretch/bend to preserve rest shape\n4. For very long sims (>500 frames): periodically re-initialize rest state via Vellum Rest Pose SOP"
+  },
+  {
+    "title": "Troubleshooting: Pop grains not packing tightly / too much empty space",
+    "category": "errors",
+    "tags": ["pop", "grain", "pack", "density", "separation", "tight"],
+    "content": "Context: POP grain simulation\nError: Grain pile has too much empty space between particles; looks unrealistically loose\nCauses:\n1. Grain radius too large\n2. No settling run — grains initialized in a sparse grid\n3. Friction too low to hold compact packing\nFix:\n1. Reduce grain radius in popgrains SOP: set Particle Separation = target grain diameter\n2. Run a pre-simulation settle pass: simulate 50+ frames with no external forces except gravity\n3. popgrains: Friction = 0.5–1.0; use Static Friction Multiplier = 2.0 for the first few frames\n4. Use a more densely-packed initial scatter: Scatter SOP with Relax Iterations = 10"
+  },
+  {
+    "title": "Troubleshooting: Pyro Wind Force has no visible effect on simulation",
+    "category": "errors",
+    "tags": ["pyro", "wind", "force", "microsolver", "velocity", "gas wind"],
+    "content": "Context: Pyro simulation with wind force\nError: Wind microsolver added but smoke/fire direction does not change\nCauses:\n1. Wind force microsolver not wired into pyrosolver correctly\n2. Wind velocity too low relative to smoke internal velocity\n3. Wind force field name mismatch\nFix:\n1. Add Gas Wind microsolver: wire it into pyrosolver > Microsolvers tab\n2. Gas Wind: Direction = (1,0,0), Speed = 2.0–10.0 (must exceed smoke internal velocity)\n3. Ensure Gas Wind Field = 'vel' (matching pyro velocity field name)\n4. Alternatively: use a Fan Force DOP or add a constant velocity field via Gas Calculate"
+  },
+  {
+    "title": "Troubleshooting: RBD objects sleeping when they should be active",
+    "category": "errors",
+    "tags": ["rbd", "sleeping", "wake", "active", "bullet", "at rest"],
+    "content": "Context: RBD simulation\nError: RBD objects come to rest too quickly and become frozen/sleeping; will not re-activate when hit\nCauses:\n1. Sleeping threshold too aggressive — velocity threshold too low\n2. Linear and angular sleep thresholds not tuned for scene scale\nFix:\n1. rbdsolver DOP > Sleeping: Sleep Velocity = 0.001–0.01 (lower = harder to sleep; default may be 0.1)\n2. Disable sleeping entirely during debug: uncheck 'Allow Sleeping'\n3. For debris that should stay active: set i@deforming=1 on the packed prims via SOP Solver\n4. Use Activation Threshold = 0.0 to force all objects to remain active"
+  },
+  {
+    "title": "Troubleshooting: FLIP viscosity solving too slowly (many CG iterations)",
+    "category": "errors",
+    "tags": ["flip", "viscosity", "cg", "iterations", "slow", "preconditioner"],
+    "content": "Context: FLIP simulation with viscosity\nError: Viscosity solve dominates simulation time; CG solver takes 500+ iterations per substep\nCauses:\n1. Very high viscosity value — CG conditioner number is poor\n2. No viscosity preconditioner enabled\n3. Grid resolution too fine for the viscosity solve\nFix:\n1. flipsolver > Viscosity: CG Iterations = 200 (set limit); CG Error = 0.01 (relax tolerance)\n2. Enable Symmetric Positive Definite solver if available\n3. For very viscous fluids (honey, lava): consider the Viscosity field VDB approach with simplified substeps\n4. Pre-condition the viscosity solve: use Jacobi preconditioner in flipsolver advanced settings"
+  },
+  {
+    "title": "Troubleshooting: Vellum simulation ignoring pin-to-target constraints",
+    "category": "errors",
+    "tags": ["vellum", "pin", "attach", "target", "constraint", "animated", "follow"],
+    "content": "Context: Vellum pin-to-target constraint\nError: Cloth or hair does not follow the animated target; constraint has no effect\nCauses:\n1. Target geometry not updated in DOP — static cache instead of live cook\n2. Pin constraint stiffness too low relative to external forces\n3. Constraint built on wrong group — no matching points\nFix:\n1. vellumsolver DOP: Target SOP Path must cook the animated geo every frame (not a static file)\n2. vellumconstraints SOP (Attach to Geometry): Stiffness = 1e8–1e10 for rigid attachment\n3. Check that the group used in the constraint contains the correct points (visualize with group SOP)\n4. Use 'Soft' vs 'Hard' constraint type: Hard = perfectly follows target; Soft = spring towards it"
+  },
+  {
+    "title": "Troubleshooting: Gas Field VOP not modifying fields correctly",
+    "category": "errors",
+    "tags": ["pyro", "gas field vop", "microsolver", "field", "modify", "expression"],
+    "content": "Context: Pyro / DOP simulation with Gas Field VOP microsolver\nError: Gas Field VOP runs without error but fields remain unchanged\nCauses:\n1. Output field name does not match the simulation field name ('density' vs 'Density')\n2. VOP network output not connected to the 'output' export node\n3. Operation mode set to 'Read' not 'Read/Write'\nFix:\n1. Gas Field VOP: Field Name must exactly match simulation field (case-sensitive: 'density' not 'Density')\n2. Inside the VOP network: ensure output connects to a dedicated 'export' parameter node\n3. Operation = 'Read/Write' to allow modification of the named field\n4. Test with a trivial override (density = 1.0) to confirm the VOP chain is wired"
+  },
+  {
+    "title": "Troubleshooting: FLIP particle attributes not surviving after cache reload",
+    "category": "errors",
+    "tags": ["flip", "attributes", "cache", "reload", "lost", "bgeo"],
+    "content": "Context: FLIP simulation with custom attributes\nError: Custom point attributes (e.g., age, id, custom_float) are missing after loading cached bgeo.sc files\nCauses:\n1. File SOP writing cache with attribute filter excluding custom attributes\n2. Attribute not present on all frames (only written at emission time)\n3. .bgeo.sc loaded with a different attribute order\nFix:\n1. rop_geometry / File SOP: set Attribute Filter to * (all) or explicitly include custom attribute names\n2. Use attribcreate SOP before the cache write to ensure the attribute exists on all particles\n3. After cache read: verify with Geometry Spreadsheet that the attribute is present on point class\n4. Use .bgeo.sc for correct attribute preservation (not .geo or .obj)"
+  },
+  {
+    "title": "Sim Workflow: Complete FLIP fluid simulation setup in Houdini",
+    "category": "recipe",
+    "tags": ["flip", "fluid", "simulation", "setup", "complete", "recipe", "dopnet"],
+    "content": "Complete FLIP fluid setup from scratch:\n\n1. GEOMETRY LEVEL (inside /obj/geo1):\n   - Create source geometry: Sphere SOP for emitter\n   - Set emitter as VDB: VDB from Polygons SOP (velocity field: 'surface')\n   - Create collision geo: Box SOP (the container)\n\n2. OBJ LEVEL:\n   - Create Empty Object: /obj/flip_sim\n   - Inside: AutoDopNetwork or create dopnet manually\n\n3. DOP NETWORK:\n   - flipobject DOP: SOP Path → source geo, Particle Separation = 0.05\n   - staticobject DOP: SOP Path → collision geo, Collision Offset = 0.05\n   - flipsolver DOP: wire flipobject into input 1, staticobject into input 2\n   - gravity DOP: Direction (0,-9.8,0), wire into merge, merge into flipsolver input 3\n\n4. SURFACE MESHING:\n   - Add particlefluidsurf SOP after DOP: Point Radius Scale = 2.0, Voxel Size = 0.02\n   - Add VDB Smooth SOP: Iterations = 3\n   - Add Convert VDB SOP to get polygonal surface\n\n5. CACHING:\n   - Add File SOP: $HIP/flip_cache/frame.$F4.bgeo.sc"
+  },
+  {
+    "title": "Sim Workflow: Complete Pyro smoke simulation setup",
+    "category": "recipe",
+    "tags": ["pyro", "smoke", "simulation", "setup", "complete", "recipe", "dopnet"],
+    "content": "Complete pyro smoke setup:\n\n1. SOURCE GEOMETRY:\n   - Create emission shape (sphere, tube, VDB volume)\n   - Convert to VDB: VDB from Polygons SOP, name = 'density'\n   - Optionally add velocity attribute for directional emission\n\n2. DOP NETWORK:\n   - pyroobject DOP: Division Size = 0.1, Max Resolution = 200\n   - sourcevolume DOP: SOP Path → VDB geo, Field = 'density', Scale = 1.0\n   - pyrosolver DOP: wire pyroobject → input 1, sourcevolume → input 2\n   - gravity DOP: not needed for smoke (buoyancy handles rise)\n\n3. KEY PYROSOLVER PARAMETERS:\n   - Buoyancy: Scale = 20.0, Temperature Diffusion = 0.1\n   - Dissipation: 0.01 (slow decay)\n   - Turbulence: add Gas Turbulence microsolver, Amplitude = 0.1, Scale = 1.0\n   - Substeps: Min=1, Max=2\n\n4. RENDERING:\n   - Assign pyro_basic_smoke shader\n   - Density Multiplier = 5.0, Shadow Density = 3.0\n   - Enable motion blur in camera"
+  },
+  {
+    "title": "Sim Workflow: RBD destruction with Voronoi fracture setup",
+    "category": "recipe",
+    "tags": ["rbd", "voronoi", "fracture", "destruction", "bullet", "constraint", "recipe"],
+    "content": "Complete RBD Voronoi fracture setup:\n\n1. SOP LEVEL:\n   a. Source wall geometry (Box SOP, size appropriate to scene)\n   b. Voronoi Fracture SOP: Connect → scatter SOP (50–200 pts), Enable 'Create Packed Geometry'\n   c. Assemble SOP: 'Create Name Attribute' = ON, 'Create Packed Primitives' = ON\n   d. Attribute Wrangle: set i@active = 0; (start sleeping)\n\n2. CONSTRAINT NETWORK:\n   a. constraintnetwork SOP: Adjacency = 'Adjacent Primitives', Constraint Type = Glue\n   b. Attribute Wrangle on constraints: f@strength = 5000.0; (tune to taste)\n\n3. DOP NETWORK:\n   a. rbdpackedobject DOP: SOP Path → assemble output, Geometry Representation = Concave\n   b. staticobject DOP: floor geometry\n   c. constraintnetwork DOP: SOP Path → constraintnetwork SOP output\n   d. rbdsolver DOP: wire all three inputs + constraintnetwork into solver\n   e. rbdsolver > Bullet: Substeps = 5, Allow Sleeping = OFF\n\n4. ACTIVATION:\n   - Use SOP Solver DOP to set i@active = 1 at the desired frame or on impact"
+  },
+  {
+    "title": "Sim Workflow: Vellum cloth simulation setup",
+    "category": "recipe",
+    "tags": ["vellum", "cloth", "simulation", "setup", "recipe", "constraint"],
+    "content": "Complete Vellum cloth setup:\n\n1. SOP LEVEL:\n   a. Create cloth geometry: Grid SOP (high-res, e.g., 50×50)\n   b. Optionally pin some points: group SOP → group 'pin_points'\n\n2. VELLUM CONSTRAINTS:\n   a. vellumconstraints SOP (Stretch): Stiffness = 1e7, Material = Cotton\n   b. vellumconstraints SOP (Bend): Stiffness = 1e5\n   c. vellumconstraints SOP (Attach to Geometry): Group = 'pin_points', Stiffness = 1e10\n\n3. DOP NETWORK:\n   a. vellumobject DOP: SOP Path → constraint-wired geometry\n   b. vellumsolver DOP:\n      - Substeps = 5\n      - Constraint Iterations = 500\n      - Gravity = (0, -9.8, 0)\n   c. Wire collision geometry into vellumsolver input 3\n\n4. COLLISION SETUP:\n   a. Add collision geometry (floor, body mesh)\n   b. Thickness on cloth: 0.02 (vellumconstraintproperty)\n   c. Ground plane: enable in vellumsolver or use a staticobject DOP\n\n5. OUTPUT:\n   - After DOP: use dopsimport SOP to extract geometry\n   - Optionally use Point Deform to transfer sim to high-res render mesh"
+  },
+  {
+    "title": "Debug: How to diagnose which DOP microsolver is causing instability",
+    "category": "best_practice",
+    "tags": ["dop", "debug", "microsolver", "instability", "bisect", "isolate"],
+    "content": "Systematic approach to isolating a broken microsolver in a DOP network:\n\n1. Binary-search the microsolver chain:\n   - Disable half the microsolvers (bypass node flag)\n   - Test if instability persists\n   - Re-enable the stable half, disable the other half\n   - Repeat until the single bad microsolver is found\n\n2. Check each microsolver's output field:\n   - Middle-click each microsolver DOP to see which fields it writes\n   - Add a Gas Field VOP after suspect microsolver: display the field min/max/NaN count\n\n3. Use the field visualizer:\n   - Viewport > D > Volume > turn on 'Density', 'Velocity', 'Temperature' overlays\n   - Look for wildly large arrows (velocity > 100 units) or black holes (NaN density)\n\n4. Common culprits in order:\n   a. Gas Turbulence — amplitude too high\n   b. Gas Advect — BFECC with high velocity + coarse resolution\n   c. Combustion microsolver — ignition near zero causing oscillation\n   d. Viscosity CG solver — too few iterations with very high viscosity"
+  },
+  {
+    "title": "Debug: Reading DOP simulation state with middle-click info",
+    "category": "best_practice",
+    "tags": ["dop", "debug", "info", "middle-click", "inspect", "field", "particle"],
+    "content": "How to inspect DOP simulation state without rendering:\n\n1. Middle-click any DOP node to see:\n   - Simulation Age (frame count)\n   - Object list (all simulated objects)\n   - Field list for each object (density, vel, temperature, etc.)\n   - Field range (min, max, NaN count)\n   - Particle count for particle-based objects\n\n2. Look for warning signs:\n   - 'NaN count > 0' in any field → solver instability detected\n   - Field range showing 1e+38 → numerical overflow\n   - Simulation Age not advancing → DOP is resetting every frame\n\n3. Geometry Spreadsheet for particle data:\n   - Alt+click the dopnet to bring up the geometry spreadsheet\n   - Select the simulation object in the left panel\n   - View all point attributes: P, v, id, age, etc.\n   - Sort by 'v' to find particles with extreme velocity\n\n4. Use 'View DOP Network in Scene View':\n   - Select dopnet → D → 'DOP Visualization' to show fields directly in viewport"
+  },
+  {
+    "title": "Debug: Checking simulation reset causes (why sim restarts unexpectedly)",
+    "category": "best_practice",
+    "tags": ["dop", "reset", "restart", "time-dependent", "dependency", "cook"],
+    "content": "How to find why a DOP simulation keeps resetting:\n\n1. Middle-click the dopnet: watch 'Simulation Age'. If it jumps back to 0 mid-playback, a reset is occurring.\n\n2. Common reset causes:\n   a. A SOP in the DOP's dependency tree is time-dependent → DOP sees new geometry every frame\n   b. A parameter expression changed → DOP considers the network modified\n   c. 'Reset Simulation When Inputs Change' is enabled in dopnet\n\n3. Find the time-dependent SOP:\n   - In the SOP network, add a Null SOP at each suspect SOP and check 'Info' in the Geometry Spreadsheet\n   - SOPs that cook at every frame will show an incrementing cook count\n   - Common offenders: Noise SOP with $T, Mountain SOP, Curve SOP with animated points\n\n4. Fix: freeze the SOP output:\n   - File SOP: mode = Read/Write/Auto → Write at rest frame, Read at all others\n   - Or: bake geometry to disk cache before the DOP import"
+  },
+  {
+    "title": "Debug: FLIP simulation — finding particles with bad attributes",
+    "category": "best_practice",
+    "tags": ["flip", "debug", "attribute", "particle", "nan", "spreadsheet", "wrangle"],
+    "content": "How to find and fix bad particle data in a FLIP simulation:\n\n1. Add a Geometry Spreadsheet after the DOP extract:\n   - Sort by 'v' (velocity magnitude) to find extreme values\n   - Add a column for vector magnitude: vexpressionattrib: length(v@v)\n\n2. Find NaN particles with an Attribute Wrangle:\n   if (isnan(v@v.x) || isnan(v@v.y) || isnan(v@v.z)) {\n       i@bad = 1;\n   }\n   Then Blast SOP with 'bad' group to remove them.\n\n3. Clamp particle velocities as a bandaid:\n   float spd = length(v@v);\n   if (spd > 50.0) v@v *= 50.0/spd;\n   (This limits top speed to 50 units without killing particles)\n\n4. Trace the bad particles to their source:\n   - Add a Trail SOP to track the trajectory of the bad particle\n   - Check if bad particles come from a specific emitter region or time window"
+  },
+  {
+    "title": "Debug: Visualizing DOP velocity fields in the viewport",
+    "category": "best_practice",
+    "tags": ["dop", "debug", "velocity", "field", "visualize", "arrows", "viewport"],
+    "content": "How to visualize velocity, temperature, and other DOP fields in the viewport:\n\n1. Select the dopnet object, press D for display options\n2. In the 'DOP Visualization' section: enable 'Velocity', 'Density', 'Temperature' as needed\n\n3. Alternatively, use the volumevisualizer SOP:\n   - Wire the DOP extract output into a Volume Visualizer SOP\n   - Set Visualization Type = 'Arrows' for velocity fields\n   - Set Scale = 0.01–0.1 to see the arrows at a readable scale\n\n4. For fine-grained field inspection:\n   - Use a Volume SOP in the SOP network post-DOP\n   - Set Visualization = 'Smoke' for density, 'Heat' for temperature\n   - Add a Primitive Wrangle to print max values: printf(\"density max: %f\", volumemax(0,'density'));\n\n5. Color-map velocity magnitude for fast identification of problem regions:\n   - Volume VOP: sample vel field → compute length → remap with color ramp"
+  },
+  {
+    "title": "Troubleshooting: Vellum tetrahedral soft body not holding shape under gravity",
+    "category": "errors",
+    "tags": ["vellum", "softbody", "tet", "tetrahedral", "deform", "stiffness", "gravity"],
+    "content": "Context: Vellum tetrahedral soft body\nError: Soft body deforms too much under gravity, doesn't hold shape\nCauses:\n1. Tet constraint stiffness too low\n2. Surface mesh not matched to tet mesh — incorrect constraint application\n3. Too few substeps or iterations\nFix:\n1. SOP: add Tet Conform SOP before vellumconstraints to create a tet mesh from the surface\n2. vellumconstraints SOP: type = 'Struts' + 'Stitch'; Stiffness = 1e7–1e9\n3. vellumsolver: Substeps = 5, Constraint Iterations = 200\n4. For rubbery effect: Stiffness = 1e5 with high damping; for stiff plastic: 1e9 with low damping"
+  },
+  {
+    "title": "Troubleshooting: FLIP fluid not respecting animated emission keyframes",
+    "category": "errors",
+    "tags": ["flip", "emission", "keyframe", "animated", "source", "stop", "start"],
+    "content": "Context: FLIP simulation\nError: Emission continues after the keyframed emission stop, or does not start at the keyed frame\nCauses:\n1. Source volume scale keyframed on the sourcevolume DOP, not on the SOP geometry\n2. Source SOP animating correctly but sourcevolume DOP accumulates across all frames\nFix:\n1. Key the 'Volume Scale' parm on the sourcevolume DOP directly: 1.0 (on frames), 0.0 (off frames)\n2. Or: use a Switch SOP to swap between an active source and an empty null at the keyframe\n3. Verify: middle-click the sourcevolume DOP — 'Volume Scale' should reflect the keyed value\n4. For pulsed emission: use a conditional expression: `($F % 10) < 5 ? 1.0 : 0.0`"
+  },
+  {
+    "title": "Troubleshooting: Gas Resize causing simulation to lose detail at boundaries",
+    "category": "errors",
+    "tags": ["pyro", "gas resize", "boundary", "crop", "detail", "smoke"],
+    "content": "Context: Pyro simulation with Gas Resize\nError: Simulation looks correct in the center but detail is lost or cut at the bounding box edges\nCauses:\n1. Resize padding too small — simulation box clips the expanding smoke\n2. Max Resolution too low — resize stops expanding beyond a threshold\n3. Closed boundaries — smoke bouncing off the resize boundary\nFix:\n1. gasdopresizefluid: Padding = 5–10 voxels (increase from default 2)\n2. Increase Max Resolution in pyroobject DOP or remove the cap during lookdev\n3. Boundary conditions: set to 'Open' not 'Closed' for smoke that should escape off-screen\n4. For contained explosions: 'Closed' is correct — ensure the box is large enough before it closes"
+  }
+]
