@@ -343,7 +343,7 @@ User Prompt ─▶ Planner(LLM) ─▶ Critic ─▶ Tool Dispatcher ─▶ hou.
             MCP server    ◀── external clients (Cursor, ...)
 ```
 
-See [`docs/architecture.md`](docs/architecture.md) for the full walkthrough.
+See [`AGENT_WORKFLOW.md`](AGENT_WORKFLOW.md) for the full technical walkthrough.
 
 ---
 

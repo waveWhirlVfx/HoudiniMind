@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "houdinimind"
-version = "7.0.0"
+version = "1.0.0"
 description = "Agentic AI for SideFX Houdini 21 — local-first, tool-using, zero-hallucination."
 readme = "README.md"
 license = { file = "LICENSE" }
