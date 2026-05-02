@@ -70,6 +70,8 @@ QUERY_EXPANSIONS: dict[str, list[str]] = {
     # VEX / Code
     "vex": ["wrangle", "snippet", "attribwrangle", "code"],
     "script": ["vex", "python", "wrangle", "expression"],
+    "hom": ["python", "hou", "houdini python"],
+    "hou": ["python", "hom", "houdini python"],
     "noise": ["perlin", "curl", "voronoi", "wnoise", "vnoise"],
     "texture": ["uv", "map", "image", "sample"],
     # Rendering
@@ -337,6 +339,9 @@ def _entry_shard_name(entry: dict) -> str:
 
     if category == "vex" or "vex function:" in title.lower() or "vex attribute:" in title.lower():
         return "vex_reference"
+
+    if category == "python" or source == "houdini_python_functions_json":
+        return "python_examples"
 
     if category == "errors" or "troubleshooting" in text:
         return "troubleshooting"
@@ -823,6 +828,62 @@ class HybridRetriever:
             intents.add("contexts")
         return intents
 
+    def _infer_metadata_preferences(self, query: str, query_terms: list[str]) -> dict:
+        """Infer metadata preferences (difficulty, performance) from query."""
+        query_lower = query.lower()
+        prefs = {
+            "preferred_difficulty": None,
+            "prefer_performant": False,
+            "prefer_simple": False,
+            "avoid_severity": None,
+        }
+
+        # Detect difficulty preferences
+        if any(x in query_lower for x in ["beginner", "simple", "basic", "easy", "tutorial"]):
+            prefs["preferred_difficulty"] = "beginner"
+            prefs["prefer_simple"] = True
+        elif any(x in query_lower for x in ["advanced", "complex", "expert", "pro"]):
+            prefs["preferred_difficulty"] = "advanced"
+        elif any(x in query_lower for x in ["how do i", "how to", "example", "snippet"]):
+            prefs["preferred_difficulty"] = "beginner"
+            prefs["prefer_simple"] = True
+
+        # Detect performance concerns
+        if any(
+            x in query_lower for x in ["slow", "fast", "performance", "optimize", "speed", "lag"]
+        ):
+            prefs["prefer_performant"] = True
+
+        # Detect severity preferences for errors
+        if any(x in query_lower for x in ["crash", "fatal", "broken", "critical"]):
+            prefs["avoid_severity"] = "low"
+
+        return prefs
+
+    def _metadata_boost(self, entry: dict, prefs: dict) -> float:
+        """Calculate boost based on metadata alignment with preferences."""
+        boost = 0.0
+
+        difficulty = entry.get("difficulty", "").lower()
+        if prefs.get("preferred_difficulty") and difficulty == prefs["preferred_difficulty"]:
+            boost += 0.25
+
+        if prefs.get("prefer_simple") and difficulty in ("beginner", "reference"):
+            boost += 0.15
+
+        if prefs.get("prefer_performant"):
+            perf = entry.get("performance_impact", "").lower()
+            if perf in ("low", "optimal"):
+                boost += 0.18
+            elif perf == "medium":
+                boost += 0.06
+
+        severity = entry.get("severity", "").lower()
+        if prefs.get("avoid_severity") and severity != prefs["avoid_severity"]:
+            boost += 0.08
+
+        return boost
+
     def _looks_exact_lookup(self, query: str, query_terms: list[str], intents: set) -> bool:
         if intents.intersection({"node", "function", "expression", "intrinsic", "troubleshooting"}):
             return True
@@ -951,7 +1012,9 @@ class HybridRetriever:
             try:
                 q_vec = self.embed_fn(query)
                 if q_vec:
-                    for i, vec in enumerate(self._vectors):
+                    with self._embed_lock:
+                        snapshot = list(self._vectors)
+                    for i, vec in enumerate(snapshot):
                         if vec:
                             cosine_scores[i] = _cosine(q_vec, vec)
             except Exception:
@@ -985,6 +1048,9 @@ class HybridRetriever:
         include_categories: list[str] | None = None,
         exclude_categories: list[str] | None = None,
         include_memory: bool = True,
+        difficulty_filter: str | None = None,
+        max_performance_impact: str | None = None,
+        prefer_performant: bool = False,
         **kwargs,
     ) -> list[dict]:
         if not self._entries or not self._bm25:
@@ -998,6 +1064,13 @@ class HybridRetriever:
             query, query_terms, self._detect_query_intents(query, query_terms)
         )
         intents = self._detect_query_intents(query, query_terms)
+
+        # ── Infer & apply metadata preferences ─────────────────────────
+        inferred_prefs = self._infer_metadata_preferences(query, query_terms)
+        if prefer_performant:
+            inferred_prefs["prefer_performant"] = True
+        if difficulty_filter:
+            inferred_prefs["preferred_difficulty"] = difficulty_filter
 
         # ── BM25 scores ──────────────────────────────────────────────
         bm25_scores = self._safe_bm25_scores(query)
@@ -1019,7 +1092,8 @@ class HybridRetriever:
             except Exception:
                 pass
             if q_vec:
-                current_vectors = list(self._vectors)
+                with self._embed_lock:
+                    current_vectors = list(self._vectors)
                 for i, vec in enumerate(current_vectors):
                     if vec:
                         cosine_scores[i] = _cosine(q_vec, vec)
@@ -1079,6 +1153,19 @@ class HybridRetriever:
             if exclude_categories and category in exclude_categories:
                 continue
 
+            # ── Metadata filtering ──────────────────────────────────────
+            if difficulty_filter:
+                entry_difficulty = entry.get("difficulty", "").lower()
+                if entry_difficulty != difficulty_filter.lower():
+                    continue
+
+            if max_performance_impact:
+                impact = entry.get("performance_impact", "").lower()
+                impact_order = {"low": 0, "medium": 1, "high": 2}
+                max_order = impact_order.get(max_performance_impact.lower(), 999)
+                if impact_order.get(impact, 999) > max_order:
+                    continue
+
             base_score = primary_lexical_weight * bm25_norm[i]
             if expanded_query_text != query:
                 base_score += expanded_lexical_weight * expanded_bm25_norm[i]
@@ -1096,6 +1183,7 @@ class HybridRetriever:
                 base_score
                 + self._intent_boost(features, intents, query_terms)
                 + self._exact_match_boost(i, features, query_terms, expanded_terms)
+                + self._metadata_boost(entry, inferred_prefs)
             )
 
             if score >= min_score:
@@ -1119,8 +1207,13 @@ class HybridRetriever:
                     sim_sel = 0.0
                     if selected:
                         sim_sel = max(
-                            _cosine(self._vectors[idx], self._vectors[s])
-                            if self._vectors[idx] and self._vectors[s]
+                            _cosine(current_vectors[idx], current_vectors[s])
+                            if (
+                                idx < len(current_vectors)
+                                and s < len(current_vectors)
+                                and current_vectors[idx]
+                                and current_vectors[s]
+                            )
                             else 0.0
                             for s in selected
                         )
@@ -1288,6 +1381,8 @@ class QueryAwareShardRetriever:
         self._entry_by_id: dict[str, dict] = {}
         self._entries_by_shard: dict[str, list[dict]] = {}
         self._shard_categories: dict[str, set] = {}
+        self._vex_symbols: set[str] = set()
+        self._python_symbols: set[str] = set()
         self._loaded_shards: dict[str, HybridRetriever] = {}
         self._runtime_entries: list[dict] = []
         self.last_route_meta: dict = {}
@@ -1307,6 +1402,8 @@ class QueryAwareShardRetriever:
         entry_by_id: dict[str, dict] = {}
         entries_by_shard: dict[str, list[dict]] = {}
         shard_categories: dict[str, set] = {}
+        vex_symbols: set[str] = set()
+        python_symbols: set[str] = set()
 
         for idx, entry in enumerate(entries):
             assigned = self._assign_entry_id(entry, idx)
@@ -1317,12 +1414,74 @@ class QueryAwareShardRetriever:
             shard_categories.setdefault(shard_name, set()).add(
                 str(assigned.get("category", "") or "").lower()
             )
+            if shard_name == "vex_reference":
+                symbol = str(assigned.get("_vex_symbol") or "").strip().lower()
+                if symbol:
+                    vex_symbols.add(symbol)
+            if shard_name == "python_examples":
+                symbol = str(assigned.get("_python_symbol") or "").strip().lower()
+                aliases = assigned.get("_python_aliases") or []
+                for candidate in [symbol, *aliases]:
+                    candidate = str(candidate or "").strip().lower()
+                    if candidate:
+                        python_symbols.add(candidate)
 
         self._entries = indexed
         self._entry_by_id = entry_by_id
         self._entries_by_shard = entries_by_shard
         self._shard_categories = shard_categories
+        self._vex_symbols = vex_symbols
+        self._python_symbols = python_symbols
         self._loaded_shards = {}
+
+    def _query_mentions_vex_symbol(self, query: str) -> bool:
+        if not self._vex_symbols:
+            return False
+        query_symbols = {
+            match.group(0).lower()
+            for match in re.finditer(r"(?<![@.])\b[A-Za-z_][A-Za-z0-9_]*\b", str(query or ""))
+        }
+        return bool(query_symbols & self._vex_symbols)
+
+    def _query_python_symbols(self, query: str) -> set[str]:
+        text = str(query or "").lower()
+        dotted_symbols = {match.group(0) for match in re.finditer(r"\bhou(?:\.[a-z_]\w*)+\b", text)}
+        bare_symbols = set()
+        for match in re.finditer(r"(?<![@.])\b[A-Za-z_][A-Za-z0-9_]*\b", str(query or "")):
+            raw = match.group(0)
+            # Avoid treating ordinary lowercase prose words like "float" or
+            # "parameter" as exact HOM symbols. Bare exact HOM lookups usually
+            # arrive as camelCase (createNode, setParmTemplateGroup) or snake_case.
+            if "_" not in raw and not any(ch.isupper() for ch in raw[1:]):
+                continue
+            bare_symbols.add(raw.lower())
+        return (dotted_symbols | bare_symbols) & self._python_symbols
+
+    def _query_mentions_python_symbol(self, query: str) -> bool:
+        if not self._python_symbols:
+            return False
+        return bool(self._query_python_symbols(query))
+
+    def _exact_python_symbol_results(self, query: str, top_k: int) -> list[dict]:
+        matches = self._query_python_symbols(query)
+        if not matches:
+            return []
+        results = []
+        for entry in self._entries_by_shard.get("python_examples", []):
+            aliases = {
+                str(alias or "").strip().lower()
+                for alias in (entry.get("_python_aliases") or [entry.get("_python_symbol")])
+                if str(alias or "").strip()
+            }
+            if not (aliases & matches):
+                continue
+            candidate = dict(entry)
+            candidate["id"] = candidate.get("_id")
+            candidate["_score"] = 9.0
+            results.append(candidate)
+            if len(results) >= top_k:
+                break
+        return results
 
     def _load_kb(self):
         if not os.path.exists(self.kb_path):
@@ -1461,6 +1620,9 @@ class QueryAwareShardRetriever:
         include_categories: list[str] | None = None,
         exclude_categories: list[str] | None = None,
         include_memory: bool = True,
+        difficulty_filter: str | None = None,
+        max_performance_impact: str | None = None,
+        prefer_performant: bool = False,
         **kwargs,
     ) -> list[dict]:
         if not self._entries:
@@ -1473,6 +1635,14 @@ class QueryAwareShardRetriever:
             exclude_categories=exclude_categories,
         )
         routed = [name for name in _route_query_shards(query) if name in eligible]
+        python_symbol_hit = "python_examples" in eligible and self._query_mentions_python_symbol(
+            query
+        )
+        vex_symbol_hit = "vex_reference" in eligible and self._query_mentions_vex_symbol(query)
+        if python_symbol_hit:
+            routed = ["python_examples"] + [name for name in routed if name != "python_examples"]
+        if vex_symbol_hit and not python_symbol_hit:
+            routed = ["vex_reference"] + [name for name in routed if name != "vex_reference"]
         if not routed:
             routed = list(eligible)
 
@@ -1495,6 +1665,10 @@ class QueryAwareShardRetriever:
             len(routed),
             self.max_shards_per_query + (2 if _sim_domains_hit >= 2 else 0),
         )
+        if python_symbol_hit and "hou." in str(query or "").lower() and not vex_symbol_hit:
+            shard_limit = min(shard_limit, 1)
+        if vex_symbol_hit and not python_symbol_hit:
+            shard_limit = min(shard_limit, 1)
         local_top_k = max(top_k * 2, 6)
 
         for shard_name in routed[:shard_limit]:
@@ -1511,6 +1685,9 @@ class QueryAwareShardRetriever:
                 include_categories=include_categories,
                 exclude_categories=exclude_categories,
                 include_memory=include_memory,
+                difficulty_filter=difficulty_filter,
+                max_performance_impact=max_performance_impact,
+                prefer_performant=prefer_performant,
                 **kwargs,
             )
             if results:
@@ -1521,6 +1698,19 @@ class QueryAwareShardRetriever:
             top_k=top_k,
             include_live_scene=include_live_scene,
         )
+        if python_symbol_hit:
+            exact_python = self._exact_python_symbol_results(query, top_k)
+            if exact_python:
+                seen_exact = {self._result_identity(entry) for entry in exact_python}
+                live = [item for item in merged if item.get("id") == "live_scene"]
+                rest = [
+                    item
+                    for item in merged
+                    if item.get("id") != "live_scene"
+                    and self._result_identity(item) not in seen_exact
+                ]
+                merged = live + exact_python + rest
+                merged = merged[: top_k + len(live)]
 
         if len([item for item in merged if item.get("id") != "live_scene"]) < top_k:
             for shard_name in eligible:
@@ -1539,6 +1729,9 @@ class QueryAwareShardRetriever:
                     include_categories=include_categories,
                     exclude_categories=exclude_categories,
                     include_memory=include_memory,
+                    difficulty_filter=difficulty_filter,
+                    max_performance_impact=max_performance_impact,
+                    prefer_performant=prefer_performant,
                     **kwargs,
                 )
                 if results:

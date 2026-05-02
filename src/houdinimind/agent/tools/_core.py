@@ -54,8 +54,8 @@ def _ok(data=None, message="OK"):
     return {"status": "ok", "message": message, "data": data}
 
 
-def _err(msg):
-    return {"status": "error", "message": msg, "data": None}
+def _err(msg, data=None):
+    return {"status": "error", "message": msg, "data": data}
 
 
 def _require_hou():
@@ -515,7 +515,7 @@ _PARM_BASE_ALIASES = {
     "columns": "cols",
     "density": "density",
     "amount": "amount",
-    "distance": "dist",
+    "distance": ("offset", "dist"),
 }
 
 _PARM_COMPONENT_ALIASES = {
@@ -714,11 +714,21 @@ def _get_search_retriever():
 
     config_path = os.path.join(HOUDINIMIND_ROOT, "data", "core_config.json")
     kb_path = _active_knowledge_base_path(HOUDINIMIND_ROOT)
+    vex_db_path = os.environ.get("HOUDINIMIND_VEX_FUNCTIONS_DB", "").strip() or os.path.join(
+        HOUDINIMIND_ROOT, "vex_functions.db"
+    )
+    python_json_path = os.environ.get(
+        "HOUDINIMIND_HOUDINI_PYTHON_JSON", ""
+    ).strip() or os.path.join(HOUDINIMIND_ROOT, "houdini_python_functions.json")
     cache_key = (
         HOUDINIMIND_ROOT,
         os.path.getmtime(config_path) if os.path.exists(config_path) else None,
         kb_path,
         os.path.getmtime(kb_path) if os.path.exists(kb_path) else None,
+        vex_db_path,
+        os.path.getmtime(vex_db_path) if os.path.exists(vex_db_path) else None,
+        python_json_path,
+        os.path.getmtime(python_json_path) if os.path.exists(python_json_path) else None,
         os.environ.get("HOUDINIMIND_NODE_CHAINS_PATH", ""),
         os.environ.get("HOUDINIMIND_HIGH_FIDELITY_PATH", ""),
         id(_shared_embed_fn) if callable(_shared_embed_fn) else None,
@@ -859,15 +869,25 @@ def _parm_alias_candidates(parm_name):
     if not lowered:
         return []
     candidates = [lowered]
+
+    def _add_mapped(mapped_val, suffix=""):
+        if isinstance(mapped_val, (list, tuple)):
+            for v in mapped_val:
+                candidates.append(f"{v}{suffix}")
+        else:
+            candidates.append(f"{mapped_val}{suffix}")
+
     mapped_base = _PARM_BASE_ALIASES.get(lowered)
     if mapped_base:
-        candidates.append(mapped_base)
+        _add_mapped(mapped_base)
+
     digit_match = re.search(r"(\D+)(\d+.*)$", lowered)
     if digit_match:
         base_part = digit_match.group(1)
         suffix_part = digit_match.group(2)
         if base_part in _PARM_BASE_ALIASES:
-            candidates.append(f"{_PARM_BASE_ALIASES[base_part]}{suffix_part}")
+            _add_mapped(_PARM_BASE_ALIASES[base_part], suffix_part)
+
     for suffix, mapped_suffix in sorted(
         _PARM_COMPONENT_ALIASES.items(), key=lambda item: len(item[0]), reverse=True
     ):
@@ -879,7 +899,12 @@ def _parm_alias_candidates(parm_name):
         if not base:
             continue
         mapped_base = _PARM_BASE_ALIASES.get(base, base)
-        candidates.append(f"{mapped_base}{mapped_suffix}")
+        if isinstance(mapped_base, (list, tuple)):
+            for m_base in mapped_base:
+                candidates.append(f"{m_base}{mapped_suffix}")
+        else:
+            candidates.append(f"{mapped_base}{mapped_suffix}")
+
     if digit_match:
         base_part = digit_match.group(1)
         suffix_part = digit_match.group(2)
@@ -887,7 +912,13 @@ def _parm_alias_candidates(parm_name):
             for c_suffix, c_mapped in _PARM_COMPONENT_ALIASES.items():
                 if suffix_part.endswith(c_suffix):
                     naked_num = suffix_part[: -len(c_suffix)]
-                    candidates.append(f"{_PARM_BASE_ALIASES[base_part]}{naked_num}{c_mapped}")
+                    mapped_base = _PARM_BASE_ALIASES[base_part]
+                    if isinstance(mapped_base, (list, tuple)):
+                        for m_base in mapped_base:
+                            candidates.append(f"{m_base}{naked_num}{c_mapped}")
+                    else:
+                        candidates.append(f"{mapped_base}{naked_num}{c_mapped}")
+
     return _ordered_unique(candidates)
 
 
@@ -1260,6 +1291,22 @@ def _validate_vex_with_checker(vex_code):
             "errors": [f"Validation system error: {e!s}"],
             "warnings": [],
         }
+
+
+def _vex_validation_unavailable(validation_result):
+    """Return True when validation failed because no checker/compiler is available."""
+    if not isinstance(validation_result, dict):
+        return False
+    if validation_result.get("status") == "compiler_not_found":
+        return True
+    errors = " ".join(str(err) for err in validation_result.get("errors") or [])
+    unavailable_markers = (
+        "hou not available",
+        "compiler_not_found",
+        "could not find snippet parm on checker node",
+        "validation system error",
+    )
+    return any(marker in errors.lower() for marker in unavailable_markers)
 
 
 def _validate_python_code(code):

@@ -77,6 +77,7 @@ class HoudiniMindPanel(
         self._autoresearch_loop = None
         self._autoresearch_running = False
         self._active_job_id = ""
+        self._cancel_pending = False
         self.agent = None
         self.job_manager = None
         self.memory = None
@@ -89,6 +90,10 @@ class HoudiniMindPanel(
         self._live_stream_timer = QtCore.QTimer(self)
         self._live_stream_timer.setInterval(22)
         self._live_stream_timer.timeout.connect(self._drain_live_stream_queue)
+        self._panel_state_save_timer = QtCore.QTimer(self)
+        self._panel_state_save_timer.setSingleShot(True)
+        self._panel_state_save_timer.setInterval(400)
+        self._panel_state_save_timer.timeout.connect(self._persist_panel_state)
 
         self._backend_ready = False
         self._asr_controller = None
@@ -190,15 +195,29 @@ class HoudiniMindPanel(
     def _on_backend_ready(self, error_msg: str) -> None:
         """Called on the Qt main thread once the backend has loaded."""
         self._backend_ready = True
+        if hasattr(self, "settings_panel") and hasattr(self.settings_panel, "load_config"):
+            self.settings_panel.load_config(self.config)
+        self._restore_panel_state()
+        self._reposition_overlays()
         self._set_init_loading_state(False)
         if error_msg:
             lbl = getattr(self, "turn_status_lbl", None)
             if lbl:
                 lbl.setText(f"Init error: {error_msg[:60]}")
+            send = getattr(self, "send_btn", None)
+            mic = getattr(self, "mic_btn", None)
+            if send:
+                send.setEnabled(False)
+                send.setToolTip("Backend initialization failed")
+            if mic:
+                mic.setEnabled(False)
+                mic.setToolTip("Backend initialization failed")
+            self._add_status_notice(f"Startup failed:\n- Backend: {error_msg}", tone="danger")
         else:
             # Wire everything that depends on agent/memory being present
             self._setup_asr_ui()
             self._start_event_hooks()
+            self._show_startup_diagnostics()
             self._refresh_models_async()
             self._restore_conversation_ui()
             # Refresh header meta (connection dot, model label)

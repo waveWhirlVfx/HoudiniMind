@@ -7,6 +7,7 @@
 Simulation tools: Vellum, FLIP, Pyro, RBD, baking.
 """
 
+import os as _os
 import traceback as _tb
 
 from . import _core as core
@@ -46,6 +47,34 @@ def _set_output_flags(node):
         node.setRenderFlag(True)
     except Exception:
         pass
+
+
+def _create_first_available(parent, candidates, default_name):
+    last_error = None
+    for node_type, node_name in candidates:
+        try:
+            node = parent.createNode(node_type, node_name or default_name)
+            return node, node_type
+        except Exception as exc:
+            last_error = exc
+    tried = ", ".join(node_type for node_type, _node_name in candidates)
+    raise RuntimeError(
+        f"No available node type in {parent.path()}: {tried}. Last error: {last_error}"
+    )
+
+
+def _set_first_valid_input(node, input_indices, input_node, output_index=0):
+    last_error = None
+    for input_index in input_indices:
+        try:
+            node.setInput(input_index, input_node, output_index)
+            return input_index
+        except Exception as exc:
+            last_error = exc
+    raise RuntimeError(
+        f"Could not connect {input_node.path()} to {node.path()} inputs "
+        f"{list(input_indices)}. Last error: {last_error}"
+    )
 
 
 def _geometry_counts(node):
@@ -106,6 +135,518 @@ def _pyro_source_attribute_names(*nodes):
     return names
 
 
+_FX_VALIDATION_WORKFLOWS = (
+    "flip",
+    "vellum_cloth",
+    "vellum_pillow",
+    "rbd",
+    "pyro",
+    "pop",
+    "grains",
+    "wire",
+    "cache_export",
+)
+
+
+def _type_name(node):
+    try:
+        return node.type().name()
+    except Exception:
+        return ""
+
+
+def _node_errors(node):
+    try:
+        return list(node.errors())
+    except Exception:
+        return []
+
+
+def _node_warnings(node):
+    try:
+        return list(node.warnings())
+    except Exception:
+        return []
+
+
+def _node_input_path(node, index):
+    if index is None:
+        return None
+    try:
+        inputs = node.inputs()
+    except Exception:
+        inputs = []
+    if index >= len(inputs) or inputs[index] is None:
+        return None
+    try:
+        return inputs[index].path()
+    except Exception:
+        return None
+
+
+def _source_parent(root, workflow):
+    try:
+        child_category = root.childTypeCategory().name().lower()
+    except Exception:
+        child_category = ""
+    if child_category == "sop":
+        return root
+    safe_name = f"hm_validate_{workflow}".replace("-", "_")
+    return root.createNode("geo", safe_name)
+
+
+def _setup_parent(root, source_parent, workflow):
+    try:
+        child_category = root.childTypeCategory().name().lower()
+    except Exception:
+        child_category = ""
+    if child_category != "sop" and workflow in {"grains", "wire"}:
+        return root
+    return source_parent
+
+
+def _create_validation_source(parent, workflow):
+    source_specs = {
+        "flip": ("sphere", "flip_source"),
+        "vellum_cloth": ("grid", "cloth_source"),
+        "vellum_pillow": ("box", "pillow_source"),
+        "rbd": ("box", "rbd_source"),
+        "pyro": ("sphere", "pyro_source_geo"),
+        "pop": ("sphere", "pop_source_geo"),
+        "grains": ("grid", "grain_source_geo"),
+        "wire": ("curve", "wire_source_curve"),
+        "cache_export": ("box", "cache_export_source"),
+    }
+    node_type, name = source_specs[workflow]
+    try:
+        source = parent.createNode(node_type, name)
+    except Exception:
+        fallback_type = "line" if workflow == "wire" else "box"
+        source = parent.createNode(fallback_type, name)
+
+    if workflow == "vellum_cloth":
+        _set_first_available_parm(source, ("sizex", "sizey", "size"), 2.0)
+    elif workflow in {"flip", "pyro", "pop"}:
+        _set_first_available_parm(source, ("rad", "radius", "scale"), 0.35)
+    elif workflow == "grains":
+        _set_first_available_parm(source, ("sizex", "sizey", "size"), 1.5)
+    return source
+
+
+def _add_check(checks, name, passed, detail=None):
+    checks.append(
+        {
+            "name": name,
+            "status": "pass" if passed else "fail",
+            "detail": detail,
+        }
+    )
+
+
+def _check_node(checks, path, expected_type=None, label=None):
+    node = hou.node(path) if path else None
+    check_name = label or f"node exists: {path}"
+    _add_check(checks, check_name, node is not None, path)
+    if node is None:
+        return None
+    actual_type = _type_name(node)
+    if expected_type:
+        if isinstance(expected_type, (list, tuple, set)):
+            type_ok = actual_type in expected_type
+            detail = f"{actual_type} in {sorted(expected_type)}"
+        else:
+            type_ok = actual_type == expected_type
+            detail = f"{actual_type} == {expected_type}"
+        _add_check(checks, f"{check_name} type", type_ok, detail)
+    errors = _node_errors(node)
+    _add_check(checks, f"{check_name} has no node errors", not errors, errors)
+    return node
+
+
+def _check_input(checks, node_path, input_index, expected_path=None, label=None):
+    node = hou.node(node_path) if node_path else None
+    actual_path = _node_input_path(node, input_index) if node is not None else None
+    if expected_path:
+        passed = actual_path == expected_path
+        detail = f"{actual_path} == {expected_path}"
+    else:
+        passed = actual_path is not None
+        detail = actual_path
+    _add_check(
+        checks,
+        label or f"{node_path} input {input_index} is wired",
+        passed,
+        detail,
+    )
+
+
+def _run_live_cook(checks, parent_path, output_path, start_frame, end_frame):
+    if not output_path or end_frame < start_frame:
+        return None
+    try:
+        from . import _advanced_tools
+
+        result = _advanced_tools.cook_network_range(
+            parent_path,
+            start_frame,
+            end_frame,
+            node_path=output_path,
+        )
+    except Exception as exc:
+        _add_check(checks, "live cook completed", False, str(exc))
+        return None
+
+    passed = result.get("status") == "ok" and not result.get("data", {}).get("error_frames")
+    _add_check(checks, "live cook completed", passed, result.get("data") or result.get("error"))
+    return result
+
+
+def _validation_row(workflow, parent_path, source_path, result, checks, cook_result=None):
+    failed = [check for check in checks if check["status"] != "pass"]
+    warnings = []
+    for value in (result.get("data") or {}).values():
+        if isinstance(value, str):
+            node = hou.node(value)
+            if node is not None:
+                warnings.extend(_node_warnings(node))
+    return {
+        "workflow": workflow,
+        "status": "pass" if result.get("status") == "ok" and not failed else "fail",
+        "parent": parent_path,
+        "source": source_path,
+        "tool_status": result.get("status"),
+        "tool_error": (
+            result.get("error") or result.get("message") if result.get("status") != "ok" else None
+        ),
+        "checks": checks,
+        "warnings": warnings,
+        "result": result.get("data"),
+        "cook": cook_result.get("data")
+        if cook_result and cook_result.get("status") == "ok"
+        else None,
+    }
+
+
+def validate_fx_workflow_matrix(
+    parent_path="/obj",
+    workflows=None,
+    cook_frames=0,
+    cache_dir="$HIP/cache/houdinimind_validation",
+):
+    """Build and validate a live low-resolution FX workflow matrix.
+
+    The tool creates disposable validation networks under ``parent_path`` and
+    verifies expected nodes, core wiring, errors, cache TOP setup, and geometry
+    export. Set ``cook_frames`` above zero to force-cook each output for that
+    many frames.
+    """
+    try:
+        _require_hou()
+        root = hou.node(parent_path)
+        if not root:
+            return _err(f"Parent not found: {parent_path}")
+
+        if workflows is None:
+            selected = list(_FX_VALIDATION_WORKFLOWS)
+        elif isinstance(workflows, str):
+            selected = [name.strip() for name in workflows.split(",") if name.strip()]
+        else:
+            selected = list(workflows)
+        unknown = [name for name in selected if name not in _FX_VALIDATION_WORKFLOWS]
+        if unknown:
+            return _err(
+                "Unknown workflow(s): "
+                + ", ".join(unknown)
+                + ". Expected one or more of: "
+                + ", ".join(_FX_VALIDATION_WORKFLOWS)
+            )
+
+        rows = []
+        start_frame = 1
+        end_frame = max(0, int(cook_frames or 0))
+
+        for workflow in selected:
+            checks = []
+            source_parent = _source_parent(root, workflow)
+            parent = _setup_parent(root, source_parent, workflow)
+            source = _create_validation_source(source_parent, workflow)
+            result = {"status": "error", "error": "workflow did not run", "data": {}}
+            cook_result = None
+            output_path = None
+
+            if workflow == "flip":
+                result = setup_flip_fluid(parent.path(), source.path(), particle_separation=0.25)
+                data = result.get("data") or {}
+                _check_node(checks, data.get("source"), "flipsource", "FLIP source")
+                _check_node(checks, data.get("dopnet"), "dopnet", "FLIP DOP network")
+                _check_node(checks, data.get("solver"), "flipsolver", "FLIP solver")
+                _check_node(checks, data.get("surface"), "particlefluidsurface", "FLIP surface")
+                _check_input(
+                    checks, data.get("source"), 0, source.path(), "FLIP source uses input geo"
+                )
+                _check_input(checks, data.get("solver"), 0, label="FLIP solver has FLIP object")
+                _check_input(
+                    checks, data.get("surface"), 0, data.get("dopnet"), "FLIP surface reads DOP"
+                )
+                output_path = data.get("surface")
+
+            elif workflow == "vellum_cloth":
+                result = setup_vellum_cloth(parent.path(), source.path())
+                data = result.get("data") or {}
+                _check_node(
+                    checks, data.get("constraints"), "vellumconstraints", "Vellum cloth constraints"
+                )
+                _check_node(checks, data.get("solver"), "vellumsolver", "Vellum cloth solver")
+                _check_node(checks, data.get("cache"), "vellumio", "Vellum cloth cache")
+                _check_input(
+                    checks, data.get("constraints"), 0, source.path(), "Vellum cloth source wired"
+                )
+                _check_input(
+                    checks, data.get("solver"), 0, data.get("constraints"), "Vellum geometry input"
+                )
+                _check_input(
+                    checks,
+                    data.get("solver"),
+                    2,
+                    data.get("constraints"),
+                    "Vellum constraints input",
+                )
+                _check_input(checks, data.get("cache"), 0, data.get("solver"), "Vellum cache input")
+                output_path = data.get("cache")
+
+            elif workflow == "vellum_pillow":
+                result = setup_vellum_pillow(parent.path(), source.path())
+                data = result.get("data") or {}
+                _check_node(
+                    checks, data.get("constraints"), "vellumconstraints", "Vellum pillow struts"
+                )
+                _check_node(checks, data.get("solver"), "vellumsolver", "Vellum pillow solver")
+                _check_input(
+                    checks, data.get("constraints"), 0, label="Pillow struts read pressure cloth"
+                )
+                _check_input(
+                    checks, data.get("solver"), 0, data.get("constraints"), "Pillow geometry input"
+                )
+                _check_input(
+                    checks,
+                    data.get("solver"),
+                    2,
+                    data.get("constraints"),
+                    "Pillow constraints input",
+                )
+                output_path = data.get("solver")
+
+            elif workflow == "rbd":
+                result = setup_rbd_fracture(parent.path(), source.path(), num_pieces=8)
+                data = result.get("data") or {}
+                _check_node(
+                    checks,
+                    data.get("fracture"),
+                    {"rbdmaterialfracture", "voronoifracture", "voronoifracturesurface"},
+                    "RBD fracture",
+                )
+                _check_node(checks, data.get("solver"), "rbdbulletsolver", "RBD bullet solver")
+                _check_node(checks, data.get("output"), "null", "RBD output")
+                _check_input(checks, data.get("fracture"), 0, source.path(), "RBD source wired")
+                _check_input(
+                    checks, data.get("solver"), 0, data.get("fracture"), "RBD solver geometry"
+                )
+                _check_input(checks, data.get("output"), 0, data.get("solver"), "RBD output wired")
+                output_path = data.get("output")
+
+            elif workflow == "pyro":
+                result = setup_pyro_sim(parent.path(), source.path(), resolution_scale=2)
+                data = result.get("data") or {}
+                _check_node(
+                    checks, data.get("source_attributes"), "attribwrangle", "Pyro attributes"
+                )
+                _check_node(checks, data.get("source"), "pyrosource", "Pyro source")
+                _check_node(
+                    checks,
+                    data.get("volume_rasterize"),
+                    "volumerasterizeattributes",
+                    "Pyro rasterize",
+                )
+                _check_node(checks, data.get("solver"), "pyrosolver", "Pyro solver")
+                _check_node(checks, data.get("output"), "null", "Pyro output")
+                _check_input(
+                    checks,
+                    data.get("source"),
+                    0,
+                    data.get("source_attributes"),
+                    "Pyro source attributes wired",
+                )
+                _check_input(
+                    checks,
+                    data.get("volume_rasterize"),
+                    0,
+                    data.get("source"),
+                    "Pyro rasterize wired",
+                )
+                _check_input(
+                    checks,
+                    data.get("solver"),
+                    0,
+                    data.get("volume_rasterize"),
+                    "Pyro solver volume input",
+                )
+                _check_input(
+                    checks, data.get("output"), 0, label="Pyro output has solver/postprocess input"
+                )
+                output_path = data.get("output")
+
+            elif workflow == "pop":
+                result = setup_pop_sim(parent.path(), source.path(), birth_rate=100)
+                data = result.get("data") or {}
+                _check_node(checks, data.get("dopnet"), "dopnet", "POP DOP network")
+                _check_node(checks, data.get("pop_object"), "popobject", "POP object")
+                _check_node(
+                    checks, data.get("pop_solver"), {"popsolver", "popsolver::2.0"}, "POP solver"
+                )
+                _check_node(
+                    checks, data.get("pop_source"), {"popsource", "popsource::2.0"}, "POP source"
+                )
+                _check_input(
+                    checks, data.get("pop_solver"), 0, data.get("pop_object"), "POP object input"
+                )
+                _check_input(
+                    checks,
+                    data.get("pop_solver"),
+                    (data.get("solver_inputs") or {}).get("source", 1),
+                    data.get("pop_source"),
+                    "POP source input",
+                )
+                _check_input(checks, data.get("pop_solver"), 2, label="POP force input")
+                output_path = data.get("pop_solver")
+
+            elif workflow == "grains":
+                from . import _advanced_tools
+
+                result = _advanced_tools.setup_grain_sim(
+                    parent.path(),
+                    source.path(),
+                    particle_separation=0.08,
+                    friction=0.6,
+                    clumping=0.05,
+                )
+                data = result.get("data") or {}
+                dopnet = data.get("dopnet")
+                _check_node(checks, data.get("geo_setup"), "geo", "Grain SOP setup")
+                _check_node(checks, dopnet, "dopnet", "Grain DOP network")
+                solver_path = data.get("solver") or (f"{dopnet}/pop_solver" if dopnet else None)
+                object_path = data.get("pop_object") or (
+                    f"{dopnet}/grain_object" if dopnet else None
+                )
+                grains_path = data.get("pop_grains") or (f"{dopnet}/pop_grains" if dopnet else None)
+                source_path = data.get("pop_source") or (
+                    f"{dopnet}/grain_source" if dopnet else None
+                )
+                _check_node(checks, object_path, "popobject", "Grain POP object")
+                _check_node(checks, source_path, "popsource", "Grain POP source")
+                _check_node(checks, grains_path, "popgrains", "POP grains")
+                _check_node(checks, solver_path, "popsolver", "Grain POP solver")
+                _check_input(checks, solver_path, 0, object_path, "Grain object input")
+                _check_input(checks, solver_path, 1, source_path, "Grain source input")
+                _check_input(checks, solver_path, 2, grains_path, "Grain constraint input")
+                output_path = solver_path
+
+            elif workflow == "wire":
+                from . import _advanced_tools
+
+                result = _advanced_tools.setup_wire_solver(parent.path(), source.path())
+                data = result.get("data") or {}
+                dopnet = data.get("dopnet")
+                _check_node(checks, data.get("wire_object"), "wireobject", "Wire object")
+                _check_node(checks, dopnet, "dopnet", "Wire DOP network")
+                _check_node(checks, data.get("solver"), "wiresolver", "Wire solver")
+                _check_input(
+                    checks, data.get("solver"), 0, label="Wire solver has wire object input"
+                )
+                output_path = data.get("solver")
+
+            elif workflow == "cache_export":
+                from . import _pdg_tools, _perf_org_tools
+
+                expanded_cache_dir = hou.expandString(cache_dir)
+                export_path = _os.path.join(expanded_cache_dir, "validation_export.bgeo.sc")
+                export_result = _perf_org_tools.export_geometry(source.path(), export_path, frame=1)
+                result = export_result
+                topnet = root.createNode("topnet", "hm_validate_cache_topnet")
+                cache_result = _pdg_tools.create_file_cache_top(
+                    topnet.path(), source.path(), cache_dir
+                )
+                data = {
+                    "export": export_result.get("data"),
+                    "file_cache": (cache_result.get("data") or {}).get("path"),
+                    "topnet": topnet.path(),
+                }
+                result = {
+                    "status": "ok"
+                    if export_result.get("status") == "ok" and cache_result.get("status") == "ok"
+                    else "error",
+                    "data": data,
+                    "error": export_result.get("error") or cache_result.get("error"),
+                }
+                _add_check(
+                    checks,
+                    "geometry export succeeded",
+                    export_result.get("status") == "ok",
+                    export_result.get("data") or export_result.get("error"),
+                )
+                exported_to = (export_result.get("data") or {}).get("exported_to")
+                _add_check(
+                    checks,
+                    "export file exists",
+                    bool(exported_to and _os.path.exists(exported_to)),
+                    exported_to,
+                )
+                _check_node(checks, topnet.path(), "topnet", "Cache TOP network")
+                _check_node(checks, data.get("file_cache"), "filecache", "File Cache TOP")
+                file_cache = hou.node(data.get("file_cache")) if data.get("file_cache") else None
+                soppath = (
+                    file_cache.parm("soppath").eval()
+                    if file_cache and file_cache.parm("soppath")
+                    else None
+                )
+                _add_check(
+                    checks, "File Cache TOP points at source SOP", soppath == source.path(), soppath
+                )
+                output_path = source.path()
+
+            if end_frame >= start_frame and workflow != "cache_export":
+                cook_result = _run_live_cook(
+                    checks, parent.path(), output_path, start_frame, end_frame
+                )
+
+            rows.append(
+                _validation_row(
+                    workflow,
+                    parent.path(),
+                    source.path(),
+                    result,
+                    checks,
+                    cook_result,
+                )
+            )
+
+        failed_rows = [row for row in rows if row["status"] != "pass"]
+        return _ok(
+            {
+                "status": "pass" if not failed_rows else "fail",
+                "total": len(rows),
+                "passed": len(rows) - len(failed_rows),
+                "failed": len(failed_rows),
+                "workflows": selected,
+                "rows": rows,
+            },
+            message=(
+                f"FX workflow validation matrix: {len(rows) - len(failed_rows)}/{len(rows)} passed."
+            ),
+        )
+    except Exception:
+        return _err(_tb.format_exc())
+
+
 def setup_vellum_cloth(
     parent_path,
     geo_node_path,
@@ -153,6 +694,7 @@ def setup_vellum_cloth(
             solver.setInput(1, merge)
         vio = parent.createNode("vellumio", "vellum_cache")
         vio.setInput(0, solver)
+        vio.setInput(1, solver, 1)
         parent.layoutChildren()
         return _ok(
             {"constraints": cfg.path(), "solver": solver.path(), "cache": vio.path()},
@@ -357,6 +899,113 @@ def setup_flip_fluid(
                 "surface": pfs.path(),
             },
             message="UNDO_TRACK: Created full FLIP rig",
+        )
+    except Exception:
+        return _err(_tb.format_exc())
+
+
+def setup_pop_sim(
+    parent_path,
+    source_node_path,
+    birth_rate=5000,
+):
+    """Create a Houdini 21 DOP-based POP simulation (dopnet, popobject, popsolver, popsource)."""
+    try:
+        _require_hou()
+        parent = hou.node(parent_path)
+        if not parent:
+            return _err(f"Parent not found: {parent_path}")
+        src_node = hou.node(source_node_path)
+        if not src_node:
+            return _err(f"Source node not found: {source_node_path}")
+
+        dopnet = parent.createNode("dopnet", "pop_sim")
+        dopnet.setInput(0, src_node)
+
+        pop_obj, pop_obj_type = _create_first_available(
+            dopnet,
+            (("popobject", "popobject1"),),
+            "popobject1",
+        )
+        pop_solver, pop_solver_type = _create_first_available(
+            dopnet,
+            (("popsolver::2.0", "popsolver1"), ("popsolver", "popsolver1")),
+            "popsolver1",
+        )
+        pop_src, pop_src_type = _create_first_available(
+            dopnet,
+            (("popsource::2.0", "popsource1"), ("popsource", "popsource1")),
+            "popsource1",
+        )
+
+        pop_solver.setInput(0, pop_obj)
+        source_input_index = _set_first_valid_input(pop_solver, (1, 3), pop_src)
+
+        output = dopnet.createNode("output", "OUT")
+        output.setInput(0, pop_solver)
+        _set_output_flags(output)
+
+        p_use = pop_src.parm("usecontextgeo")
+        if p_use:
+            try:
+                p_use.set(1)
+            except Exception:
+                pass
+
+        p_birth = pop_src.parm("birthrate")
+        if p_birth:
+            try:
+                p_birth.set(birth_rate)
+            except Exception:
+                pass
+
+        pop_force, pop_force_type = _create_first_available(
+            dopnet,
+            (
+                ("popvortex", "popvortex1"),
+                ("popforce", "popforce1"),
+                ("popwind", "popwind1"),
+            ),
+            "popforce1",
+        )
+        pop_drag, pop_drag_type = _create_first_available(
+            dopnet,
+            (("popdrag", "popdrag1"),),
+            "popdrag1",
+        )
+
+        merge_forces = dopnet.createNode("merge", "merge_forces")
+        merge_forces.setInput(0, pop_force)
+        merge_forces.setInput(1, pop_drag)
+
+        forces_input_index = _set_first_valid_input(pop_solver, (2,), merge_forces)
+
+        dopnet.layoutChildren()
+        parent.layoutChildren()
+
+        return _ok(
+            {
+                "dopnet": dopnet.path(),
+                "pop_object": pop_obj.path(),
+                "pop_solver": pop_solver.path(),
+                "pop_source": pop_src.path(),
+                "pop_force": pop_force.path(),
+                "pop_vortex": pop_force.path(),
+                "pop_drag": pop_drag.path(),
+                "solver_inputs": {
+                    "object": 0,
+                    "source": source_input_index,
+                    "forces": forces_input_index,
+                },
+                "node_types": {
+                    "pop_object": pop_obj_type,
+                    "pop_solver": pop_solver_type,
+                    "pop_source": pop_src_type,
+                    "pop_force": pop_force_type,
+                    "pop_drag": pop_drag_type,
+                },
+            },
+            message="UNDO_TRACK: Created POP simulation DOP network",
         )
     except Exception:
         return _err(_tb.format_exc())

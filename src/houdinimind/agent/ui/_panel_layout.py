@@ -640,22 +640,26 @@ class PanelLayoutMixin:
         """Keep floating overlay panels anchored below the header."""
         if not hasattr(self, "settings_panel"):
             return
-        # Position settings overlay: full width minus margins, below header row (~46px)
-        m = 10  # matches root layout margins
-        header_h = 46  # approx header + spacing
-        w = self.width() - m * 2
+        # Position settings overlay against live widget geometry instead of a
+        # hard-coded header height. Houdini panels can be docked very small.
+        m = 10
+        anchor_y = 46
+        if hasattr(self, "workspace_splitter") and self.workspace_splitter.geometry().top() > 0:
+            anchor_y = max(36, self.workspace_splitter.geometry().top())
+        w = max(260, self.width() - m * 2)
         self.settings_panel.setFixedWidth(w)
         self.settings_panel.adjustSize()
         h = self.settings_panel.sizeHint().height()
-        self.settings_panel.setGeometry(m, header_h, w, h)
+        self.settings_panel.setGeometry(m, anchor_y, w, h)
         self.settings_panel.raise_()
 
         # Position scroll-to-bottom button: bottom-right of chat area
         if hasattr(self, "scroll_to_bottom_btn") and hasattr(self, "scroll"):
             sb_w = 28
             sb_h = 28
-            # Place it just above the composer input (~80px from bottom)
-            x = self.width() - sb_w - 20
-            y = self.height() - sb_h - 100
+            scroll_rect = self.scroll.geometry()
+            global_top_left = self.scroll.mapTo(self, QtCore.QPoint(0, 0))
+            x = global_top_left.x() + scroll_rect.width() - sb_w - 16
+            y = global_top_left.y() + scroll_rect.height() - sb_h - 16
             self.scroll_to_bottom_btn.setGeometry(x, y, sb_w, sb_h)
             self.scroll_to_bottom_btn.raise_()

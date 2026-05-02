@@ -14,6 +14,7 @@ Run this script to rebuild the KB:
 Or call build_kb() from install.py.
 """
 
+import glob
 import json
 import os
 import re
@@ -241,7 +242,396 @@ def _load_node_chain_training_data() -> list:
     return entries
 
 
-import glob
+def _houdini_python_source_candidates(data_dir: str | None = None) -> list[str]:
+    candidates = []
+
+    env_value = os.environ.get("HOUDINIMIND_HOUDINI_PYTHON_JSON", "").strip()
+    if env_value:
+        for part in env_value.split(os.pathsep):
+            part = part.strip()
+            if part:
+                candidates.append(part)
+
+    data_roots = [data_dir, DATA_DIR]
+    for root in data_roots:
+        if not root:
+            continue
+        candidates.extend(
+            [
+                os.path.join(root, "knowledge", "houdini_python_functions.json"),
+                os.path.join(root, "db", "houdini_python_functions.json"),
+                os.path.join(os.path.dirname(root), "houdini_python_functions.json"),
+            ]
+        )
+
+    candidates.extend(
+        [
+            os.path.join(ROOT, "houdini_python_functions.json"),
+            os.path.join(os.getcwd(), "houdini_python_functions.json"),
+            os.path.join(os.path.dirname(os.getcwd()), "houdini_python_functions.json"),
+        ]
+    )
+
+    seen = set()
+    unique = []
+    for path in candidates:
+        norm = os.path.normcase(os.path.abspath(path))
+        if norm in seen:
+            continue
+        seen.add(norm)
+        unique.append(path)
+    return unique
+
+
+def _clean_houdini_python_text(value) -> str:
+    text = str(value or "").strip()
+    if not text:
+        return ""
+    replacements = {
+        "â": "'",
+        "â": "'",
+        "â": '"',
+        "â": '"',
+        "â": "-",
+        "â": "-",
+        "Ã": "x",
+    }
+    for old, new in replacements.items():
+        text = text.replace(old, new)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def _python_symbol_aliases(name: str, namespace: str, signature: str) -> list[str]:
+    raw_name = str(name or "").strip().rstrip("()")
+    raw_namespace = str(namespace or "").strip().rstrip(".")
+    raw_signature = str(signature or "").strip()
+    aliases = [raw_name]
+    if raw_namespace and raw_name and not raw_name.startswith(raw_namespace + "."):
+        method_name = raw_name.rsplit(".", 1)[-1]
+        aliases.append(f"{raw_namespace}.{method_name}")
+    if raw_signature:
+        sig_name = raw_signature.split("(", 1)[0].strip()
+        if sig_name:
+            aliases.append(sig_name)
+            if raw_namespace and "." not in sig_name:
+                aliases.append(f"{raw_namespace}.{sig_name}")
+    for alias in list(aliases):
+        if "." in alias:
+            aliases.append(alias.rsplit(".", 1)[-1])
+    return _dedupe_tags(alias.lower() for alias in aliases if alias)
+
+
+def _houdini_python_function_to_entry(item: dict, source_path: str, index: int) -> dict:
+    name = _clean_houdini_python_text(item.get("name")) or f"hou.unknown_{index}"
+    namespace = _clean_houdini_python_text(item.get("namespace")) or "hou"
+    item_type = _clean_houdini_python_text(item.get("type")) or "function"
+    signature = _clean_houdini_python_text(item.get("signature"))
+    description = _clean_houdini_python_text(item.get("description"))
+    aliases = _python_symbol_aliases(name, namespace, signature)
+
+    content_parts = [
+        f"Qualified Name: {name}",
+        f"Namespace: {namespace}",
+        f"Type: {item_type}",
+    ]
+    if signature:
+        display_signature = signature
+        if item_type == "method" and "." not in signature.split("(", 1)[0] and namespace:
+            display_signature = f"{namespace}.{signature}"
+        content_parts.append(f"Signature: {display_signature}")
+    if description:
+        content_parts.append(f"Description: {description}")
+    if item_type == "method":
+        content_parts.append(
+            "Usage Note: call methods on the appropriate HOM object instance; verify exact "
+            "attribute casing with live hou/dir() when the source name is normalized."
+        )
+
+    return {
+        "title": f"Houdini Python HOM: {name}",
+        "category": "python",
+        "tags": _dedupe_tags(
+            [
+                "python",
+                "hom",
+                "hou",
+                item_type,
+                namespace,
+                name,
+                *aliases,
+                *_slug_tokens(namespace),
+                *_slug_tokens(name),
+                *_slug_tokens(description[:240]),
+            ]
+        ),
+        "content": "\n".join(content_parts),
+        "_source": "houdini_python_functions_json",
+        "_source_path": os.path.basename(source_path),
+        "_python_symbol": aliases[0] if aliases else name.lower(),
+        "_python_aliases": aliases,
+        "_python_namespace": namespace,
+        "_python_type": item_type,
+    }
+
+
+def _load_houdini_python_function_knowledge(data_dir: str | None = None) -> list:
+    """Load the Houdini HOM Python reference as one RAG entry per function/method."""
+    source_path = next(
+        (path for path in _houdini_python_source_candidates(data_dir) if os.path.exists(path)), ""
+    )
+    if not source_path:
+        return []
+
+    try:
+        with open(source_path, encoding="utf-8") as f:
+            payload = json.load(f)
+    except Exception as e:
+        print(f"[KB Builder] Failed to read Houdini Python JSON {source_path}: {e}")
+        return []
+
+    records = payload.get("functions") if isinstance(payload, dict) else payload
+    if not isinstance(records, list):
+        print(f"[KB Builder] Skipping Houdini Python JSON {source_path}: no function list found")
+        return []
+
+    entries = []
+    seen = set()
+    for index, item in enumerate(records, start=1):
+        if not isinstance(item, dict):
+            continue
+        name = _clean_houdini_python_text(item.get("name"))
+        signature = _clean_houdini_python_text(item.get("signature"))
+        dedupe_key = (name.lower(), signature.lower())
+        if not name or dedupe_key in seen:
+            continue
+        seen.add(dedupe_key)
+        entries.append(_houdini_python_function_to_entry(item, source_path, index))
+
+    if entries:
+        print(
+            f"[KB Builder] Loaded {len(entries)} Houdini Python HOM reference entries "
+            f"from {os.path.basename(source_path)}"
+        )
+    return entries
+
+
+_VEX_TYPE_PREFIXES = (
+    "matrix4",
+    "matrix3",
+    "matrix2",
+    "vector4",
+    "vector2",
+    "vector",
+    "string",
+    "float",
+    "bsdf",
+    "dict",
+    "void",
+    "int",
+)
+
+
+def _vex_db_source_candidates(data_dir: str | None = None) -> list[str]:
+    candidates = []
+
+    env_value = os.environ.get("HOUDINIMIND_VEX_FUNCTIONS_DB", "").strip()
+    if env_value:
+        for part in env_value.split(os.pathsep):
+            part = part.strip()
+            if part:
+                candidates.append(part)
+
+    data_roots = [data_dir, DATA_DIR]
+    for root in data_roots:
+        if not root:
+            continue
+        candidates.extend(
+            [
+                os.path.join(root, "knowledge", "vex_functions.db"),
+                os.path.join(root, "db", "vex_functions.db"),
+                os.path.join(os.path.dirname(root), "vex_functions.db"),
+            ]
+        )
+
+    candidates.extend(
+        [
+            os.path.join(os.getcwd(), "vex_functions.db"),
+            os.path.join(os.path.dirname(os.getcwd()), "vex_functions.db"),
+        ]
+    )
+
+    seen = set()
+    unique = []
+    for path in candidates:
+        norm = os.path.normcase(os.path.abspath(path))
+        if norm in seen:
+            continue
+        seen.add(norm)
+        unique.append(path)
+    return unique
+
+
+def _parse_jsonish_list(value) -> list[str]:
+    if not value:
+        return []
+    if isinstance(value, list):
+        return [str(item).strip() for item in value if str(item).strip()]
+    if not isinstance(value, str):
+        return [str(value).strip()] if str(value).strip() else []
+    text = value.strip()
+    if not text:
+        return []
+    try:
+        parsed = json.loads(text)
+    except Exception:
+        parsed = None
+    if isinstance(parsed, list):
+        return [str(item).strip() for item in parsed if str(item).strip()]
+    return [text]
+
+
+def _format_vex_parameter(param: str) -> str:
+    raw = str(param or "").strip()
+    if not raw or raw == "...":
+        return raw
+
+    default = ""
+    if "=" in raw:
+        raw, default_value = raw.split("=", 1)
+        default = "=" + default_value.strip()
+
+    array_suffix = ""
+    while raw.endswith("[]"):
+        raw = raw[:-2]
+        array_suffix += "[]"
+
+    for type_name in ("<type>", *_VEX_TYPE_PREFIXES):
+        if raw == type_name:
+            return type_name + array_suffix + default
+        if raw.startswith(type_name) and len(raw) > len(type_name):
+            return f"{type_name}{array_suffix} {raw[len(type_name) :]}{default}"
+    return raw + array_suffix + default
+
+
+def _format_compact_vex_signature(function_name: str, signature: str) -> str:
+    raw = str(signature or "").strip()
+    if not raw:
+        return ""
+
+    marker = f"{function_name}("
+    if marker not in raw:
+        return raw
+
+    return_type, rest = raw.split(marker, 1)
+    return_type = return_type.strip()
+    params_text = rest.rsplit(")", 1)[0] if ")" in rest else rest
+    params = [_format_vex_parameter(part.strip()) for part in params_text.split(",")]
+    rendered_params = ", ".join(part for part in params if part)
+    if return_type:
+        return f"{return_type} {function_name}({rendered_params})"
+    return f"{function_name}({rendered_params})"
+
+
+def _vex_db_function_to_entry(row: dict, signatures: list[tuple[str, str]]) -> dict:
+    name = str(row.get("name") or "").strip()
+    summary = str(row.get("summary") or "").strip()
+    description = str(row.get("description") or "").strip()
+    category = str(row.get("category") or "").strip()
+    examples = _parse_jsonish_list(row.get("examples"))
+    related = _parse_jsonish_list(row.get("related_functions"))
+
+    signature_lines = []
+    for signature, signature_description in signatures:
+        rendered = _format_compact_vex_signature(name, signature)
+        if not rendered:
+            continue
+        sig_desc = str(signature_description or "").strip()
+        signature_lines.append(f"- {rendered}" + (f": {sig_desc}" if sig_desc else ""))
+
+    content_parts = [
+        f"Function: {name}",
+        f"VEX Category: {category or 'uncategorized'}",
+    ]
+    if summary:
+        content_parts.append(f"Summary: {summary}")
+    if description and description != summary:
+        content_parts.append(f"Description: {description}")
+    if signature_lines:
+        content_parts.append("Signatures:\n" + "\n".join(signature_lines))
+    if examples:
+        content_parts.append("Examples:\n" + "\n".join(f"- {example}" for example in examples[:8]))
+    if related:
+        content_parts.append("Related Functions: " + ", ".join(related[:20]))
+
+    return {
+        "title": f"VEX Function: {name}",
+        "category": "vex",
+        "tags": _dedupe_tags(
+            [
+                "vex",
+                "function",
+                name,
+                *_slug_tokens(name),
+                *_slug_tokens(category),
+                *_slug_tokens(summary),
+                *related[:20],
+            ]
+        ),
+        "content": "\n".join(content_parts),
+        "_source": "vex_functions_db",
+        "_source_path": "vex_functions.db",
+        "_vex_symbol": name,
+        "_vex_category": category,
+        "_signature_count": len(signature_lines),
+    }
+
+
+def _load_vex_function_db_knowledge(data_dir: str | None = None) -> list:
+    """Load the SQLite VEX function reference as one RAG entry per function."""
+    db_path = next(
+        (path for path in _vex_db_source_candidates(data_dir) if os.path.exists(path)), ""
+    )
+    if not db_path:
+        return []
+
+    entries = []
+    try:
+        import sqlite3
+
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        function_rows = conn.execute(
+            "SELECT name, summary, description, category, examples, related_functions "
+            "FROM functions ORDER BY name"
+        ).fetchall()
+        signature_rows = conn.execute(
+            "SELECT function_name, signature, description "
+            "FROM signatures ORDER BY function_name, id"
+        ).fetchall()
+        conn.close()
+    except Exception as e:
+        print(f"[KB Builder] Failed to load VEX function DB {db_path}: {e}")
+        return []
+
+    signatures_by_function: dict[str, list[tuple[str, str]]] = {}
+    for row in signature_rows:
+        signatures_by_function.setdefault(str(row["function_name"]), []).append(
+            (str(row["signature"] or ""), str(row["description"] or ""))
+        )
+
+    for row in function_rows:
+        row_dict = dict(row)
+        name = str(row_dict.get("name") or "").strip()
+        if not name:
+            continue
+        entries.append(_vex_db_function_to_entry(row_dict, signatures_by_function.get(name, [])))
+
+    if entries:
+        print(
+            f"[KB Builder] Loaded {len(entries)} VEX function reference entries "
+            f"from {os.path.basename(db_path)}"
+        )
+    return entries
 
 
 def _high_fidelity_source_candidates() -> list:
@@ -1255,8 +1645,25 @@ _EMPTY_NODE_SENTINEL = "(no parameters documented)"
 
 
 def _normalise(entries: list) -> list:
+    import hashlib
+    import re as _re
+
+    def _content_fingerprint(text: str) -> str:
+        """Whitespace-collapsed, case-folded SHA1 of the content body.
+
+        Catches near-duplicates that differ only in formatting / casing —
+        previously these slipped past the strict equality dedup and bloated
+        the KB. We hash rather than store the full text so the seen-set stays
+        small even for KBs with hundreds of thousands of entries.
+        """
+        if not text:
+            return ""
+        collapsed = _re.sub(r"\s+", " ", text).strip().lower()
+        return hashlib.sha1(collapsed.encode("utf-8", "ignore")).hexdigest()
+
     normalised = []
-    seen_keys = set()
+    seen_keys: set = set()
+    duplicates_dropped = 0
     excluded_sources = 0
     empty_nodes = 0
     for i, entry in enumerate(entries):
@@ -1289,12 +1696,15 @@ def _normalise(entries: list) -> list:
             empty_nodes += 1
             continue
 
+        title_norm = _re.sub(r"\s+", " ", entry.get("title", "")).strip().lower()
+        category_norm = (entry.get("category") or "").strip().lower()
         dedupe_key = (
-            entry.get("title", "").strip(),
-            entry.get("category", "").strip(),
-            entry.get("content", ""),
+            title_norm,
+            category_norm,
+            _content_fingerprint(entry.get("content", "")),
         )
         if dedupe_key in seen_keys:
+            duplicates_dropped += 1
             continue
         seen_keys.add(dedupe_key)
         # Add metadata
@@ -1306,6 +1716,8 @@ def _normalise(entries: list) -> list:
         print(f"[KB Builder] Excluded {excluded_sources} synthetic fine-tuning entries")
     if empty_nodes:
         print(f"[KB Builder] Excluded {empty_nodes} empty node entries (no parameter data)")
+    if duplicates_dropped:
+        print(f"[KB Builder] Dropped {duplicates_dropped} near-duplicate entries")
     return normalised
 
 
@@ -1331,6 +1743,8 @@ def build_kb(output_path: str | None = None, verbose: bool = True) -> str:
     all_entries.extend(_load_high_fidelity_knowledge())
     all_entries.extend(_load_gemma_jsonl_knowledge())
     all_entries.extend(_load_general_json_knowledge())
+    all_entries.extend(_load_houdini_python_function_knowledge())
+    all_entries.extend(_load_vex_function_db_knowledge())
     all_entries.extend(_load_session_recipes())
 
     normalised = _normalise(all_entries)

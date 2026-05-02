@@ -198,6 +198,8 @@ class PanelStateMixin:
     def _refresh_header_meta(self):
         if not hasattr(self, "header_status_lbl"):
             return
+        backend = str(self.config.get("backend", "ollama") or "ollama").lower()
+        backend_label = "NVIDIA NIM" if backend == "nvidia" else "Ollama"
         if (
             hasattr(self, "conn_status")
             and getattr(self.conn_status.retry_btn, "isVisible", lambda: False)()
@@ -207,7 +209,9 @@ class PanelStateMixin:
             self.header_status_lbl.setStyleSheet(
                 "color: #c05050; font-size: 13px; background: transparent; padding: 0;"
             )
-            self.header_status_lbl.setToolTip("Ollama not reachable — run: ollama serve")
+            self.header_status_lbl.setToolTip(f"{backend_label} not reachable")
+            if hasattr(self, "settings_panel") and hasattr(self.settings_panel, "set_model_status"):
+                self.settings_panel.set_model_status(f"{backend_label} not reachable", "error")
             return
         chat_model = (
             self.chat_model_combo.current_model() if hasattr(self, "chat_model_combo") else ""
@@ -215,17 +219,35 @@ class PanelStateMixin:
         vision_model = (
             self.vision_model_combo.current_model() if hasattr(self, "vision_model_combo") else ""
         )
-        bits = ["Ollama connected"]
+        bits = [f"Backend: {backend_label}"]
         if chat_model:
             bits.append(f"Chat: {chat_model}")
         if vision_model:
             bits.append(f"Vision: {vision_model}")
+        if not chat_model or not vision_model:
+            self.header_status_lbl.setText("●")
+            self.header_status_lbl.setStyleSheet(
+                "color: #c8a050; font-size: 13px; background: transparent; padding: 0;"
+            )
+            missing = []
+            if not chat_model:
+                missing.append("chat model")
+            if not vision_model:
+                missing.append("vision model")
+            tooltip = f"{backend_label}: missing " + " and ".join(missing)
+            self.header_status_lbl.setToolTip(tooltip)
+            if hasattr(self, "settings_panel") and hasattr(self.settings_panel, "set_model_status"):
+                self.settings_panel.set_model_status(tooltip, "warn")
+            return
+
         # Green dot only — tooltip shows the details on hover
         self.header_status_lbl.setText("●")
         self.header_status_lbl.setStyleSheet(
             "color: #5aaa78; font-size: 13px; background: transparent; padding: 0;"
         )
         self.header_status_lbl.setToolTip(" • ".join(bits))
+        if hasattr(self, "settings_panel") and hasattr(self.settings_panel, "set_model_status"):
+            self.settings_panel.set_model_status(" • ".join(bits), "ok")
 
     def _apply_view_mode(self):
         simple = self._detail_mode == "simple"
@@ -267,6 +289,73 @@ class PanelStateMixin:
         self._refresh_header_meta()
         self._refresh_action_availability()
 
+    def _queue_panel_state_save(self):
+        timer = getattr(self, "_panel_state_save_timer", None)
+        if timer is not None:
+            timer.start()
+
+    def _persist_panel_state(self):
+        if not getattr(self, "config", None):
+            return
+        ui_cfg = self.config.setdefault("ui", {})
+        state = ui_cfg.setdefault("panel_state", {})
+        state.update(
+            {
+                "detail_mode": getattr(self, "_detail_mode", "simple"),
+                "focus_mode": bool(getattr(self, "_focus_mode", False)),
+                "quick_prompts": bool(getattr(self, "_show_quick_prompts", False)),
+                "settings_visible": bool(
+                    hasattr(self, "settings_panel") and not self.settings_panel.isHidden()
+                ),
+                "vision_next": bool(
+                    self.vision_toggle_btn.isChecked()
+                    if hasattr(self, "vision_toggle_btn")
+                    else True
+                ),
+                "fast_next": bool(
+                    self.fast_toggle_btn.isChecked() if hasattr(self, "fast_toggle_btn") else False
+                ),
+            }
+        )
+        if hasattr(self, "workspace_splitter"):
+            sizes = self.workspace_splitter.sizes()
+            if len(sizes) == 2 and sum(sizes) > 0:
+                state["splitter_sizes"] = sizes
+        if hasattr(self, "inspector_tabs"):
+            state["inspector_tab"] = int(self.inspector_tabs.currentIndex())
+        if hasattr(self, "_save_runtime_config"):
+            self._save_runtime_config()
+
+    def _restore_panel_state(self):
+        state = ((self.config or {}).get("ui") or {}).get("panel_state") or {}
+        if not state:
+            return
+        self._detail_mode = "advanced" if state.get("detail_mode") == "advanced" else "simple"
+        self._focus_mode = bool(state.get("focus_mode", False))
+        self._show_quick_prompts = bool(state.get("quick_prompts", False))
+        if hasattr(self, "vision_toggle_btn"):
+            self.vision_toggle_btn.blockSignals(True)
+            self.vision_toggle_btn.setChecked(bool(state.get("vision_next", True)))
+            self.vision_toggle_btn.blockSignals(False)
+            self._vision_for_next_message = self.vision_toggle_btn.isChecked()
+        if hasattr(self, "fast_toggle_btn"):
+            self.fast_toggle_btn.blockSignals(True)
+            self.fast_toggle_btn.setChecked(bool(state.get("fast_next", False)))
+            self.fast_toggle_btn.blockSignals(False)
+            self._fast_for_next_message = self.fast_toggle_btn.isChecked()
+        if hasattr(self, "workspace_splitter"):
+            sizes = state.get("splitter_sizes")
+            if isinstance(sizes, list) and len(sizes) == 2 and sum(sizes) > 0:
+                self._last_workspace_sizes = [int(sizes[0]), int(sizes[1])]
+                self.workspace_splitter.setSizes(self._last_workspace_sizes)
+        if hasattr(self, "inspector_tabs"):
+            tab = int(state.get("inspector_tab", 0) or 0)
+            if 0 <= tab < self.inspector_tabs.count():
+                self.inspector_tabs.setCurrentIndex(tab)
+        if hasattr(self, "settings_panel"):
+            self.settings_panel.setVisible(bool(state.get("settings_visible", False)))
+        self._apply_view_mode()
+
     def _refresh_action_availability(self):
         has_agent = bool(getattr(self, "agent", None))
         has_memory = bool(getattr(self, "memory", None))
@@ -293,6 +382,7 @@ class PanelStateMixin:
         controls = {
             "more_actions_btn": not self._busy,
             "refresh_models_btn": not self._busy,
+            "doctor_btn": not self._busy,
             "mic_btn": not self._busy,
             "scene_btn": can_scene,
             "sync_scene_action": can_scene,
@@ -317,6 +407,8 @@ class PanelStateMixin:
         }
         for name, enabled in controls.items():
             control = getattr(self, name, None)
+            if control is None and hasattr(self, "settings_panel"):
+                control = getattr(self.settings_panel, name, None)
             if control is not None:
                 try:
                     control.setEnabled(bool(enabled))

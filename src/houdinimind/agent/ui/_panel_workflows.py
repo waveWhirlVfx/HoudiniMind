@@ -626,8 +626,29 @@ class PanelWorkflowMixin:
         self.mode_label.setText(msg)
         self._refresh_turn_status(msg)
 
+    def _show_startup_diagnostics(self):
+        issues = getattr(self, "_startup_issues", []) or []
+        if not issues:
+            return
+        lines = ["Startup completed with issues:"]
+        for issue in issues[:6]:
+            subsystem = issue.get("subsystem", "Startup")
+            error = str(issue.get("error", "")).strip()
+            if len(error) > 180:
+                error = error[:177].rstrip() + "..."
+            lines.append(f"- {subsystem}: {error}")
+        if len(issues) > 6:
+            lines.append(f"- {len(issues) - 6} more issue(s) in the debug log.")
+        self._add_status_notice("\n".join(lines), tone="warning")
+        self._refresh_turn_status("Startup completed with diagnostics to review.")
+
     def _set_busy(self, busy: bool):
         self._busy = busy
+        if not busy:
+            self._cancel_pending = False
+            if hasattr(self, "stop_btn"):
+                self.stop_btn.setEnabled(True)
+                self.stop_btn.setText("■")
         # Legacy strip is intentionally hidden from UI.
         if hasattr(self, "turn_strip"):
             self.turn_strip.setVisible(False)
@@ -670,23 +691,20 @@ class PanelWorkflowMixin:
         self._refresh_action_availability()
 
     def _on_stop(self):
+        if not self._busy and not self._autoresearch_running:
+            return
+        self._cancel_pending = True
+        if hasattr(self, "stop_btn"):
+            self.stop_btn.setEnabled(False)
+            self.stop_btn.setText("...")
+        self._show_status("Stopping at the next safe checkpoint...")
+        self._refresh_turn_status("Stopping at the next safe checkpoint...")
+
         # 1. Signal the agent thread to stop ASAP
         if self._autoresearch_running:
             self._stop_autoresearch()
         if self.agent:
             self.agent.cancel()
-
-        # 2. Reset UI — agent.cancel() sets the cancel event so the background
-        #    thread will exit at its next checkpoint.  We must clear _busy now
-        #    so the user can immediately issue a new request.
-        self._set_busy(False)
-        self._hide_status()
-        self.stop_btn.setVisible(False)
-        self.send_btn.setVisible(True)
-        self.input_box.setEnabled(True)
-
-        self._add_system_note("⏹ Stopped.")
-        self._refresh_turn_status("Stopped.")
 
     def _on_undo(self):
         if self._busy:
@@ -755,6 +773,8 @@ class PanelWorkflowMixin:
             return ""
 
     def closeEvent(self, event):
+        if hasattr(self, "_persist_panel_state"):
+            self._persist_panel_state()
         if getattr(self, "_asr_controller", None):
             try:
                 self._asr_controller.stop()

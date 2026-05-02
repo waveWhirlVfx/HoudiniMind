@@ -133,18 +133,23 @@ def get_node_parameters(node_path, compact=True):
         return _err(_traceback.format_exc())
 
 
-def get_node_inputs(node_path, only_connected=True):
+def get_node_inputs(node_path, only_connected=True, max_inputs=64):
     """Check input connections and any red-arrow errors."""
     try:
         _require_hou()
         node = hou.node(node_path)
         if not node:
             return _err("Node not found")
+        try:
+            max_inputs = max(1, int(max_inputs))
+        except (TypeError, ValueError):
+            max_inputs = 64
         input_names = list(node.inputNames()) if hasattr(node, "inputNames") else []
         raw_inputs = list(node.inputs()) if hasattr(node, "inputs") else []
         raw_connectors = list(node.inputConnectors()) if hasattr(node, "inputConnectors") else []
         input_count = max(len(input_names), len(raw_inputs), len(raw_connectors))
         inputs = []
+        connected_inputs = []
         for i in range(input_count):
             conn = raw_connectors[i] if i < len(raw_connectors) else None
             conn_errors = []
@@ -160,25 +165,31 @@ def get_node_inputs(node_path, only_connected=True):
                             conn_errors.extend(list(nested.errors()))
                         except Exception:
                             pass
-            inputs.append(
-                {
-                    "index": i,
-                    "label": input_names[i] if i < len(input_names) else f"Input {i}",
-                    "connected_to": raw_inputs[i].path()
-                    if i < len(raw_inputs) and raw_inputs[i]
-                    else None,
-                    "errors": conn_errors,
-                }
-            )
-        connected_inputs = [
-            inp for inp in inputs if inp["connected_to"] is not None or inp["errors"]
-        ]
+            item = {
+                "index": i,
+                "label": input_names[i] if i < len(input_names) else f"Input {i}",
+                "connected_to": raw_inputs[i].path()
+                if i < len(raw_inputs) and raw_inputs[i]
+                else None,
+                "errors": conn_errors,
+            }
+            has_signal = item["connected_to"] is not None or bool(item["errors"])
+            if has_signal:
+                connected_inputs.append(item)
+            if only_connected:
+                if has_signal:
+                    inputs.append(item)
+            elif i < max_inputs or has_signal:
+                inputs.append(item)
         return _ok(
             {
                 "node": node_path,
-                "inputs": connected_inputs,
-                "total_input_slots": len(inputs),
+                "inputs": inputs,
+                "total_input_slots": input_count,
+                "reported_input_slots": len(inputs),
                 "connected_count": len(connected_inputs),
+                "truncated": not only_connected and len(inputs) < input_count,
+                "max_inputs": max_inputs,
             }
         )
     except Exception as e:

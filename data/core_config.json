@@ -1,9 +1,9 @@
 {
   "_comment": "HoudiniMind core config v12 \u2014 safe to edit. Agent never touches this file.",
   "_backend_note": "Ollama supports both local and cloud models. Set model to any ollama pull'd model.",
-  "backend": "ollama",
-  "model": "qwen3.5:397b-cloud",
-  "vision_model": "qwen3.5:397b-cloud",
+  "backend": "nvidia",
+  "model": "deepseek-ai/deepseek-v4-pro",
+  "vision_model": "deepseek-ai/deepseek-v4-pro",
   "asr_model": "base.en",
   "asr_sample_rate": 16000,
   "asr_chunk_seconds": 2.4,
@@ -75,7 +75,20 @@
     "auto_inject_scene_on_chat": false,
     "show_tool_calls": true,
     "show_llm_trace_history": false,
-    "raw_llm_response": true
+    "raw_llm_response": true,
+    "panel_state": {
+      "detail_mode": "simple",
+      "focus_mode": false,
+      "quick_prompts": false,
+      "settings_visible": false,
+      "vision_next": false,
+      "fast_next": false,
+      "splitter_sizes": [
+        469,
+        0
+      ],
+      "inspector_tab": 2
+    }
   },
   "plan_enabled": true,
   "semantic_scoring_enabled": true,
@@ -93,6 +106,20 @@
   "embed_tools_at_startup": true,
   "enable_repair_critic": true,
   "verify_skip_vision": false,
+  "clarification_enabled": true,
+  "preconditions_enabled": true,
+  "failure_blacklist_enabled": true,
+  "failure_blacklist_window": 12,
+  "tool_retry_enabled": true,
+  "tool_retry_max_attempts": 3,
+  "tool_retry_base_delay_s": 0.4,
+  "tool_retry_max_delay_s": 4.0,
+  "circuit_breaker_threshold": 4,
+  "circuit_breaker_cool_down_s": 60.0,
+  "turn_budget_enabled": true,
+  "turn_wall_clock_s": 240.0,
+  "turn_max_input_tokens": 200000,
+  "turn_max_output_tokens": 16000,
   "_perf_notes": "Perf tuning: 1 research iteration, 2k RAG context budget, 20 tool schemas (down from 40 rounds), startup tool-embedding warmup, lightweight verification.",
   "_schedule_note": "Scheduled AutoResearch: set schedule_enabled=true to auto-run research on topics every schedule_interval_h hours.",
   "schedule_enabled": false,
@@ -110,5 +137,8 @@
   "cache_scene_observation": true,
   "_runtime_note": "Model-size-specific planning/vision overrides have been removed. Planning and vision now follow the explicit runtime settings only.",
   "vision_enabled": true,
-  "_hou_app_version": "21.0.559"
+  "_hou_app_version": "21.0.559",
+  "api_key": "",
+  "openai_base_url": "https://integrate.api.nvidia.com/v1",
+  "mcp_port": 9875
 }

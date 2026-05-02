@@ -48,6 +48,7 @@ try:
         StatusNoticeWidget,
         ToolActivityGroup,
         ToolCallWidget,
+        TurnSummaryWidget,
         createInterface,
     )
 except ModuleNotFoundError as exc:
@@ -64,6 +65,7 @@ except ModuleNotFoundError as exc:
     ModelCombo = SettingsPanel = SmartInput = LoadingSpinner = MessageBubble = None
     ToolCallWidget = ToolActivityGroup = ImagePreview = EmptyStateWidget = None
     StatusNoticeWidget = FeedbackChip = QuickPromptBar = ConnectionStatus = None
+    TurnSummaryWidget = None
     ErrorBannerWidget = DebugLogDialog = RecipeBrowserDialog = None
     ResearchOptionCard = ResearchOptionsWidget = None
 

@@ -747,17 +747,23 @@ class AutoResearchLoop:
     def _clean_scene(self, stream_cb: Callable):
         """Create a fresh geo container for each attempt."""
         try:
+            import hou as _hou
+
             from .tools import TOOL_FUNCTIONS
+
+            # Use hipFile.clear every 5 attempts for a total state reset (Mac stability rule)
+            if self._session_stats.get("total_attempts", 0) % 5 == 0:
+                _hou.hipFile.clear(suppress_save_prompt=True)
+                stream_cb("\u200b🧹 Hard reset scene (hipFile.clear)\n")
 
             # Create a new geo node for the attempt
             create_fn = TOOL_FUNCTIONS.get("create_node")
             if create_fn:
-                import hou as _hou
-
                 # Delete existing autoresearch geo if present
                 existing = _hou.node("/obj/autoresearch_geo")
                 if existing:
                     existing.destroy()
+                    _hou.undonest.clear()  # Clear undo stack after delete (Mac stability rule)
                 create_fn(parent_path="/obj", node_type="geo", name="autoresearch_geo")
                 stream_cb("\u200b🧹 Clean scene ready\n")
         except Exception as e:

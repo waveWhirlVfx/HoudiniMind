@@ -112,6 +112,11 @@ class _FakeFinalizerGeometry:
     def prims(self):
         return self._prims
 
+    def saveToFile(self, path):
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w", encoding="utf-8") as handle:
+            handle.write("fake bgeo\n")
+
 
 class _FakeFinalizerType:
     def __init__(self, name):
@@ -136,6 +141,7 @@ class _FakeFinalizerNode:
         self._geometry = _FakeFinalizerGeometry(points=points, prims=prims, prim_type=prim_type)
         self._inputs = []
         self._outputs = []
+        self._children = []
         self._parms = {}
         self._display = False
         self._render = False
@@ -158,6 +164,29 @@ class _FakeFinalizerNode:
 
     def outputs(self):
         return list(self._outputs)
+
+    def children(self):
+        return list(self._children)
+
+    def node(self, name):
+        for child in self._children:
+            if child.name() == name:
+                return child
+        return None
+
+    def createNode(self, node_type, name=None):
+        node_name = name or f"{node_type}1"
+        node = _FakeFinalizerNode(self, node_name, node_type)
+        self._children.append(node)
+        owner = self
+        while owner is not None and not hasattr(owner, "_node_map"):
+            owner = owner.parent() if hasattr(owner, "parent") else None
+        if owner is not None:
+            owner._node_map[node.path()] = node
+        return node
+
+    def layoutChildren(self):
+        return None
 
     def inputConnections(self):
         return [node for node in self._inputs if node is not None]
@@ -276,11 +305,21 @@ class _FakeFinalizerHou:
 
     def __init__(self, parent):
         self._parent = parent
+        self._frame = 1
         self.ui = self._UI()
         self.paneTabType = self._PaneTabType()
 
     def node(self, path):
         return self._parent._node_map.get(path)
+
+    def frame(self):
+        return self._frame
+
+    def setFrame(self, frame):
+        self._frame = frame
+
+    def expandString(self, value):
+        return value.replace("$HIP", _workspace_temp_root())
 
 
 class _FakeHdefereval:
@@ -908,6 +947,53 @@ class AgentFoundationTests(unittest.TestCase):
         self.assertEqual(output.inputs()[0].path(), "/obj/rbd_geo/rbd_bullet_solver")
         self.assertTrue(output.isDisplayFlagSet())
 
+    def test_setup_pop_sim_uses_houdini21_pop_fallback_nodes(self):
+        from houdinimind.agent import tools
+
+        class _RejectingDopNode(_FakeFinalizerNode):
+            def createNode(self, node_type, name=None):
+                if node_type in {"popsolver", "popvortex"}:
+                    raise RuntimeError(f"Unknown node type: {node_type}")
+                return super().createNode(node_type, name)
+
+        class _PopParent(_FakeFinalizerParent):
+            def createNode(self, node_type, name=None):
+                node_name = name or f"{node_type}1"
+                if node_type == "dopnet":
+                    node = _RejectingDopNode(self, node_name, node_type)
+                    self._children.append(node)
+                    self._node_map[node.path()] = node
+                    return node
+                return super().createNode(node_type, name)
+
+        parent = _PopParent("/obj/pop_geo")
+        source = parent.createNode("sphere", "source_sphere")
+        fake_hou = _FakeFinalizerHou(parent)
+        original_hou = getattr(tools, "hou", None)
+        original_available = tools.HOU_AVAILABLE
+
+        try:
+            tools.hou = fake_hou
+            tools.HOU_AVAILABLE = True
+            result = tools.setup_pop_sim("/obj/pop_geo", source.path(), birth_rate=123)
+        finally:
+            if original_hou is None:
+                delattr(tools, "hou")
+            else:
+                tools.hou = original_hou
+            tools.HOU_AVAILABLE = original_available
+
+        self.assertEqual(result["status"], "ok")
+        self.assertEqual(result["data"]["node_types"]["pop_solver"], "popsolver::2.0")
+        self.assertEqual(result["data"]["node_types"]["pop_force"], "popforce")
+        self.assertEqual(result["data"]["solver_inputs"], {"object": 0, "source": 1, "forces": 2})
+        solver = parent._node_map["/obj/pop_geo/pop_sim/popsolver1"]
+        source_node = parent._node_map["/obj/pop_geo/pop_sim/popsource1"]
+        force_merge = parent._node_map["/obj/pop_geo/pop_sim/merge_forces"]
+        self.assertEqual(solver.inputs()[0].path(), "/obj/pop_geo/pop_sim/popobject1")
+        self.assertEqual(solver.inputs()[1], source_node)
+        self.assertEqual(solver.inputs()[2], force_merge)
+
     def test_setup_pyro_sim_builds_sop_solver_chain(self):
         from houdinimind.agent import tools
 
@@ -1035,6 +1121,72 @@ class AgentFoundationTests(unittest.TestCase):
         self.assertEqual(rasterize.inputs()[0].path(), "/obj/pyro_volume/pyrosource1")
         self.assertEqual(solver.inputs()[0].path(), "/obj/pyro_volume/pyro_volume_rasterize")
 
+    def test_validate_fx_workflow_matrix_covers_expert_sim_and_cache_workflows(self):
+        from houdinimind.agent import tools
+        from tests.fake_hou import FakeCategory
+
+        class _ObjectRoot(_FakeFinalizerParent):
+            def __init__(self, path):
+                super().__init__(path)
+                self._child_category = FakeCategory("Object")
+
+        parent = _ObjectRoot("/obj")
+        fake_hou = _FakeFinalizerHou(parent)
+        original_hou = getattr(tools, "hou", None)
+        original_available = tools.HOU_AVAILABLE
+
+        try:
+            tools.hou = fake_hou
+            tools.HOU_AVAILABLE = True
+            result = tools.validate_fx_workflow_matrix("/obj", cook_frames=1)
+        finally:
+            if original_hou is None:
+                delattr(tools, "hou")
+            else:
+                tools.hou = original_hou
+            tools.HOU_AVAILABLE = original_available
+
+        self.assertEqual(result["status"], "ok")
+        data = result["data"]
+        self.assertEqual(data["status"], "pass")
+        self.assertEqual(data["total"], 9)
+        self.assertEqual(data["passed"], 9)
+        self.assertEqual(
+            data["workflows"],
+            [
+                "flip",
+                "vellum_cloth",
+                "vellum_pillow",
+                "rbd",
+                "pyro",
+                "pop",
+                "grains",
+                "wire",
+                "cache_export",
+            ],
+        )
+        rows = {row["workflow"]: row for row in data["rows"]}
+        self.assertEqual(
+            rows["flip"]["result"]["solver"], "/obj/hm_validate_flip/flip_dopnet/flipsolver1"
+        )
+        self.assertEqual(
+            rows["pyro"]["result"]["volume_rasterize"],
+            "/obj/hm_validate_pyro/pyro_volume_rasterize",
+        )
+        vellum_cache = parent._node_map["/obj/hm_validate_vellum_cloth/vellum_cache"]
+        self.assertEqual(
+            vellum_cache.inputs()[1].path(), "/obj/hm_validate_vellum_cloth/vellum_solver"
+        )
+        self.assertEqual(rows["grains"]["result"]["dopnet"], "/obj/grain_sim")
+        self.assertEqual(rows["grains"]["result"]["solver"], "/obj/grain_sim/pop_solver")
+        grain_solver = parent._node_map["/obj/grain_sim/pop_solver"]
+        self.assertEqual(grain_solver.inputs()[0].path(), "/obj/grain_sim/grain_object")
+        self.assertEqual(grain_solver.inputs()[1].path(), "/obj/grain_sim/grain_source")
+        self.assertEqual(grain_solver.inputs()[2].path(), "/obj/grain_sim/pop_grains")
+        self.assertEqual(rows["wire"]["result"]["solver"], "/obj/wire_sim/wire_solver")
+        self.assertTrue(os.path.exists(rows["cache_export"]["result"]["export"]["exported_to"]))
+        self.assertIn("validate_fx_workflow_matrix", tools.TOOL_FUNCTIONS)
+
     def test_create_node_chain_inserts_pyro_volume_rasterize_before_solver(self):
         from houdinimind.agent import tools
 
@@ -1161,6 +1313,63 @@ class AgentFoundationTests(unittest.TestCase):
         self.assertNotIn("source_node", cleaned)
         self.assertNotIn("target_node", cleaned)
 
+    def test_tool_validator_normalizes_connect_port_aliases(self):
+        from houdinimind.agent.tool_models import ToolValidator
+        from houdinimind.agent.tools._registry import TOOL_SCHEMAS
+
+        validator = ToolValidator(TOOL_SCHEMAS)
+        cleaned = validator.validate(
+            "connect_nodes",
+            {
+                "from_path": "/obj/geo1/box1",
+                "to_path": "/obj/geo1/xform1",
+                "from_output": "1",
+                "to_input": "2",
+            },
+        )
+
+        self.assertEqual(cleaned["from_path"], "/obj/geo1/box1")
+        self.assertEqual(cleaned["to_path"], "/obj/geo1/xform1")
+        self.assertEqual(cleaned["from_out"], 1)
+        self.assertEqual(cleaned["to_in"], 2)
+        self.assertNotIn("from_output", cleaned)
+        self.assertNotIn("to_input", cleaned)
+
+    def test_tool_validator_rejects_invalid_enum_value(self):
+        from houdinimind.agent.tool_models import ToolArgumentError, ToolValidator
+        from houdinimind.agent.tools._registry import TOOL_SCHEMAS
+
+        validator = ToolValidator(TOOL_SCHEMAS)
+
+        with self.assertRaises(ToolArgumentError):
+            validator.validate("list_node_types", {"category": "definitely_not_a_category"})
+
+    def test_tool_schemas_expose_signature_controls(self):
+        from houdinimind.agent.tools._registry import TOOL_SCHEMAS
+
+        schemas = {
+            schema["function"]["name"]: schema["function"]["parameters"]["properties"]
+            for schema in TOOL_SCHEMAS
+        }
+
+        self.assertIn("compact", schemas["get_node_parameters"])
+        self.assertIn("only_connected", schemas["get_node_inputs"])
+        self.assertIn("max_inputs", schemas["get_node_inputs"])
+        self.assertIn("max_attribs", schemas["get_geometry_attributes"])
+        self.assertIn("cleanup_on_error", schemas["create_node_chain"])
+        self.assertIn("cook", schemas["create_node"])
+        self.assertIn("extra_parameters", schemas["convert_network_to_hda"])
+        self.assertIn("max_total_seconds", schemas["cook_network_range"])
+
+    def test_agent_loop_image_hash_normalizes_base64_payload(self):
+        from houdinimind.agent.loop import AgentLoop
+
+        raw_hash = AgentLoop._compute_image_hash("aGVsbG8=")
+        spaced_hash = AgentLoop._compute_image_hash("data:image/png;base64,aG Vs\nbG8=")
+
+        self.assertEqual(raw_hash, spaced_hash)
+        self.assertEqual(len(raw_hash), 64)
+
     def test_tool_validator_infers_null_node_type_from_name(self):
         from houdinimind.agent.tool_models import ToolValidator
         from houdinimind.agent.tools._registry import TOOL_SCHEMAS
@@ -1204,6 +1413,7 @@ class AgentFoundationTests(unittest.TestCase):
         self.assertIn("Parameter 'numpieces' not found", result["message"])
 
     def test_safe_set_parameter_maps_vex_code_to_snippet(self):
+        import houdinimind.agent.tools._node_tools as node_tools
         from houdinimind.agent import tools
 
         node = _FakeParmNode(
@@ -1213,10 +1423,17 @@ class AgentFoundationTests(unittest.TestCase):
         )
         original_hou = getattr(tools, "hou", None)
         original_available = tools.HOU_AVAILABLE
+        original_validator = node_tools._validate_vex_with_checker
 
         try:
             tools.hou = FakeHou({"/obj/geo1/wrangle1": node})
             tools.HOU_AVAILABLE = True
+            node_tools._validate_vex_with_checker = lambda _code: {
+                "success": True,
+                "errors": [],
+                "warnings": [],
+                "status": "fallback",
+            }
             result = tools.safe_set_parameter(
                 "/obj/geo1/wrangle1",
                 "vex_code",
@@ -1228,9 +1445,59 @@ class AgentFoundationTests(unittest.TestCase):
             else:
                 tools.hou = original_hou
             tools.HOU_AVAILABLE = original_available
+            node_tools._validate_vex_with_checker = original_validator
 
         self.assertEqual(result["status"], "ok")
         self.assertEqual(node.parm("snippet").eval(), "@Cd = {1, 0, 0};")
+
+    def test_safe_set_parameter_rejects_invalid_vex_snippet(self):
+        import houdinimind.agent.tools._node_tools as node_tools
+        from houdinimind.agent import tools
+
+        node = _FakeParmNode(
+            "/obj/geo1/wrangle1",
+            type_name="attribwrangle",
+            parms={"snippet": "@P.y += 1;"},
+        )
+        original_hou = getattr(tools, "hou", None)
+        original_available = tools.HOU_AVAILABLE
+        original_validator = node_tools._validate_vex_with_checker
+
+        try:
+            tools.hou = FakeHou({"/obj/geo1/wrangle1": node})
+            tools.HOU_AVAILABLE = True
+            node_tools._validate_vex_with_checker = lambda _code: {
+                "success": False,
+                "errors": ["Call to undefined function 'rayhittest'"],
+                "warnings": [],
+                "status": "fallback",
+            }
+            result = tools.safe_set_parameter(
+                "/obj/geo1/wrangle1",
+                "snippet",
+                "float d = rayhittest(@P, {0,1,0}, 0.1);",
+            )
+        finally:
+            if original_hou is None:
+                delattr(tools, "hou")
+            else:
+                tools.hou = original_hou
+            tools.HOU_AVAILABLE = original_available
+            node_tools._validate_vex_with_checker = original_validator
+
+        self.assertEqual(result["status"], "error")
+        self.assertIn("VEX validation failed", result["message"])
+        self.assertEqual(node.parm("snippet").eval(), "@P.y += 1;")
+
+    def test_execute_python_blocks_direct_wrangle_snippet_write(self):
+        from houdinimind.agent import tools
+
+        result = tools.execute_python(
+            "node = hou.node('/obj/geo1/wrangle1')\nnode.parm('snippet').set('@P.y += 1;')\n"
+        )
+
+        self.assertEqual(result["status"], "error")
+        self.assertIn("write_vex_code", result["message"])
 
     def test_attempt_parameter_recovery_rejects_semantically_different_fuzzy_match(self):
         import houdinimind.agent.loop as loop_mod
@@ -2786,6 +3053,50 @@ class AgentFoundationTests(unittest.TestCase):
         self.assertEqual(result["data"]["inputs"][0]["connected_to"], "/obj/geo1/source")
         self.assertEqual(result["data"]["inputs"][0]["errors"], ["bad wire"])
 
+    def test_get_node_inputs_caps_unconnected_variable_inputs(self):
+        from houdinimind.agent import tools
+
+        class _LargeInputNode:
+            def __init__(self):
+                self._connected = _FakeInputLabelNode("/obj/geo1/source99")
+
+            def inputNames(self):
+                return ["input1"]
+
+            def inputs(self):
+                inputs = [None] * 100
+                inputs[99] = self._connected
+                return inputs
+
+            def inputConnectors(self):
+                return [None] * 100
+
+        original_hou = getattr(tools, "hou", None)
+        original_available = tools.HOU_AVAILABLE
+
+        try:
+            tools.hou = FakeHou({"/obj/geo1/merge1": _LargeInputNode()})
+            tools.HOU_AVAILABLE = True
+            result = tools.get_node_inputs(
+                "/obj/geo1/merge1",
+                only_connected=False,
+                max_inputs=4,
+            )
+        finally:
+            if original_hou is None:
+                delattr(tools, "hou")
+            else:
+                tools.hou = original_hou
+            tools.HOU_AVAILABLE = original_available
+
+        self.assertEqual(result["status"], "ok")
+        self.assertEqual(result["data"]["total_input_slots"], 100)
+        self.assertEqual(result["data"]["reported_input_slots"], 5)
+        self.assertTrue(result["data"]["truncated"])
+        self.assertEqual(result["data"]["connected_count"], 1)
+        self.assertEqual(result["data"]["inputs"][-1]["index"], 99)
+        self.assertEqual(result["data"]["inputs"][-1]["connected_to"], "/obj/geo1/source99")
+
     def test_get_geometry_attributes_supports_global_attribs_api(self):
         from houdinimind.agent import tools
 
@@ -3054,6 +3365,148 @@ class AgentFoundationTests(unittest.TestCase):
         self.assertIn("usd", policy["include_categories"])
         self.assertIn("general", policy["include_categories"])
         self.assertEqual(policy["exclude_categories"], ["errors"])
+
+    def test_vex_build_turn_keeps_vex_rag_tools_available(self):
+        from houdinimind.agent.request_modes import _build_mode_disabled_tools_for_query
+
+        disabled = _build_mode_disabled_tools_for_query(
+            "Write a VEX wrangle using pcopen to gather nearby point colors."
+        )
+
+        self.assertNotIn("search_knowledge", disabled)
+        self.assertNotIn("get_vex_snippet", disabled)
+
+    def test_python_build_turn_keeps_python_rag_available(self):
+        from houdinimind.agent.request_modes import (
+            _build_mode_disabled_tools_for_query,
+            get_rag_category_policy,
+        )
+
+        query = "Write Houdini Python using hou.Node.createNode and setParmTemplateGroup."
+        disabled = _build_mode_disabled_tools_for_query(query)
+        policy = get_rag_category_policy("build", query)
+
+        self.assertNotIn("search_knowledge", disabled)
+        self.assertIn("python", policy["include_categories"])
+        self.assertIn("general", policy["include_categories"])
+
+    def test_agent_loop_injects_vex_contract_and_vex_rag_categories(self):
+        from houdinimind.agent.loop import AgentLoop
+
+        class _FakeRetriever:
+            def _query_mentions_vex_symbol(self, query):
+                return "pcopen" in query
+
+        class _FakeRag:
+            retriever = _FakeRetriever()
+
+        tmp = _workspace_case_dir("vex_contract_guidance")
+        self.addCleanup(lambda: shutil.rmtree(tmp, ignore_errors=True))
+        loop = AgentLoop(
+            {"data_dir": tmp, "ollama_url": "http://localhost:11434"}, rag_injector=_FakeRag()
+        )
+
+        guidance = loop._build_vex_contract_guidance(
+            "Use pcopen to average nearby colors in a point wrangle.",
+            "build",
+        )
+        kwargs = loop._get_rag_injection_kwargs(
+            "build",
+            "Use pcopen to average nearby colors in a point wrangle.",
+        )
+
+        self.assertIn('category_filter="vex"', guidance)
+        self.assertIn("write_vex_code", guidance)
+        self.assertIn("validation_failed", guidance)
+        self.assertIn("vex", kwargs["include_categories"])
+        self.assertIn("nodes", kwargs["include_categories"])
+        self.assertIn("general", kwargs["include_categories"])
+
+    def test_dust_contact_request_uses_build_mode_and_contract_rag(self):
+        from houdinimind.agent.loop import AgentLoop
+        from houdinimind.agent.task_contracts import build_task_contract
+
+        query = (
+            "I want wherever crag is touching feet to the ground "
+            "I want you to emit dust from those points"
+        )
+        tmp = _workspace_case_dir("dust_contact_contract_mode")
+        self.addCleanup(lambda: shutil.rmtree(tmp, ignore_errors=True))
+        loop = AgentLoop({"data_dir": tmp, "ollama_url": "http://localhost:11434"})
+
+        mode, confidence = loop._classify_request_mode(query)
+        contract = build_task_contract(query)
+        kwargs = loop._get_rag_injection_kwargs(mode, query)
+
+        self.assertEqual(mode, "build")
+        self.assertGreaterEqual(confidence, 0.9)
+        self.assertIsNotNone(contract)
+        self.assertEqual(contract.contract_id, "dust_contact_emission")
+        self.assertIn("vex", kwargs["include_categories"])
+        self.assertIn("nodes", kwargs["include_categories"])
+        self.assertIn("workflow", kwargs["include_categories"])
+        self.assertIn("sim", kwargs["include_categories"])
+
+    def test_dust_contact_contract_flags_container_only_vopnet_result(self):
+        from houdinimind.agent.task_contracts import build_task_contract, verify_task_contract
+
+        query = (
+            "I want wherever crag is touching feet to the ground "
+            "I want you to emit dust from those points"
+        )
+        contract = build_task_contract(query)
+        before_snapshot = {
+            "nodes": [
+                {
+                    "path": "/obj/testgeometry_crag1/testgeometry_crag1",
+                    "type": "testgeometry_crag",
+                    "category": "Sop",
+                }
+            ],
+            "connections": [],
+        }
+        after_snapshot = {
+            "nodes": [
+                *before_snapshot["nodes"],
+                {"path": "/obj/ground", "type": "geo", "category": "Obj"},
+                {"path": "/obj/dust_sim", "type": "geo", "category": "Obj"},
+                {
+                    "path": "/obj/dust_sim/dust_emission",
+                    "type": "vopnet",
+                    "category": "Sop",
+                },
+                {"path": "/obj/dust_sim/crag_geo", "type": "object_merge", "category": "Sop"},
+                {"path": "/obj/dust_sim/ground_geo", "type": "object_merge", "category": "Sop"},
+            ],
+            "connections": [],
+        }
+
+        issues = verify_task_contract(
+            contract,
+            before_snapshot,
+            after_snapshot,
+            ["/obj/dust_sim"],
+            ["/obj/dust_sim"],
+        )
+        messages = "\n".join(issue["message"] for issue in issues)
+
+        self.assertIn("vopnet", messages)
+        self.assertIn("contact-point", messages)
+        self.assertIn("visible output", messages)
+
+    def test_task_contract_guidance_mentions_acceptance_and_repair(self):
+        from houdinimind.agent.task_contracts import (
+            build_task_contract,
+            format_task_contract_guidance,
+        )
+
+        contract = build_task_contract("emit dust where particles hit the ground")
+        guidance = format_task_contract_guidance(contract)
+
+        self.assertIn("Dust emission from ground-contact points", guidance)
+        self.assertIn("contact points", guidance)
+        self.assertIn("dust/particle source", guidance)
+        self.assertIn("repair", guidance.lower())
 
     def test_rag_eval_harness_reports_hit_at_k_and_mrr(self):
         from houdinimind.rag.eval_harness import evaluate_retriever, load_eval_cases
@@ -3890,6 +4343,59 @@ class AgentFoundationTests(unittest.TestCase):
         self.assertEqual(failure_calls["count"], 3)
         self.assertEqual(success_calls["count"], 2)
 
+    def test_run_loop_recovers_from_malformed_tool_arguments(self):
+        import houdinimind.agent.loop as loop_mod
+        from houdinimind.agent.loop import AgentLoop
+
+        tmp = _workspace_case_dir("loop_bad_tool_json_recovery")
+        self.addCleanup(lambda: shutil.rmtree(tmp, ignore_errors=True))
+        loop = AgentLoop({"data_dir": tmp, "ollama_url": "http://localhost:11434"})
+        original_create = loop_mod.TOOL_FUNCTIONS["create_node"]
+        create_calls = {"count": 0}
+        llm_calls = {"index": 0}
+        responses = [
+            {
+                "content": "",
+                "tool_calls": [
+                    {
+                        "id": "call_bad_json",
+                        "function": {
+                            "name": "create_node",
+                            "arguments": '{"parent_path": "/obj", "node_type": "box",',
+                        },
+                    }
+                ],
+            },
+            {"content": "Recovered after correcting the tool call.", "tool_calls": []},
+        ]
+
+        def fake_create_node(**_kwargs):
+            create_calls["count"] += 1
+            return {"status": "ok", "message": "created", "data": {}}
+
+        def fake_chat(messages, *_args, **_kwargs):
+            if llm_calls["index"] == 1:
+                tool_messages = [m for m in messages if m.get("role") == "tool"]
+                self.assertTrue(tool_messages)
+                self.assertEqual(tool_messages[-1].get("tool_call_id"), "call_bad_json")
+                self.assertIn("Argument JSON parsing failed", tool_messages[-1]["content"])
+            response = responses[llm_calls["index"]]
+            llm_calls["index"] += 1
+            return response
+
+        try:
+            loop_mod.TOOL_FUNCTIONS["create_node"] = fake_create_node
+            loop.llm.chat = fake_chat
+            result = loop._run_loop(
+                [{"role": "user", "content": "Build a box"}],
+                request_mode="build",
+            )
+        finally:
+            loop_mod.TOOL_FUNCTIONS["create_node"] = original_create
+
+        self.assertEqual(result, "Recovered after correcting the tool call.")
+        self.assertEqual(create_calls["count"], 0)
+
     def test_build_loop_returns_friendly_message_on_llm_overload(self):
         from houdinimind.agent.loop import AgentLoop
 
@@ -4441,7 +4947,10 @@ class AgentFoundationTests(unittest.TestCase):
         self.addCleanup(lambda: shutil.rmtree(tmp, ignore_errors=True))
         loop = AgentLoop({"data_dir": tmp, "ollama_url": "http://localhost:11434"})
 
-        loop._last_turn_verification_report = {"status": "fail"}
+        loop._last_turn_verification_report = {
+            "status": "fail",
+            "issues": [{"severity": "repair", "message": "display node disconnected"}],
+        }
         loop._last_turn_write_tools = ["create_node"]
         loop._last_turn_checkpoint_path = "/tmp/fake_checkpoint.hip"
 
@@ -4922,6 +5431,97 @@ class AgentFoundationTests(unittest.TestCase):
             "python_examples", retriever.last_route_meta.get("selected_shards", [])[:1]
         )
         self.assertLessEqual(len(retriever._loaded_shards), 2)
+
+    def test_query_aware_shard_retriever_routes_exact_vex_symbol_without_vex_keyword(self):
+        from houdinimind.rag.retriever import QueryAwareShardRetriever
+
+        tmp = _workspace_case_dir("query_routed_exact_vex_symbol")
+        self.addCleanup(lambda: shutil.rmtree(tmp, ignore_errors=True))
+        kb_path = os.path.join(tmp, "knowledge_base.json")
+        with open(kb_path, "w", encoding="utf-8") as f:
+            json.dump(
+                {
+                    "entries": [
+                        {
+                            "_id": "pcopen",
+                            "title": "VEX Function: pcopen",
+                            "category": "vex",
+                            "tags": ["vex", "function", "pcopen"],
+                            "content": "Function: pcopen\nSignatures:\n- int pcopen(...)",
+                            "_source": "vex_functions_db",
+                            "_vex_symbol": "pcopen",
+                        },
+                        {
+                            "_id": "workflow",
+                            "title": "Point Cloud Workflow",
+                            "category": "workflow",
+                            "tags": ["point", "cloud", "workflow"],
+                            "content": "Build points, scatter them, and cache the result.",
+                        },
+                    ]
+                },
+                f,
+            )
+
+        retriever = QueryAwareShardRetriever(
+            kb_path=kb_path,
+            hybrid_weight=0.0,
+            max_shards_per_query=1,
+        )
+        results = retriever.retrieve(
+            "Which arguments does pcopen take for radius and maxpoints?",
+            top_k=1,
+            min_score=0.0,
+        )
+
+        self.assertEqual(results[0]["title"], "VEX Function: pcopen")
+        self.assertEqual(retriever.last_route_meta.get("selected_shards"), ["vex_reference"])
+
+    def test_query_aware_shard_retriever_routes_exact_hou_symbol_to_python(self):
+        from houdinimind.rag.retriever import QueryAwareShardRetriever
+
+        tmp = _workspace_case_dir("query_routed_exact_hou_symbol")
+        self.addCleanup(lambda: shutil.rmtree(tmp, ignore_errors=True))
+        kb_path = os.path.join(tmp, "knowledge_base.json")
+        with open(kb_path, "w", encoding="utf-8") as f:
+            json.dump(
+                {
+                    "entries": [
+                        {
+                            "_id": "hou-node-createnode",
+                            "title": "Houdini Python HOM: hou.node.createnode",
+                            "category": "python",
+                            "tags": ["python", "hom", "hou.node.createnode", "createnode"],
+                            "content": "Qualified Name: hou.node.createnode\nSignature: hou.node.createnode(node_type_name)",
+                            "_source": "houdini_python_functions_json",
+                            "_python_symbol": "hou.node.createnode",
+                            "_python_aliases": ["hou.node.createnode", "createnode"],
+                        },
+                        {
+                            "_id": "workflow",
+                            "title": "Node Creation Workflow",
+                            "category": "workflow",
+                            "tags": ["node", "creation"],
+                            "content": "Create nodes using Houdini tools.",
+                        },
+                    ]
+                },
+                f,
+            )
+
+        retriever = QueryAwareShardRetriever(
+            kb_path=kb_path,
+            hybrid_weight=0.0,
+            max_shards_per_query=1,
+        )
+        results = retriever.retrieve(
+            "What arguments does hou.Node.createNode take?",
+            top_k=1,
+            min_score=0.0,
+        )
+
+        self.assertEqual(results[0]["title"], "Houdini Python HOM: hou.node.createnode")
+        self.assertEqual(retriever.last_route_meta.get("selected_shards"), ["python_examples"])
 
     def test_query_aware_shard_retriever_prefers_hda_and_python_for_asset_tooling_queries(self):
         from houdinimind.rag.retriever import QueryAwareShardRetriever
@@ -5500,6 +6100,127 @@ class AgentFoundationTests(unittest.TestCase):
         self.assertIn("wheel_copy (copytopoints::2.0)", entry["content"])
         self.assertIn("Visible output nodes: wheel_copy", entry["content"])
 
+    def test_kb_builder_loads_vex_function_database(self):
+        import sqlite3
+
+        from houdinimind.rag import kb_builder as kb_mod
+
+        tmp = _workspace_case_dir("vex_function_db")
+        self.addCleanup(lambda: shutil.rmtree(tmp, ignore_errors=True))
+        db_path = os.path.join(tmp, "vex_functions.db")
+        conn = sqlite3.connect(db_path)
+        conn.executescript(
+            """
+            CREATE TABLE functions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT UNIQUE NOT NULL,
+                summary TEXT,
+                description TEXT,
+                category TEXT,
+                examples TEXT,
+                related_functions TEXT
+            );
+            CREATE TABLE signatures (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                function_name TEXT NOT NULL,
+                signature TEXT NOT NULL,
+                description TEXT
+            );
+            CREATE TABLE categories (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT UNIQUE NOT NULL,
+                function_count INTEGER
+            );
+            """
+        )
+        conn.execute(
+            "INSERT INTO functions "
+            "(name, summary, description, category, examples, related_functions) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            (
+                "pcopen",
+                "Returns a handle to a point cloud file.",
+                "Returns a handle to a point cloud file.",
+                "Point Clouds and 3D Images",
+                '["int handle = pcopen(0, \\"P\\", @P, 1.0, 16);"]',
+                '["pciterate", "pcimport"]',
+            ),
+        )
+        conn.execute(
+            "INSERT INTO signatures (function_name, signature, description) VALUES (?, ?, ?)",
+            (
+                "pcopen",
+                "intpcopen(intopinput,stringPchannel,vectorP,floatradius,intmaxpoints)",
+                "",
+            ),
+        )
+        conn.commit()
+        conn.close()
+
+        previous = os.environ.get("HOUDINIMIND_VEX_FUNCTIONS_DB")
+        os.environ["HOUDINIMIND_VEX_FUNCTIONS_DB"] = db_path
+        try:
+            entries = kb_mod._load_vex_function_db_knowledge(tmp)
+        finally:
+            if previous is None:
+                os.environ.pop("HOUDINIMIND_VEX_FUNCTIONS_DB", None)
+            else:
+                os.environ["HOUDINIMIND_VEX_FUNCTIONS_DB"] = previous
+
+        self.assertEqual(len(entries), 1)
+        entry = entries[0]
+        self.assertEqual(entry["title"], "VEX Function: pcopen")
+        self.assertEqual(entry["category"], "vex")
+        self.assertEqual(entry["_source"], "vex_functions_db")
+        self.assertEqual(entry["_vex_symbol"], "pcopen")
+        self.assertIn("Point Clouds and 3D Images", entry["content"])
+        self.assertIn(
+            "int pcopen(int opinput, string Pchannel, vector P, float radius, int maxpoints)",
+            entry["content"],
+        )
+        self.assertIn("pciterate", entry["content"])
+
+    def test_kb_builder_loads_houdini_python_function_json(self):
+        from houdinimind.rag import kb_builder as kb_mod
+
+        tmp = _workspace_case_dir("houdini_python_function_json")
+        self.addCleanup(lambda: shutil.rmtree(tmp, ignore_errors=True))
+        json_path = os.path.join(tmp, "houdini_python_functions.json")
+        with open(json_path, "w", encoding="utf-8") as f:
+            json.dump(
+                {
+                    "metadata": {"source": "test"},
+                    "functions": [
+                        {
+                            "name": "hou.node.createnode",
+                            "namespace": "hou.node",
+                            "type": "method",
+                            "signature": "createnode(node_type_name, node_name=none)  -> hou.node",
+                            "description": "Create a new node of type node_type_name as a child.",
+                        }
+                    ],
+                },
+                f,
+            )
+
+        previous = os.environ.get("HOUDINIMIND_HOUDINI_PYTHON_JSON")
+        os.environ["HOUDINIMIND_HOUDINI_PYTHON_JSON"] = json_path
+        try:
+            entries = kb_mod._load_houdini_python_function_knowledge(tmp)
+        finally:
+            if previous is None:
+                os.environ.pop("HOUDINIMIND_HOUDINI_PYTHON_JSON", None)
+            else:
+                os.environ["HOUDINIMIND_HOUDINI_PYTHON_JSON"] = previous
+
+        self.assertEqual(len(entries), 1)
+        entry = entries[0]
+        self.assertEqual(entry["title"], "Houdini Python HOM: hou.node.createnode")
+        self.assertEqual(entry["category"], "python")
+        self.assertEqual(entry["_source"], "houdini_python_functions_json")
+        self.assertIn("hou.node.createnode", entry["_python_aliases"])
+        self.assertIn("Signature: hou.node.createnode", entry["content"])
+
     def test_rag_prefers_generated_kb_when_newer(self):
         from houdinimind.rag import _knowledge_base_path
 
@@ -5619,6 +6340,122 @@ class AgentFoundationTests(unittest.TestCase):
         titles = [entry.get("title") for entry in injector.retriever._entries]
         self.assertIn("High-Fidelity Asset: Gothic Arch", titles)
         self.assertEqual(titles.count("High-Fidelity Asset: Gothic Arch"), 1)
+
+    def test_create_rag_pipeline_merges_runtime_vex_function_database(self):
+        import sqlite3
+
+        from houdinimind.rag import create_rag_pipeline
+
+        tmp = _workspace_case_dir("rag_runtime_vex_db")
+        self.addCleanup(lambda: shutil.rmtree(tmp, ignore_errors=True))
+        knowledge_dir = os.path.join(tmp, "knowledge")
+        os.makedirs(knowledge_dir, exist_ok=True)
+        with open(os.path.join(knowledge_dir, "knowledge_base.json"), "w", encoding="utf-8") as f:
+            json.dump({"entries": []}, f)
+
+        db_path = os.path.join(tmp, "vex_functions.db")
+        conn = sqlite3.connect(db_path)
+        conn.executescript(
+            """
+            CREATE TABLE functions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT UNIQUE NOT NULL,
+                summary TEXT,
+                description TEXT,
+                category TEXT,
+                examples TEXT,
+                related_functions TEXT
+            );
+            CREATE TABLE signatures (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                function_name TEXT NOT NULL,
+                signature TEXT NOT NULL,
+                description TEXT
+            );
+            CREATE TABLE categories (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT UNIQUE NOT NULL,
+                function_count INTEGER
+            );
+            """
+        )
+        conn.execute(
+            "INSERT INTO functions "
+            "(name, summary, description, category, examples, related_functions) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            ("chramp", "Evaluates a ramp parameter.", "", "Nodes", "[]", "[]"),
+        )
+        conn.execute(
+            "INSERT INTO signatures (function_name, signature, description) VALUES (?, ?, ?)",
+            ("chramp", "floatchramp(stringchannel,floatramppos)", ""),
+        )
+        conn.commit()
+        conn.close()
+
+        previous = os.environ.get("HOUDINIMIND_VEX_FUNCTIONS_DB")
+        os.environ["HOUDINIMIND_VEX_FUNCTIONS_DB"] = db_path
+        try:
+            injector = create_rag_pipeline(tmp, {"rag_hybrid_search": False})
+        finally:
+            if previous is None:
+                os.environ.pop("HOUDINIMIND_VEX_FUNCTIONS_DB", None)
+            else:
+                os.environ["HOUDINIMIND_VEX_FUNCTIONS_DB"] = previous
+
+        results = injector.retriever.retrieve(
+            "How should I call chramp for a float ramp parameter?",
+            top_k=1,
+            min_score=0.0,
+        )
+
+        self.assertEqual(results[0]["title"], "VEX Function: chramp")
+        self.assertIn("vex_reference", injector.retriever.last_route_meta["selected_shards"])
+
+    def test_create_rag_pipeline_merges_runtime_houdini_python_json(self):
+        from houdinimind.rag import create_rag_pipeline
+
+        tmp = _workspace_case_dir("rag_runtime_houdini_python_json")
+        self.addCleanup(lambda: shutil.rmtree(tmp, ignore_errors=True))
+        knowledge_dir = os.path.join(tmp, "knowledge")
+        os.makedirs(knowledge_dir, exist_ok=True)
+        with open(os.path.join(knowledge_dir, "knowledge_base.json"), "w", encoding="utf-8") as f:
+            json.dump({"entries": []}, f)
+
+        json_path = os.path.join(tmp, "houdini_python_functions.json")
+        with open(json_path, "w", encoding="utf-8") as f:
+            json.dump(
+                {
+                    "functions": [
+                        {
+                            "name": "hou.node.setparmtemplategroup",
+                            "namespace": "hou.node",
+                            "type": "method",
+                            "signature": "setparmtemplategroup(parm_template_group)",
+                            "description": "Change the spare parameters for this node.",
+                        }
+                    ]
+                },
+                f,
+            )
+
+        previous = os.environ.get("HOUDINIMIND_HOUDINI_PYTHON_JSON")
+        os.environ["HOUDINIMIND_HOUDINI_PYTHON_JSON"] = json_path
+        try:
+            injector = create_rag_pipeline(tmp, {"rag_hybrid_search": False})
+        finally:
+            if previous is None:
+                os.environ.pop("HOUDINIMIND_HOUDINI_PYTHON_JSON", None)
+            else:
+                os.environ["HOUDINIMIND_HOUDINI_PYTHON_JSON"] = previous
+
+        results = injector.retriever.retrieve(
+            "How do I use hou.Node.setParmTemplateGroup to add spare parameters?",
+            top_k=1,
+            min_score=0.0,
+        )
+
+        self.assertEqual(results[0]["title"], "Houdini Python HOM: hou.node.setparmtemplategroup")
+        self.assertIn("python_examples", injector.retriever.last_route_meta["selected_shards"])
 
     def test_general_json_loader_transforms_examples_and_troubleshooting(self):
         from houdinimind.rag import kb_builder as kb_mod
@@ -6136,6 +6973,50 @@ class AgentFoundationTests(unittest.TestCase):
         self.assertIn("Set expression", result["message"])
         self.assertEqual(node.parm("tx").expression, ("ch('/obj/CTRL/tx')", "hscript"))
 
+    def test_set_node_parameter_sets_scalar_tuple_uniformly(self):
+        import houdinimind.agent.tools as tools_mod
+
+        class ParmTuple:
+            def __init__(self, name, size):
+                self._name = name
+                self._size = size
+                self._value = [0.0] * size
+
+            def __len__(self):
+                return self._size
+
+            def eval(self):
+                return list(self._value)
+
+            def set(self, value):
+                self._value = list(value)
+
+            def parmTemplate(self):
+                return _FakeParmTemplate()
+
+        class _FakeTupleNode(_FakeParmNode):
+            def __init__(self, path):
+                super().__init__(path, type_name="sphere", parms={})
+                self.radius = ParmTuple("rad", 3)
+
+            def parmTuple(self, name):
+                if name == "rad":
+                    return self.radius
+                return None
+
+        original_hou = getattr(tools_mod, "hou", None)
+        node = _FakeTupleNode("/obj/geo1/sphere1")
+
+        try:
+            tools_mod.hou = None
+            result = tools_mod._set_node_parameter(node, "rad", 0.35)
+        finally:
+            tools_mod.hou = original_hou
+
+        self.assertEqual(result["status"], "ok")
+        self.assertEqual(node.radius.eval(), [0.35, 0.35, 0.35])
+        self.assertEqual(result["data"]["new"], [0.35, 0.35, 0.35])
+
     def test_create_node_chain_returns_error_on_partial_failure(self):
         import houdinimind.agent.tools as tools_mod
 
@@ -6194,15 +7075,18 @@ class AgentFoundationTests(unittest.TestCase):
                 self.destroyed = True
 
         class _FakeChainParent:
-            def __init__(self, path):
+            def __init__(self, path, fail_types=None):
                 self._path = path
                 self._nodes = {path: self}
                 self._created = []
+                self._fail_types = set(fail_types or [])
 
             def path(self):
                 return self._path
 
             def createNode(self, node_type, name=None):
+                if node_type in self._fail_types:
+                    raise RuntimeError(f"cannot create {node_type}")
                 node_name = name or f"{node_type}1"
                 node = _FakeChainNode(self, node_name, node_type)
                 self._nodes[node.path()] = node
@@ -6232,6 +7116,30 @@ class AgentFoundationTests(unittest.TestCase):
                     {"type": "box", "name": "box1"},
                     {"type": "xform", "name": "xform1", "parms": {"missingparm": 1}},
                 ],
+                cleanup_on_error=False,
+            )
+
+            cleanup_parent = _FakeChainParent("/obj/geo_cleanup")
+            tools_mod.hou = _FakeChainHou(cleanup_parent)
+            cleanup_result = tools_mod.create_node_chain(
+                "/obj/geo_cleanup",
+                [
+                    {"type": "box", "name": "box1"},
+                    {"type": "xform", "name": "xform1", "parms": {"missingparm": 1}},
+                ],
+                cleanup_on_error=True,
+            )
+
+            failed_parent = _FakeChainParent("/obj/geo_failed", fail_types={"badtype"})
+            tools_mod.hou = _FakeChainHou(failed_parent)
+            failed_result = tools_mod.create_node_chain(
+                "/obj/geo_failed",
+                [
+                    {"type": "box", "name": "box1"},
+                    {"type": "badtype", "name": "bad1", "inputs": ["box1"]},
+                    {"type": "null", "name": "OUT"},
+                ],
+                cleanup_on_error=False,
             )
         finally:
             tools_mod.hou = original_hou
@@ -6241,6 +7149,16 @@ class AgentFoundationTests(unittest.TestCase):
         self.assertTrue(result["data"]["partial"])
         self.assertEqual(result["data"]["count"], 2)
         self.assertIn("Chain incomplete", result["message"])
+        self.assertTrue(all(not node.destroyed for node in parent._created))
+
+        self.assertEqual(cleanup_result["status"], "error")
+        self.assertEqual(cleanup_result["data"]["count"], 2)
+        self.assertEqual(len(cleanup_result["data"]["cleaned_up"]), 2)
+        self.assertTrue(all(node.destroyed for node in cleanup_parent._created))
+
+        self.assertEqual(failed_result["status"], "error")
+        out_node = failed_parent._nodes["/obj/geo_failed/OUT"]
+        self.assertEqual(out_node._inputs, [])
 
     def test_create_node_chain_rejects_missing_step_type(self):
         import houdinimind.agent.tools as tools_mod
@@ -6950,6 +7868,75 @@ class AgentFoundationTests(unittest.TestCase):
             HoudiniMindPanel._setup_backend = original_setup
             HoudiniMindPanel._start_event_hooks = original_hooks
             HoudiniMindPanel._refresh_models_async = original_refresh
+
+    def test_settings_panel_emits_nvidia_api_key_config(self):
+        try:
+            from PySide6 import QtWidgets
+
+            from houdinimind.agent.ui._widgets import SettingsPanel
+        except Exception as exc:
+            self.skipTest(f"PySide6 unavailable: {exc}")
+
+        QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+        panel = SettingsPanel(
+            {
+                "ui": {},
+                "backend": "nvidia",
+                "model": "deepseek-ai/deepseek-v4-pro",
+                "vision_model": "deepseek-ai/deepseek-v4-pro",
+                "api_key": "old-key",
+                "openai_base_url": "https://integrate.api.nvidia.com/v1",
+            }
+        )
+        emitted = []
+        panel.settings_changed.connect(emitted.append)
+
+        panel.backend_combo.setCurrentIndex(panel.backend_combo.findData("nvidia"))
+        panel.chat_model_combo.setCurrentText("deepseek-ai/deepseek-v4-pro")
+        panel.api_key_edit.setText("nvapi-test")
+        panel.openai_url_edit.setText("https://integrate.api.nvidia.com/v1")
+        panel._emit()
+
+        self.assertEqual(emitted[-1]["backend"], "nvidia")
+        self.assertEqual(emitted[-1]["api_key"], "nvapi-test")
+        self.assertEqual(emitted[-1]["openai_base_url"], "https://integrate.api.nvidia.com/v1")
+        self.assertTrue(panel.url_edit.isHidden())
+        self.assertFalse(panel.api_key_edit.isHidden())
+
+    def test_nvidia_backend_dispatches_to_openai_compatible_chat(self):
+        from houdinimind.agent.llm_client import OllamaClient
+
+        client = OllamaClient(
+            {
+                "backend": "nvidia",
+                "model": "deepseek-ai/deepseek-v4-pro",
+                "api_key": "nvapi-test",
+                "openai_base_url": "https://integrate.api.nvidia.com/v1",
+                "context_window": 32768,
+            }
+        )
+        seen = {}
+
+        def fake_openai_chat(messages, tools=None, model_override=None, **kwargs):
+            seen["messages"] = messages
+            seen["tools"] = tools
+            seen["model_override"] = model_override
+            seen["kwargs"] = kwargs
+            return {"role": "assistant", "content": "ok"}
+
+        client._openai_compatible_chat = fake_openai_chat
+        result = client.chat(
+            [{"role": "user", "content": "hello"}],
+            tools=[{"type": "function", "function": {"name": "noop", "parameters": {}}}],
+            chunk_callback=lambda _delta: None,
+        )
+
+        self.assertEqual(result["content"], "ok")
+        self.assertEqual(client.backend_name, "nvidia")
+        self.assertEqual(client.base_url, "https://integrate.api.nvidia.com/v1")
+        self.assertEqual(seen["model_override"], "deepseek-ai/deepseek-v4-pro")
+        self.assertEqual(seen["tools"][0]["function"]["name"], "noop")
+        self.assertIn("chunk_callback", seen["kwargs"])
 
 
 if __name__ == "__main__":

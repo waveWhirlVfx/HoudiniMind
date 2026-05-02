@@ -5,6 +5,8 @@
 # ==============================================================================
 import json
 import os
+import queue
+import ssl
 import threading
 import traceback
 
@@ -17,13 +19,42 @@ except ImportError:
 
 
 class PanelBackendMixin:
+    def _record_startup_issue(self, subsystem: str, exc: Exception | str) -> None:
+        issues = getattr(self, "_startup_issues", None)
+        if issues is None:
+            issues = []
+            self._startup_issues = issues
+        issues.append({"subsystem": subsystem, "error": str(exc)})
+
+    def _urlopen_with_ssl_fallback(self, req, timeout: int):
+        try:
+            import certifi
+
+            context = ssl.create_default_context(cafile=certifi.where())
+        except Exception:
+            context = ssl.create_default_context()
+        try:
+            import urllib.request
+
+            return urllib.request.urlopen(req, timeout=timeout, context=context)
+        except ssl.SSLCertVerificationError:
+            import urllib.request
+
+            return urllib.request.urlopen(
+                req,
+                timeout=timeout,
+                context=ssl._create_unverified_context(),
+            )
+
     def _setup_backend(self):
+        self._startup_issues = []
         try:
             self._config_path = os.path.join(HOUDINIMIND_ROOT, "data", "core_config.json")
             with open(self._config_path) as f:
                 self.config = json.load(f)
         except Exception as e:
             print(f"Config load failed: {e}")
+            self._record_startup_issue("Config", e)
             self.config = {}
             self._config_path = os.path.join(HOUDINIMIND_ROOT, "data", "core_config.json")
 
@@ -49,6 +80,7 @@ class PanelBackendMixin:
             )
         except Exception as e:
             print(f"MemoryManager unavailable: {e}")
+            self._record_startup_issue("Memory", e)
         _time.sleep(0)  # yield GIL after MemoryManager
 
         rag_injector = None
@@ -58,6 +90,7 @@ class PanelBackendMixin:
             rag_injector = create_rag_pipeline(self.config.get("data_dir", ""), self.config)
         except Exception as e:
             print(f"RAG unavailable: {e}")
+            self._record_startup_issue("RAG", e)
         _time.sleep(0)  # yield GIL after RAG pipeline (FAISS/model load)
 
         try:
@@ -79,6 +112,7 @@ class PanelBackendMixin:
             self.agent.set_confirmation_callback(self.sig_confirm_request.emit)
         except Exception as e:
             print(f"AgentLoop error: {e}")
+            self._record_startup_issue("Agent", e)
             traceback.print_exc()
         _time.sleep(0)  # yield GIL after AgentLoop
 
@@ -97,6 +131,7 @@ class PanelBackendMixin:
                 self._research_scheduler.start()
         except Exception as e:
             print(f"[HoudiniMind] ResearchScheduler init failed: {e}")
+            self._record_startup_issue("Scheduler", e)
         _time.sleep(0)  # yield GIL after ResearchScheduler
 
         # ── Skills Platform ───────────────────────────────────────────────
@@ -119,6 +154,7 @@ class PanelBackendMixin:
                 )
         except Exception as e:
             print(f"[HoudiniMind] SkillLoader init failed: {e}")
+            self._record_startup_issue("Skills", e)
         _time.sleep(0)  # yield GIL after SkillLoader
 
     def _ensure_schema(self, data_dir: str):
@@ -155,6 +191,7 @@ class PanelBackendMixin:
             self.event_hooks.register()
         except Exception as e:
             print(f"EventHooks failed: {e}")
+            self._record_startup_issue("Event Hooks", e)
         # ── HipFile save event → learning cycle ───────────────────────────
         try:
             import hou
@@ -163,6 +200,7 @@ class PanelBackendMixin:
             print("[HoudiniMind] HipFile event callback registered.")
         except Exception as e:
             print(f"[HoudiniMind] HipFile event callback failed: {e}")
+            self._record_startup_issue("HipFile Events", e)
 
     def _on_hip_file_event(self, event_type):
         """
@@ -208,20 +246,50 @@ class PanelBackendMixin:
         self.sig_tool_called.emit(tool_name, args, result)
 
     def _refresh_models_async(self):
-        """Fetch available Ollama models in a background thread."""
+        """Fetch available models in a background thread."""
 
         def _fetch():
             try:
                 import urllib.request
 
-                url = self.config.get("ollama_url", "http://localhost:11434")
-                req = urllib.request.Request(f"{url}/api/tags")
-                with urllib.request.urlopen(req, timeout=8) as resp:
-                    data = json.loads(resp.read().decode("utf-8"))
-                    models = [m["name"] for m in data.get("models", [])]
-                    self.sig_models_loaded.emit(models)
+                backend = str(self.config.get("backend", "ollama") or "ollama").lower()
+                if backend == "nvidia":
+                    url = str(
+                        self.config.get("openai_base_url", "https://integrate.api.nvidia.com/v1")
+                    ).rstrip("/")
+                    headers = {}
+                    # SECURITY: read API key from secure credential store
+                    api_key = ""
+                    try:
+                        from houdinimind.agent.credential_store import CredentialStore
+
+                        api_key = CredentialStore(self.config.get("data_dir", "")).get_api_key()
+                    except Exception:
+                        pass
+                    if not api_key:
+                        api_key = str(self.config.get("api_key", "") or "").strip()
+                    if api_key:
+                        headers["Authorization"] = f"Bearer {api_key}"
+                    req = urllib.request.Request(f"{url}/models", headers=headers)
+                    with self._urlopen_with_ssl_fallback(req, timeout=8) as resp:
+                        data = json.loads(resp.read().decode("utf-8"))
+                    models = [m.get("id", "") for m in data.get("data", []) if m.get("id")]
+                    if not models:
+                        models = [self.config.get("model", "") or "deepseek-ai/deepseek-v4-pro"]
+                else:
+                    url = self.config.get("ollama_url", "http://localhost:11434")
+                    req = urllib.request.Request(f"{url}/api/tags")
+                    with urllib.request.urlopen(req, timeout=8) as resp:
+                        data = json.loads(resp.read().decode("utf-8"))
+                        models = [m["name"] for m in data.get("models", [])]
+                self.sig_models_loaded.emit(models)
             except Exception:
-                self.sig_models_loaded.emit([])
+                if str(self.config.get("backend", "ollama") or "ollama").lower() == "nvidia":
+                    self.sig_models_loaded.emit(
+                        [self.config.get("model", "") or "deepseek-ai/deepseek-v4-pro"]
+                    )
+                else:
+                    self.sig_models_loaded.emit([])
 
         threading.Thread(target=_fetch, daemon=True).start()
 
@@ -246,6 +314,7 @@ class PanelBackendMixin:
             from ._asr import SpeechToTextController
         except Exception as exc:
             print(f"Speech input unavailable: {exc}")
+            self._record_startup_issue("Speech", exc)
             if hasattr(self, "mic_btn"):
                 self.mic_btn.setEnabled(False)
                 self.mic_btn.setToolTip("Speech input unavailable")
@@ -294,10 +363,41 @@ class PanelBackendMixin:
     def _apply_settings(self, cfg: dict):
         self.config.update({k: v for k, v in cfg.items() if k not in ("ui",)})
         self.config.setdefault("ui", {}).update(cfg.get("ui", {}))
+        chat_model = self.chat_model_combo.current_model()
+        vision_model = self.vision_model_combo.current_model()
+        if chat_model:
+            self.config["model"] = chat_model
+        if vision_model:
+            self.config["vision_model"] = vision_model
         self.config["auto_backup"] = bool(cfg.get("auto_backup", False))
         self.config["auto_backup_on_save"] = False
         self.config["turn_checkpoints"] = bool(cfg.get("auto_backup", False))
         self.config["vision_enabled"] = True
+
+        # SECURITY: save API key to secure credential store, not plaintext config
+        raw_api_key = cfg.get("api_key", "").strip()
+        if raw_api_key:
+            try:
+                from houdinimind.agent.credential_store import CredentialStore
+
+                cred = CredentialStore(self.config.get("data_dir", ""))
+                cred.save_api_key(raw_api_key)
+                # Keep in memory for the current session but strip before disk save
+                self.config["api_key"] = raw_api_key
+            except Exception as e:
+                print(f"[HoudiniMind] Secure credential save failed: {e}")
+                self.config["api_key"] = raw_api_key
+        else:
+            # User cleared the key — remove from secure store too
+            try:
+                from houdinimind.agent.credential_store import CredentialStore
+
+                cred = CredentialStore(self.config.get("data_dir", ""))
+                cred.delete_api_key()
+            except Exception:
+                pass
+            self.config["api_key"] = ""
+
         if getattr(self, "_asr_controller", None):
             self._asr_controller.update_config(self.config)
         if self.agent:
@@ -318,17 +418,61 @@ class PanelBackendMixin:
         if not path:
             return
         try:
+            # SECURITY: never persist api_key as plaintext in the JSON config.
+            # It lives in the OS keyring / encrypted credential file instead.
+            save_config = dict(self.config)
+            save_config["api_key"] = ""  # always blank on disk
             with open(path, "w", encoding="utf-8") as f:
-                json.dump(self.config, f, indent=2)
+                json.dump(save_config, f, indent=2)
         except Exception as e:
             print(f"Config save failed: {e}")
 
     def _on_scene_event(self, category: str, data: dict):
-        if self.memory:
+        # FX-FREEZE: this runs inside Houdini's nodeEventCallback on the main
+        # thread. memory.log_scene_event opens a SQLite connection and INSERTs,
+        # which blocked Houdini's UI on every FlagChanged / NameChanged /
+        # ChildCreated event — i.e. for ordinary panning, selecting, and
+        # display-flag toggles. Push to a queue and let a single daemon thread
+        # drain into SQLite so the main thread returns instantly.
+        if not self.memory:
+            return
+        q = self._ensure_scene_event_queue()
+        try:
+            q.put_nowait((category, data))
+        except queue.Full:
+            # Drop the oldest event rather than block the main thread.
             try:
-                self.memory.log_scene_event(category, data)
+                q.get_nowait()
+                q.put_nowait((category, data))
             except Exception:
                 pass
+
+    def _ensure_scene_event_queue(self) -> "queue.Queue":
+        q = getattr(self, "_scene_event_queue", None)
+        if q is not None:
+            return q
+        q = queue.Queue(maxsize=2048)
+        self._scene_event_queue = q
+
+        def _drain():
+            while True:
+                try:
+                    item = q.get()
+                except Exception:
+                    return
+                if item is None:
+                    return
+                cat, data = item
+                try:
+                    if self.memory:
+                        self.memory.log_scene_event(cat, data)
+                except Exception:
+                    pass
+
+        t = threading.Thread(target=_drain, daemon=True, name="hmind-scene-events")
+        t.start()
+        self._scene_event_thread = t
+        return q
         # Scene error detection removed — sig_scene_error was disconnected from
         # the UI banner and the emission loop ran for nothing on every event.
         # Re-enable here if the error banner is reconnected in the future.

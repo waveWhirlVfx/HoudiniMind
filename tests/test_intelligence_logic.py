@@ -86,12 +86,29 @@ class TestIntelligence(unittest.TestCase):
         # Mock checker to return failure
         import houdinimind.agent.tools._node_tools as nt
 
-        nt._validate_vex_with_checker = MagicMock(
-            return_value={"success": False, "errors": ["Syntax error at line 1"], "warnings": []}
-        )
+        original_hou = getattr(nt, "hou", None)
+        original_available = nt.HOU_AVAILABLE
+        original_core_available = core.HOU_AVAILABLE
+        original_validator = nt._validate_vex_with_checker
+        try:
+            nt.hou = hou
+            nt.HOU_AVAILABLE = True
+            core.HOU_AVAILABLE = True
+            nt._validate_vex_with_checker = MagicMock(
+                return_value={
+                    "success": False,
+                    "errors": ["Syntax error at line 1"],
+                    "warnings": [],
+                }
+            )
+            res = nt.write_vex_code("/obj/wrangle", "@P.y += 1")
+        finally:
+            nt.hou = original_hou
+            nt.HOU_AVAILABLE = original_available
+            core.HOU_AVAILABLE = original_core_available
+            nt._validate_vex_with_checker = original_validator
 
-        res = nt.write_vex_code("/obj/wrangle", "@P.y += 1")
-        self.assertEqual(res["status"], "ok")  # It returns _ok with status: validation_failed
+        self.assertEqual(res["status"], "error")
         self.assertEqual(res["data"]["status"], "validation_failed")
         self.assertIn("Syntax error", res["data"]["errors"][0])
         print("✓ VEX structured error return verified.")
@@ -133,6 +150,33 @@ class TestIntelligence(unittest.TestCase):
         self.assertIn("get_simulation_diagnostic", names)
         self.assertNotIn("get_dop_objects", names[: names.index("get_simulation_diagnostic") + 1])
         print("✓ Pyro tool selection prefers SOP diagnostics.")
+
+    def test_particle_sim_tool_selection_includes_pop_builder(self):
+        schemas = [
+            {"function": {"name": name, "description": name, "parameters": {"type": "object"}}}
+            for name in (
+                "get_scene_summary",
+                "create_node",
+                "safe_set_parameter",
+                "connect_nodes",
+                "search_knowledge",
+                "setup_pop_sim",
+                "get_sim_stats",
+                "get_dop_objects",
+                "bake_simulation",
+            )
+        ]
+
+        selected = select_relevant_tool_schemas(
+            "create a particle simulation with pop forces",
+            schemas,
+            top_n=len(schemas),
+        )
+        names = [schema["function"]["name"] for schema in selected]
+
+        self.assertIn("setup_pop_sim", names)
+        self.assertIn("get_sim_stats", names)
+        self.assertIn("get_dop_objects", names)
 
 
 if __name__ == "__main__":

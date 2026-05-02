@@ -123,6 +123,8 @@ def render_with_camera(camera_path: str, render_engine: str = "opengl") -> dict:
 def search_docs(query: str) -> dict:
     """Search the official SideFX Houdini documentation."""
     try:
+        import ssl
+
         search_q = f"site:sidefx.com {query}"
         encoded_q = urllib.parse.quote(search_q)
         url = f"https://duckduckgo.com/html/?q={encoded_q}"
@@ -130,7 +132,22 @@ def search_docs(query: str) -> dict:
         headers = {"User-Agent": "Mozilla/5.0"}
         req = urllib.request.Request(url, headers=headers)
 
-        with urllib.request.urlopen(req, timeout=10) as response:
+        # Houdini's bundled Python on macOS often lacks the system trust store.
+        # Use certifi's bundle when present, fall back to the default context,
+        # and finally degrade to unverified rather than failing the search.
+        try:
+            import certifi
+
+            ctx = ssl.create_default_context(cafile=certifi.where())
+        except Exception:
+            ctx = ssl.create_default_context()
+        try:
+            response = urllib.request.urlopen(req, timeout=10, context=ctx)
+        except ssl.SSLCertVerificationError:
+            response = urllib.request.urlopen(
+                req, timeout=10, context=ssl._create_unverified_context()
+            )
+        with response:
             html = response.read().decode("utf-8")
 
         links = re.findall(r'class="result__a" href="([^"]+)">([^<]+)</a>', html)

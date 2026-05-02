@@ -33,6 +33,7 @@ from ._widgets import (
     StatusNoticeWidget,
     ToolActivityGroup,
     ToolCallWidget,
+    TurnSummaryWidget,
 )
 
 __all__ = [
@@ -59,5 +60,6 @@ __all__ = [
     "StatusNoticeWidget",
     "ToolActivityGroup",
     "ToolCallWidget",
+    "TurnSummaryWidget",
     "createInterface",
 ]

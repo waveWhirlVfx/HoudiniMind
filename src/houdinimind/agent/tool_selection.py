@@ -96,10 +96,18 @@ _TOOL_KEYWORD_MAP = {
         "setup_pyro_sim",
         "setup_rbd_fracture",
         "setup_vellum_cloth",
+        "setup_pop_sim",
+        "get_simulation_diagnostic",
         "get_dop_objects",
         "get_sim_stats",
     ],
     "simulation": [
+        "setup_flip_fluid",
+        "setup_pyro_sim",
+        "setup_rbd_fracture",
+        "setup_vellum_cloth",
+        "setup_pop_sim",
+        "get_simulation_diagnostic",
         "get_dop_objects",
         "get_sim_stats",
         "get_flip_diagnostic",
@@ -111,11 +119,14 @@ _TOOL_KEYWORD_MAP = {
     "pyro": ["setup_pyro_sim", "get_simulation_diagnostic", "get_sim_stats", "search_knowledge"],
     "fire": ["setup_pyro_sim", "search_knowledge"],
     "smoke": ["setup_pyro_sim", "search_knowledge"],
-    "rbd": ["setup_rbd_fracture", "get_dop_objects"],
-    "fracture": ["setup_rbd_fracture", "search_knowledge"],
-    "destroy": ["setup_rbd_fracture", "search_knowledge"],
-    "vellum": ["setup_vellum_cloth", "search_knowledge"],
-    "cloth": ["setup_vellum_cloth", "search_knowledge"],
+    "rbd": ["setup_rbd_fracture", "get_simulation_diagnostic", "get_dop_objects"],
+    "fracture": ["setup_rbd_fracture", "get_simulation_diagnostic", "search_knowledge"],
+    "destroy": ["setup_rbd_fracture", "get_simulation_diagnostic", "search_knowledge"],
+    "vellum": ["setup_vellum_cloth", "get_simulation_diagnostic", "search_knowledge"],
+    "cloth": ["setup_vellum_cloth", "get_simulation_diagnostic", "search_knowledge"],
+    "pop": ["setup_pop_sim", "get_sim_stats", "get_dop_objects"],
+    "particle": ["setup_pop_sim", "get_sim_stats", "get_dop_objects"],
+    "particles": ["setup_pop_sim", "get_sim_stats", "get_dop_objects"],
     "bed": [
         "create_bed_controls",
         "create_node_chain",
@@ -193,13 +204,11 @@ _TOOL_KEYWORD_MAP = {
         "inspect_display_output",
         "finalize_sop_network",
         "set_display_flag",
-        "capture_pane",
     ],
     "final": [
         "inspect_display_output",
         "finalize_sop_network",
         "set_display_flag",
-        "capture_pane",
     ],
     "merge": ["create_node_chain", "connect_nodes", "finalize_sop_network"],
     "spatial": ["audit_spatial_layout", "get_bounding_box"],
@@ -244,7 +253,7 @@ def select_relevant_tool_schemas(
     allow_execute_python = bool(_PYTHON_TOOL_HINT_RE.search(query or ""))
 
     schema_by_name = {s.get("function", {}).get("name"): s for s in all_schemas}
-    selected_names: list = list(_TOOL_KEYWORD_MAP["_always"])
+    selected_names: list = []
 
     for keyword, tools in _TOOL_KEYWORD_MAP.items():
         if keyword == "_always":
@@ -253,6 +262,9 @@ def select_relevant_tool_schemas(
             for t in tools:
                 if t not in selected_names:
                     selected_names.append(t)
+    for t in _TOOL_KEYWORD_MAP["_always"]:
+        if t not in selected_names:
+            selected_names.append(t)
 
     if len(selected_names) < top_n:
         remaining = [n for n in schema_by_name if n not in selected_names]
@@ -280,7 +292,9 @@ def select_relevant_tool_schemas(
     strip_descs = bool(config.get("schema_strip_descriptions", False))
 
     result = []
-    for name in selected_names[:top_n]:
+    for name in selected_names:
+        if len(result) >= top_n:
+            break
         if name in schema_by_name:
             schema = copy.deepcopy(schema_by_name[name])
             if strip_descs:

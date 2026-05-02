@@ -13,7 +13,9 @@ from .eval_harness import evaluate_retriever, load_eval_cases, run_retrieval_eva
 from .injector import ContextInjector
 from .kb_builder import (
     _load_high_fidelity_knowledge,
+    _load_houdini_python_function_knowledge,
     _load_node_chain_training_data,
+    _load_vex_function_db_knowledge,
     build_kb,
     rebuild_kb_from_session_feedback,
 )
@@ -119,6 +121,16 @@ def create_rag_pipeline(data_dir: str, config: dict | None = None) -> ContextInj
             runtime_entries.append(entry)
             existing_keys.add(key)
     for entry in _load_high_fidelity_knowledge():
+        key = _runtime_entry_key(entry)
+        if key not in existing_keys:
+            runtime_entries.append(entry)
+            existing_keys.add(key)
+    for entry in _load_houdini_python_function_knowledge(data_dir):
+        key = _runtime_entry_key(entry)
+        if key not in existing_keys:
+            runtime_entries.append(entry)
+            existing_keys.add(key)
+    for entry in _load_vex_function_db_knowledge(data_dir):
         key = _runtime_entry_key(entry)
         if key not in existing_keys:
             runtime_entries.append(entry)

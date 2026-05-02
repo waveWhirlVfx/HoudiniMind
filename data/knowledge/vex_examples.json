@@ -3,596 +3,1570 @@
     {
       "title": "VEX: Simple Random Pscale",
       "category": "vex",
-      "tags": ["pscale", "random", "rand"],
-      "content": "Set a random pscale based on point number:\n@pscale = rand(@ptnum);"
+      "tags": [
+        "pscale",
+        "random",
+        "rand"
+      ],
+      "content": "Set a random pscale based on point number:\n@pscale = rand(@ptnum);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "beginner",
+      "use_case": "general geometry",
+      "context": "point wrangle / CVEX",
+      "performance_impact": "low"
     },
     {
       "title": "VEX: Clamped Random Color",
       "category": "vex",
-      "tags": ["Cd", "color", "clamp"],
-      "content": "Set a random color clamped between 0.2 and 0.8:\n@Cd = set(clamp(rand(@ptnum), 0.2, 0.8), clamp(rand(@ptnum+1), 0.2, 0.8), clamp(rand(@ptnum+2), 0.2, 0.8));"
+      "tags": [
+        "Cd",
+        "color",
+        "clamp"
+      ],
+      "content": "Set a random color clamped between 0.2 and 0.8:\n@Cd = set(clamp(rand(@ptnum), 0.2, 0.8), clamp(rand(@ptnum+1), 0.2, 0.8), clamp(rand(@ptnum+2), 0.2, 0.8));",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "beginner",
+      "use_case": "coloring & texturing",
+      "context": "point wrangle / CVEX",
+      "performance_impact": "low"
     },
     {
       "title": "VEX: Distance to Origin Mask",
       "category": "vex",
-      "tags": ["distance", "mask", "length"],
-      "content": "Create a mask attribute based on distance to center:\nf@mask = 1.0 - clamp(length(@P) / chf('max_dist'), 0, 1);"
+      "tags": [
+        "distance",
+        "mask",
+        "length"
+      ],
+      "content": "Create a mask attribute based on distance to center:\nf@mask = 1.0 - clamp(length(@P) / chf('max_dist'), 0, 1);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "beginner",
+      "use_case": "general geometry",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
     },
     {
       "title": "VEX: Delete Points by Y Threshold",
       "category": "vex",
-      "tags": ["delete", "removepoint", "threshold"],
-      "content": "Remove points below a certain height:\nif (@P.y < chf('threshold')) {\n    removepoint(0, @ptnum);\n}"
+      "tags": [
+        "delete",
+        "removepoint",
+        "threshold"
+      ],
+      "content": "Remove points below a certain height:\nif (@P.y < chf('threshold')) {\n    removepoint(0, @ptnum);\n}",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "point wrangle / CVEX",
+      "performance_impact": "low"
     },
     {
       "title": "VEX: Sine Wave Animation",
       "category": "vex",
-      "tags": ["sin", "animation", "deform"],
-      "content": "Displace points along Y based on a sine wave over time:\n@P.y += sin(@P.x * chf('freq') + @Time * chf('speed')) * chf('amp');"
+      "tags": [
+        "sin",
+        "animation",
+        "deform"
+      ],
+      "content": "Displace points along Y based on a sine wave over time:\n@P.y += sin(@P.x * chf('freq') + @Time * chf('speed')) * chf('amp');",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "animation & deformation",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
     },
     {
       "title": "VEX: Point Cloud Proximity count",
       "category": "vex",
-      "tags": ["pcopen", "pcnumfound", "proximity"],
-      "content": "Count neighbors within a radius using point clouds:\nint handle = pcopen(0, 'P', @P, chf('radius'), 1000);\ni@neighbors = pcnumfound(handle);\npcclose(handle);"
+      "tags": [
+        "pcopen",
+        "pcnumfound",
+        "proximity"
+      ],
+      "content": "Count neighbors within a radius using point clouds:\nint handle = pcopen(0, 'P', @P, chf('radius'), 1000);\ni@neighbors = pcnumfound(handle);\npcclose(handle);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "advanced",
+      "use_case": "geometry processing",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "medium"
     },
     {
       "title": "VEX: Align to Normal (N to orient)",
       "category": "vex",
-      "tags": ["orient", "quaternion", "normal"],
-      "content": "Convert a normal vector to an orientation quaternion:\n@orient = lookat(set(0,0,0), @N);"
+      "tags": [
+        "orient",
+        "quaternion",
+        "normal"
+      ],
+      "content": "Convert a normal vector to an orientation quaternion:\n@orient = lookat(set(0,0,0), @N);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "advanced",
+      "use_case": "general geometry",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "medium"
     },
     {
       "title": "VEX: Random Rotation around Axis",
       "category": "vex",
-      "tags": ["quaternion", "rotation", "qrotate"],
-      "content": "Apply a random rotation around the Y axis:\nfloat angle = rand(@ptnum) * 3.6e2;\nvector axis = {0,1,0};\n@orient = qconvert(quaternion(radians(angle), axis));"
+      "tags": [
+        "quaternion",
+        "rotation",
+        "qrotate"
+      ],
+      "content": "Apply a random rotation around the Y axis:\nfloat angle = rand(@ptnum) * 3.6e2;\nvector axis = {0,1,0};\n@orient = qconvert(quaternion(radians(angle), axis));",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "advanced",
+      "use_case": "general geometry",
+      "context": "point wrangle / CVEX",
+      "performance_impact": "medium"
     },
     {
       "title": "VEX: Normalize Age for Particles",
       "category": "vex",
-      "tags": ["particles", "age", "life"],
-      "content": "Calculate a 0-1 normal_age for particles:\nf@norm_age = @age / @life;"
+      "tags": [
+        "particles",
+        "age",
+        "life"
+      ],
+      "content": "Calculate a 0-1 normal_age for particles:\nf@norm_age = @age / @life;",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "particle effects",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "medium"
     },
     {
       "title": "VEX: Simple Spiral Pattern",
       "category": "vex",
-      "tags": ["spiral", "math", "sin", "cos"],
-      "content": "Create a spiral point distribution:\nfloat angle = @ptnum * chf('angle_step');\nfloat r = @ptnum * chf('radius_step');\n@P = set(cos(angle)*r, 0, sin(angle)*r);"
+      "tags": [
+        "spiral",
+        "math",
+        "sin",
+        "cos"
+      ],
+      "content": "Create a spiral point distribution:\nfloat angle = @ptnum * chf('angle_step');\nfloat r = @ptnum * chf('radius_step');\n@P = set(cos(angle)*r, 0, sin(angle)*r);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "procedural generation",
+      "context": "point wrangle / CVEX",
+      "performance_impact": "low"
     },
     {
       "title": "VEX: Copy Attribute from Second Input (Nearpoint)",
       "category": "vex",
-      "tags": ["nearpoint", "attribute", "transfer"],
-      "content": "Transfer Cd from the closest point in the second input:\nint near = nearpoint(1, @P);\n@Cd = point(1, 'Cd', near);"
+      "tags": [
+        "nearpoint",
+        "attribute",
+        "transfer"
+      ],
+      "content": "Transfer Cd from the closest point in the second input:\nint near = nearpoint(1, @P);\n@Cd = point(1, 'Cd', near);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "coloring & texturing",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
     },
     {
       "title": "VEX: Average Neighbor Position",
       "category": "vex",
-      "tags": ["neighbours", "smooth", "average"],
-      "content": "Smooth geometry by averaging neighbor positions:\nint neighbors[] = neighbours(0, @ptnum);\nvector avg_p = {0,0,0};\nforeach (int nb; neighbors) {\n    avg_p += point(0, 'P', nb);\n}\n@P = avg_p / len(neighbors);"
+      "tags": [
+        "neighbours",
+        "smooth",
+        "average"
+      ],
+      "content": "Smooth geometry by averaging neighbor positions:\nint neighbors[] = neighbours(0, @ptnum);\nvector avg_p = {0,0,0};\nforeach (int nb; neighbors) {\n    avg_p += point(0, 'P', nb);\n}\n@P = avg_p / len(neighbors);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "advanced",
+      "use_case": "geometry processing",
+      "context": "point wrangle / CVEX",
+      "performance_impact": "medium"
     },
     {
       "title": "VEX: Detect Edge Points",
       "category": "vex",
-      "tags": ["neighbourcount", "edge", "boundary"],
-      "content": "Identify points on the boundary of a mesh (assuming grid-like topology):\nif (neighbourcount(0, @ptnum) < 4) {\n    i@is_edge = 1;\n}"
+      "tags": [
+        "neighbourcount",
+        "edge",
+        "boundary"
+      ],
+      "content": "Identify points on the boundary of a mesh (assuming grid-like topology):\nif (neighbourcount(0, @ptnum) < 4) {\n    i@is_edge = 1;\n}",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "point wrangle / CVEX",
+      "performance_impact": "low"
     },
     {
       "title": "VEX: Random Segment Selection (Groups)",
       "category": "vex",
-      "tags": ["group", "random", "selection"],
-      "content": "Assign points to a group randomly based on a probability slider:\nif (rand(@ptnum + chf('seed')) < chf('prob')) {\n    setpointgroup(0, 'selected', @ptnum, 1);\n}"
+      "tags": [
+        "group",
+        "random",
+        "selection"
+      ],
+      "content": "Assign points to a group randomly based on a probability slider:\nif (rand(@ptnum + chf('seed')) < chf('prob')) {\n    setpointgroup(0, 'selected', @ptnum, 1);\n}",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "point wrangle / CVEX",
+      "performance_impact": "low"
     },
     {
       "title": "VEX: Custom Ramp Lookup",
       "category": "vex",
-      "tags": ["ramp", "chramp", "mapping"],
-      "content": "Use a custom ramp UI to control pscale based on X position:\nfloat t = fit01(clamp(@P.x, -1, 1), 0, 1);\n@pscale = chramp('my_ramp', t);"
+      "tags": [
+        "ramp",
+        "chramp",
+        "mapping"
+      ],
+      "content": "Use a custom ramp UI to control pscale based on X position:\nfloat t = fit01(clamp(@P.x, -1, 1), 0, 1);\n@pscale = chramp('my_ramp', t);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "point wrangle / CVEX",
+      "performance_impact": "low"
     },
     {
       "title": "VEX: Curl Noise Velocity",
       "category": "vex",
-      "tags": ["curlnoise", "velocity", "noise"],
-      "content": "Assign curl noise to velocity:\n@v = curlnoise(@P * chf('freq') + @Time) * chf('amp');"
+      "tags": [
+        "curlnoise",
+        "velocity",
+        "noise"
+      ],
+      "content": "Assign curl noise to velocity:\n@v = curlnoise(@P * chf('freq') + @Time) * chf('amp');",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
     },
     {
       "title": "VEX: Gradient of Attribute",
       "category": "vex",
-      "tags": ["gradient", "nearpoints", "math"],
-      "content": "Simple approximation of an attribute gradient:\nint pts[] = nearpoints(0, @P, chf('dist'), 8);\nvector grad = {0,0,0};\nforeach (int p; pts) {\n    float val = point(0, 'mask', p);\n    grad += (point(0, 'P', p) - @P) * (val - f@mask);\n}\n@N = normalize(grad);"
+      "tags": [
+        "gradient",
+        "nearpoints",
+        "math"
+      ],
+      "content": "Simple approximation of an attribute gradient:\nint pts[] = nearpoints(0, @P, chf('dist'), 8);\nvector grad = {0,0,0};\nforeach (int p; pts) {\n    float val = point(0, 'mask', p);\n    grad += (point(0, 'P', p) - @P) * (val - f@mask);\n}\n@N = normalize(grad);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "advanced",
+      "use_case": "geometry processing",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "medium"
     },
     {
       "title": "VEX: Fit Value to Range",
       "category": "vex",
-      "tags": ["fit", "remap"],
-      "content": "Remap an attribute value from one range to another:\n@pscale = fit(f@density, 0, 10, 0.1, 2.0);"
+      "tags": [
+        "fit",
+        "remap"
+      ],
+      "content": "Remap an attribute value from one range to another:\n@pscale = fit(f@density, 0, 10, 0.1, 2.0);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "beginner",
+      "use_case": "general geometry",
+      "context": "point wrangle / CVEX",
+      "performance_impact": "low"
     },
     {
       "title": "VEX: Set Bounding Box Center",
       "category": "vex",
-      "tags": ["bbox", "center", "getbbox"],
-      "content": "Calculate the center of the bounding box:\nvector min, max;\ngetbbox(0, min, max);\nvector center = (min + max) * 0.5;\n@P -= center;"
+      "tags": [
+        "bbox",
+        "center",
+        "getbbox"
+      ],
+      "content": "Calculate the center of the bounding box:\nvector min, max;\ngetbbox(0, min, max);\nvector center = (min + max) * 0.5;\n@P -= center;",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
     },
     {
       "title": "VEX: Rotate Vector around Normalized Axis",
       "category": "vex",
-      "tags": ["rotate", "matrix", "vector"],
-      "content": "Rotate the normal around arbitrary axis:\nmatrix3 m = ident();\nrotate(m, radians(chf('angle')), normalize(chv('axis')));\n@N *= m;"
+      "tags": [
+        "rotate",
+        "matrix",
+        "vector"
+      ],
+      "content": "Rotate the normal around arbitrary axis:\nmatrix3 m = ident();\nrotate(m, radians(chf('angle')), normalize(chv('axis')));\n@N *= m;",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "advanced",
+      "use_case": "general geometry",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "medium"
     },
     {
       "title": "VEX: Array Summation",
       "category": "vex",
-      "tags": ["array", "foreach", "sum"],
-      "content": "Sum values in an array attribute:\nfloat total = 0;\nforeach (float v; f[]@my_array) {\n    total += v;\n}\nf@sum = total;"
+      "tags": [
+        "array",
+        "foreach",
+        "sum"
+      ],
+      "content": "Sum values in an array attribute:\nfloat total = 0;\nforeach (float v; f[]@my_array) {\n    total += v;\n}\nf@sum = total;",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "advanced",
+      "use_case": "general geometry",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "medium"
     },
     {
       "title": "VEX: Find Closest Primitive",
       "category": "vex",
-      "tags": ["xyzdist", "proximity", "primitive"],
-      "content": "Get distance and primitive info to closest geometry in input 1:\nint prim;\nvector uv;\nfloat dist = xyzdist(1, @P, prim, uv);\nf@dist_to_surface = dist;"
+      "tags": [
+        "xyzdist",
+        "proximity",
+        "primitive"
+      ],
+      "content": "Get distance and primitive info to closest geometry in input 1:\nint prim;\nvector uv;\nfloat dist = xyzdist(1, @P, prim, uv);\nf@dist_to_surface = dist;",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "coloring & texturing",
+      "context": "prim wrangle / CVEX",
+      "performance_impact": "low"
     },
     {
       "title": "VEX: Sample UV Attribute from Surface",
       "category": "vex",
-      "tags": ["primuv", "uv", "attribute"],
-      "content": "Sample UVs from second input based on closest point:\nint prim;\nvector uv;\nxyzdist(1, @P, prim, uv);\n@uv = primuv(1, 'uv', prim, uv);"
+      "tags": [
+        "primuv",
+        "uv",
+        "attribute"
+      ],
+      "content": "Sample UVs from second input based on closest point:\nint prim;\nvector uv;\nxyzdist(1, @P, prim, uv);\n@uv = primuv(1, 'uv', prim, uv);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "coloring & texturing",
+      "context": "prim wrangle / CVEX",
+      "performance_impact": "low"
     },
     {
       "title": "VEX: Per-Primitive Center",
       "category": "vex",
-      "tags": ["intrinsic", "primitive", "center"],
-      "content": "Calculate the center of the current primitive:\n@P = primintrinsic(0, 'centroid', @primnum);"
+      "tags": [
+        "intrinsic",
+        "primitive",
+        "center"
+      ],
+      "content": "Calculate the center of the current primitive:\n@P = primintrinsic(0, 'centroid', @primnum);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "prim wrangle / CVEX",
+      "performance_impact": "low"
     },
     {
       "title": "VEX: String Concatenation",
       "category": "vex",
-      "tags": ["string", "sprintf"],
-      "content": "Create a unique name string for each point:\ns@name = sprintf('point_%d_val_%.2f', @ptnum, f@value);"
+      "tags": [
+        "string",
+        "sprintf"
+      ],
+      "content": "Create a unique name string for each point:\ns@name = sprintf('point_%d_val_%.2f', @ptnum, f@value);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "point wrangle / CVEX",
+      "performance_impact": "medium"
     },
     {
       "title": "VEX: Bitwise Operations Check",
       "category": "vex",
-      "tags": ["bitwise", "flag"],
-      "content": "Check if a bit flag is set:\nif (i@flags & 1) {\n    i@is_active = 1;\n}"
+      "tags": [
+        "bitwise",
+        "flag"
+      ],
+      "content": "Check if a bit flag is set:\nif (i@flags & 1) {\n    i@is_active = 1;\n}",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
     },
     {
       "title": "VEX: Dictionary Access (Basic)",
       "category": "vex",
-      "tags": ["dict", "setdictvalue", "getdictvalue"],
-      "content": "Store and retrieve values from a VEX dictionary:\ndict my_dict = dict();\nsetdictvalue(my_dict, 'level', 5);\nsetdictvalue(my_dict, 'state', 'active');\ni@lvl = getdictvalue(my_dict, 'level');"
+      "tags": [
+        "dict",
+        "setdictvalue",
+        "getdictvalue"
+      ],
+      "content": "Store and retrieve values from a VEX dictionary:\ndict my_dict = dict();\nsetdictvalue(my_dict, 'level', 5);\nsetdictvalue(my_dict, 'state', 'active');\ni@lvl = getdictvalue(my_dict, 'level');",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
     },
     {
       "title": "VEX: Pathfinding - Direction to Goal",
       "category": "vex",
-      "tags": ["path", "vector", "goal"],
-      "content": "Calculate normalized direction to a goal point:\nvector goal = chv('goal_pos');\n@v = normalize(goal - @P) * chf('speed');"
+      "tags": [
+        "path",
+        "vector",
+        "goal"
+      ],
+      "content": "Calculate normalized direction to a goal point:\nvector goal = chv('goal_pos');\n@v = normalize(goal - @P) * chf('speed');",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
     },
     {
       "title": "VEX: Bouncing Ball Physics (Simple)",
       "category": "vex",
-      "tags": ["physics", "velocity", "floor"],
-      "content": "Simple bounce logic: reverse velocity on hitting floor:\nif (@P.y < 0) {\n    @P.y = 0;\n    @v.y = -@v.y * chf('damp');\n}"
+      "tags": [
+        "physics",
+        "velocity",
+        "floor"
+      ],
+      "content": "Simple bounce logic: reverse velocity on hitting floor:\nif (@P.y < 0) {\n    @P.y = 0;\n    @v.y = -@v.y * chf('damp');\n}",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
     },
     {
       "title": "VEX: Calculate Curvature (Approx)",
       "category": "vex",
-      "tags": ["curvature", "neighbor", "dot"],
-      "content": "Rough curvature check based on normal deviation of neighbors:\nint nbs[] = neighbours(0, @ptnum);\nfloat avg_dot = 0;\nforeach (int nb; nbs) {\n    vector nb_n = point(0, 'N', nb);\n    avg_dot += dot(@N, nb_n);\n}\nf@curvature = 1.0 - (avg_dot / len(nbs));"
+      "tags": [
+        "curvature",
+        "neighbor",
+        "dot"
+      ],
+      "content": "Rough curvature check based on normal deviation of neighbors:\nint nbs[] = neighbours(0, @ptnum);\nfloat avg_dot = 0;\nforeach (int nb; nbs) {\n    vector nb_n = point(0, 'N', nb);\n    avg_dot += dot(@N, nb_n);\n}\nf@curvature = 1.0 - (avg_dot / len(nbs));",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "advanced",
+      "use_case": "general geometry",
+      "context": "point wrangle / CVEX",
+      "performance_impact": "medium"
     },
     {
       "title": "VEX: Remove Degenerate Primitives",
       "category": "vex",
-      "tags": ["removeprim", "area", "primitive"],
-      "content": "Delete primitives with near-zero area:\nif (prim_area(0, @primnum) < 1e-5) {\n    removeprim(0, @primnum, 1);\n}"
-    },
-    {
-        "title": "VEX: Lerp Position between inputs",
-        "category": "vex",
-        "tags": ["lerp", "blend", "morph"],
-        "content": "Blend position between input 0 and input 1:\nvector p1 = point(1, 'P', @ptnum);\n@P = lerp(@P, p1, chf('blend'));"
-    },
-    {
-        "title": "VEX: Smoothstep Mask",
-        "category": "vex",
-        "tags": ["smoothstep", "mask"],
-        "content": "Create a smooth transition mask:\nfloat val = @P.x;\nf@mask = smoothstep(chf('min'), chf('max'), val);"
-    },
-    {
-        "title": "VEX: Checkerboard Pattern",
-        "category": "vex",
-        "tags": ["checker", "math", "mod"],
-        "content": "Apply a checkerboard pattern based on grid position:\nint ix = int(floor(@P.x * chf('freq')));\nint iz = int(floor(@P.z * chf('freq')));\n@Cd = (ix + iz) % 2 == 0 ? set(1,1,1) : set(0,0,0);"
-    },
-    {
-        "title": "VEX: Random Int attribute",
-        "category": "vex",
-        "tags": ["int", "random", "id"],
-        "content": "Random integer between 0 and N-1:\ni@class = int(rand(@ptnum + chf('seed')) * chi('num_classes'));"
-    },
-    {
-        "title": "VEX: Set Attribute by Point Index Range",
-        "category": "vex",
-        "tags": ["index", "group", "range"],
-        "content": "Identify the first 100 points:\nif (@ptnum < 100) i@is_special = 1;"
-    },
-    {
-        "title": "VEX: Triangle Normal Calculation",
-        "category": "vex",
-        "tags": ["normal", "cross", "primitive"],
-        "content": "Manual normal calculation for a triangle primitive:\nint pts[] = primpoints(0, @primnum);\nvector a = point(0, 'P', pts[0]);\nvector b = point(0, 'P', pts[1]);\nvector c = point(0, 'P', pts[2]);\n@N = normalize(cross(b-a, c-a));"
-    },
-    {
-        "title": "VEX: Exploded View logic",
-        "category": "vex",
-        "tags": ["explode", "centroid", "primitive"],
-        "content": "Offset primitives from centroid for an exploded view:\nvector center = getbbox_center(0);\nvector p_center = primintrinsic(0, 'centroid', @primnum);\nvector dir = normalize(p_center - center);\n@P += dir * chf('scale');"
-    },
-    {
-        "title": "VEX: Sine Displacement along Curve",
-        "category": "vex",
-        "tags": ["curve", "u", "wave"],
-        "content": "Apply a wave to points on a curve based on their U coordinate:\n@P += @N * sin(f@u * chf('freq') * 2 * PI + @Time) * chf('amp');"
-    },
-    {
-        "title": "VEX: Normalize Vector Attribute",
-        "category": "vex",
-        "tags": ["normalize", "vector"],
-        "content": "Normalize the velocity attribute:\n@v = normalize(@v);"
-    },
-    {
-        "title": "VEX: Cull Points by Camera Frustum (Pseudo)",
-        "category": "vex",
-        "tags": ["frustum", "cull", "camera"],
-        "content": "Remove points outside a simplified camera field:\nvector p_cam = ptransform('obj/cam1', @P);\nif (abs(p_cam.x) > 1.0 || abs(p_cam.y) > 1.0) {\n    removepoint(0, @ptnum);\n}"
-    },
-    {
-        "title": "VEX: Add Point at Centroid",
-        "category": "vex",
-        "tags": ["addpoint", "centroid"],
-        "content": "Calculate the average position and add a point there (run on detail):\nvector avg = {0,0,0};\nfor (int i=0; i<npoints(0); ++i) {\n    avg += point(0, 'P', i);\n}\naddpoint(0, avg / npoints(0));"
-    },
-    {
-        "title": "VEX: Distance to Curve (Nearpoint to input 1)",
-        "category": "vex",
-        "tags": ["curve", "distance"],
-        "content": "Find distance to the closest point on a curve in input 1:\nf@dist = distance(@P, point(1, 'P', nearpoint(1, @P)));"
-    },
-    {
-        "title": "VEX: Per-Point Seed for Simulation",
-        "category": "vex",
-        "tags": ["seed", "rand", "id"],
-        "content": "A stable seed using id if available, else ptnum:\nfloat seed = rand(hasattrib(0, 'id') ? i@id : @ptnum);"
-    },
-    {
-        "title": "VEX: Sample Density from Fog Volume",
-        "category": "vex",
-        "tags": ["volume", "sample", "density"],
-        "content": "Read density value from first input volume at current point P:\nf@val = volumesample(0, 'density', @P);"
-    },
-    {
-        "title": "VEX: Gradient of Volume (Voxel-based)",
-        "category": "vex",
-        "tags": ["volumegradient", "volume"],
-        "content": "Get the gradient vector of a volume field:\n@N = volumegradient(0, 'density', @P);"
-    },
-    {
-        "title": "VEX: Volume to Clouds (Density modification)",
-        "category": "vex",
-        "tags": ["volume", "noise", "density"],
-        "content": "Add 3D noise to a volume density (run on volume points):\nfloat n = noise(@P * chf('freq'));\nf@density *= clamp(n - chf('bias'), 0, 1);"
-    },
-    {
-        "title": "VEX: Set Attribute by Point ID map",
-        "category": "vex",
-        "tags": ["id", "map", "attribute"],
-        "content": "Lookup value from input 1 using stable IDs:\nint other_pt = findattribval(1, 'point', 'id', i@id);\nif (other_pt != -1) @Cd = point(1, 'Cd', other_pt);"
-    },
-    {
-        "title": "VEX: Randomize Normal (Jitter)",
-        "category": "vex",
-        "tags": ["normal", "random", "jitter"],
-        "content": "Add random noise to normals:\n@N = normalize(@N + (vnoise(@P * 10) - 0.5) * chf('amt'));"
-    },
-    {
-        "title": "VEX: Create Polygon from Points (Run on Detail)",
-        "category": "vex",
-        "tags": ["addprim", "polygon"],
-        "content": "Connect points in order with a polygon (run once on detail):\nint pr = addprim(0, 'poly');\nfor(int i=0; i<npoints(0); ++i) {\n    addvertex(0, pr, i);\n}"
-    },
-    {
-        "title": "VEX: Check if Point is inside Bounding Box",
-        "category": "vex",
-        "tags": ["bbox", "overlap", "inside"],
-        "content": "Test if point P is within the bounds of input 1:\nvector mi, ma;\ngetbbox(1, mi, ma);\nif (@P.x >= mi.x && @P.x <= ma.x && ...) i@inside = 1;"
-    },
-    {
-        "title": "VEX: Tangent calculation for curve",
-        "category": "vex",
-        "tags": ["tangent", "curve", "derivative"],
-        "content": "Direction from this point to the next along curve:\nint next = (@ptnum + 1) % npoints(0);\n@v = normalize(point(0, 'P', next) - @P);"
-    },
-    {
-        "title": "VEX: Attract to Curve (Proximity Force)",
-        "category": "vex",
-        "tags": ["force", "attract", "curve"],
-        "content": "Generate a force towards the closest part of a curve:\nint pr; vector uv;\nxyzdist(1, @P, pr, uv);\nvector surf_p = primuv(1, 'P', pr, uv);\n@v += normalize(surf_p - @P) * chf('strength');"
-    },
-    {
-        "title": "VEX: Delete by Attribute Mean",
-        "category": "vex",
-        "tags": ["mean", "average", "delete"],
-        "content": "Remove points with attribute below average (run detail first to get mean):\nfloat mean = detail(0, 'mean_val');\nif (f@value < mean) removepoint(0, @ptnum);"
-    },
-    {
-        "title": "VEX: Rotate P around Origin",
-        "category": "vex",
-        "tags": ["rotate", "matrix", "origin"],
-        "content": "Apply global rotation to geometry:\nmatrix3 m = ident();\nrotate(m, radians(@Time * 90), {0,1,0});\n@P *= m;"
-    },
-    {
-        "title": "VEX: Map Point to UV space (Spherical)",
-        "category": "vex",
-        "tags": ["uv", "spherical", "projection"],
-        "content": "Simple spherical UV mapping:\nvector n = normalize(@P);\n@uv = set(atan2(n.z, n.x)/(2*PI)+0.5, asin(n.y)/PI+0.5, 0);"
-    },
-    {
-        "title": "VEX: Find Max Attribute Value (Run on Detail)",
-        "category": "vex",
-        "tags": ["max", "attribute", "detail"],
-        "content": "Find the maximum pscale in the geometry:\nfloat max_val = -1e10;\nfor(int i=0; i<npoints(0); ++i) {\n    max_val = max(max_val, point(0, 'pscale', i));\n}\nf@max_pscale = max_val;"
-    },
-    {
-        "title": "VEX: Simple Gravity Force",
-        "category": "vex",
-        "tags": ["gravity", "velocity"],
-        "content": "Apply gravity to velocity over time:\n@v.y -= 9.8 * chf('timestep');"
-    },
-    {
-        "title": "VEX: Vellum Hair Pinning",
-        "category": "vex",
-        "tags": ["vellum", "hair", "stopped"],
-        "content": "Pin first point of every curve for Vellum sim:\nif (vertexprimindex(0, @ptnum) == 0) i@stopped = 1;"
-    },
-    {
-        "title": "VEX: Create ID based on stable seed",
-        "category": "vex",
-        "tags": ["id", "seed", "unique"],
-        "content": "Generate a unique ID that doesn't change when geometry is re-ordered:\ni@id = int(rand(@P.x * 123.45 + @P.z * 543.21) * 1000000);"
-    },
-    {
-        "title": "VEX: Voronoi Cell Center",
-        "category": "vex",
-        "tags": ["voronoi", "wnoise"],
-        "content": "Get the center position of the nearest Voronoi cell:\nvector cell_center;\nwnoise(@P, 0, cell_center);\n@Cd = cell_center;"
-    },
-    {
-        "title": "VEX: Simple Bounding Sphere check",
-        "category": "vex",
-        "tags": ["sphere", "radius", "inside"],
-        "content": "Check if point is inside a world-space sphere:\nif (distance(@P, chv('origin')) < chf('radius')) {\n    i@active = 1;\n}"
-    },
-    {
-        "title": "VEX: Flatten along Axis",
-        "category": "vex",
-        "tags": ["flatten", "projection"],
-        "content": "Flatten geomety to Y=0 plane:\n@P.y = 0;"
-    },
-    {
-        "title": "VEX: Random Hue to Color",
-        "category": "vex",
-        "tags": ["hsv", "color", "hsvtorgb"],
-        "content": "Set random color by varying only hue:\n@Cd = hsvtorgb(set(rand(@ptnum), 0.8, 1.0));"
-    },
-    {
-        "title": "VEX: Mirror geometry on X (Simple logic)",
-        "category": "vex",
-        "tags": ["mirror", "projection"],
-        "content": "Move points to their mirrored position on the negative X side:\nif (@P.x > 0) @P.x = -@P.x;"
-    },
-    {
-        "title": "VEX: Simple String manipulation (Search/Replace)",
-        "category": "vex",
-        "tags": ["string", "replace", "re_replace"],
-        "content": "Simple name update using string substitution:\ns@name = re_replace('old_', 'new_', s@name);"
-    },
-    {
-        "title": "VEX: Detect Concave Points (Approx)",
-        "category": "vex",
-        "tags": ["concave", "curvature"],
-        "content": "Detect points in 'valleys' by checking neighbor distance to average plane:\nvector avg_nb = {0,0,0};\nint nbs[] = neighbours(0, @ptnum);\nforeach(int n; nbs) avg_nb += point(0, 'P', n);\navg_nb /= len(nbs);\nif (dot(@N, normalize(avg_nb - @P)) > 0.1) i@concave = 1;"
-    },
-    {
-        "title": "VEX: Simple Heat Diffusion (Feedback)",
-        "category": "vex",
-        "tags": ["diffusion", "heat", "neighbor"],
-        "content": "Blur an attribute by averaging with neighbors:\nfloat total = f@temp;\nint nbs[] = neighbours(0, @ptnum);\nforeach(int n; nbs) total += point(0, 'temp', n);\nf@temp = total / (len(nbs) + 1);"
-    },
-    {
-        "title": "VEX: Triangle Perimeter count",
-        "category": "vex",
-        "tags": ["perimeter", "length", "primitive"],
-        "content": "Calculate the length of the primitive boundary:\nf@perim = prim_perimeter(0, @primnum);"
-    },
-    {
-        "title": "VEX: Group by Point count on Primitive",
-        "category": "vex",
-        "tags": ["group", "primitive", "count"],
-        "content": "Group triangles vs quads:\nint count = primvertexcount(0, @primnum);\nif (count == 3) setprimgroup(0, 'tris', @primnum, 1);\nelse if (count == 4) setprimgroup(0, 'quads', @primnum, 1);"
-    },
-    {
-        "title": "VEX: Matrix from Rotation axis and angle",
-        "category": "vex",
-        "tags": ["matrix", "rotate", "axis"],
-        "content": "Manually build a rotation matrix:\nmatrix3 m = ident();\nrotate(m, radians(45), {0,1,0});"
-    },
-    {
-        "title": "VEX: Simple Project to Surface",
-        "category": "vex",
-        "tags": ["project", "xyzdist", "primuv"],
-        "content": "Snap points to closest surface location in input 1:\nint pr; vector uv;\nxyzdist(1, @P, pr, uv);\n@P = primuv(1, 'P', pr, uv);"
-    },
-    {
-        "title": "VEX: Simple Random Orient",
-        "category": "vex",
-        "tags": ["orient", "random", "quaternion"],
-        "content": "Assign a completely random orientation to each point:\n@orient = set(rand(@ptnum)-0.5, rand(@ptnum+1)-0.5, rand(@ptnum+2)-0.5, rand(@ptnum+3)-0.5);\n@orient = normalize(@orient);"
-    },
-    {
-        "title": "VEX: Calculate pscale from Area",
-        "category": "vex",
-        "tags": ["pscale", "area"],
-        "content": "Set pscale based on surrounding face area (approx):\nfloat area = 0;\nint prims[] = pointprims(0, @ptnum);\nforeach(int p; prims) area += prim_area(0, p);\n@pscale = sqrt(area) * 0.5;"
-    },
-    {
-        "title": "VEX: Offset points along Normal",
-        "category": "vex",
-        "tags": ["offset", "normal", "P"],
-        "content": "Puff out geometry by moving along N:\n@P += @N * chf('dist');"
-    },
-    {
-        "title": "VEX: Filter by Id attribute",
-        "category": "vex",
-        "tags": ["id", "filter", "delete"],
-        "content": "Remove points with even IDs:\nif (i@id % 2 == 0) removepoint(0, @ptnum);"
-    },
-    {
-        "title": "VEX: Distance to Bounding Box Edge",
-        "category": "vex",
-        "tags": ["bbox", "distance", "edge"],
-        "content": "Calculate how close point is to the edge of the scene:\nvector mi, ma;\ngetbbox(0, mi, ma);\nfloat dx = min(@P.x - mi.x, ma.x - @P.x);\nfloat dz = min(@P.z - mi.z, ma.z - @P.z);\nf@dist_to_edge = min(dx, dz);"
-    },
-    {
-        "title": "VEX: Simple L-System branch logic",
-        "category": "vex",
-        "tags": ["lsystem", "branch", "iteration"],
-        "content": "Scale points based on their generation in an L-system:\n@pscale = pow(0.8, i@generation);"
-    },
-    {
-        "title": "VEX: Group based on Normal direction",
-        "category": "vex",
-        "tags": ["normal", "group", "up"],
-        "content": "Select top-facing surfaces:\nif (dot(@N, {0,1,0}) > 0.8) setpointgroup(0, 'top', @ptnum, 1);"
-    },
-    {
-        "title": "VEX: Volume Sample Gradient 3D",
-        "category": "vex",
-        "tags": ["volume", "gradient", "vector"],
-        "content": "Get the steepness and direction of a fog volume:\n@v = volumegradient(0, 'density', @P);"
-    },
-    {
-        "title": "VEX: Simple Sine wave displacement (radial)",
-        "category": "vex",
-        "tags": ["radial", "sin", "ripple"],
-        "content": "Create expansion ripples from origin:\nfloat dist = length(@P);\n@P += normalize(@P) * sin(dist * 10 - @Time) * 0.1;"
-    },
-    {
-        "title": "VEX: Randomize Material ID",
-        "category": "vex",
-        "tags": ["random", "material", "id"],
-        "content": "Assign random material slots:\ni@mat_id = int(rand(@ptnum) * 5);"
-    },
-    {
-        "title": "VEX: Simple Bounding Cylinder check",
-        "category": "vex",
-        "tags": ["cylinder", "inside", "math"],
-        "content": "Check if points are within vertical cylinder R=10:\nif (length(set(@P.x, 0, @P.z)) < 10) i@inside = 1;"
-    },
-    {
-        "title": "VEX: Cross Product of two attributes",
-        "category": "vex",
-        "tags": ["cross", "vector", "tangent"],
-        "content": "Calculate binormal from normal and tangent:\n@up = cross(@N, @v);"
-    },
-    {
-        "title": "VEX: Sample Heat attribute at specific UV",
-        "category": "vex",
-        "tags": ["primuv", "heat", "sample"],
-        "content": "Get attribute from second input at world-UV point {0.5, 0.5}:\nf@target_val = primuv(1, 'heat', 0, set(0.5, 0.5, 0));"
-    },
-    {
-        "title": "VEX: Random string name selection",
-        "category": "vex",
-        "tags": ["string", "random", "list"],
-        "content": "Pick a random name from a hardcoded list:\nstring names[] = {'red', 'blue', 'green'};\ns@c_name = names[int(rand(@ptnum) * len(names))];"
-    },
-    {
-        "title": "VEX: Matrix Determinant",
-        "category": "vex",
-        "tags": ["matrix", "determinant", "scale"],
-        "content": "Check if a transformation matrix is inverted:\nif (determinant(m@transform) < 0) i@inverted = 1;"
-    },
-    {
-        "title": "VEX: Simple Smooth Rotation Quat",
-        "category": "vex",
-        "tags": ["rotate", "quaternion", "time"],
-        "content": "Slowly spin points around Y:\n@orient = quaternion(radians(@Time * 10), {0,1,0});"
-    },
-    {
-        "title": "VEX: Simple Distance to Point 0",
-        "category": "vex",
-        "tags": ["distance", "point"],
-        "content": "Calculate attribute based on proximity to the first point:\nf@dist_to_start = distance(@P, point(0, 'P', 0));"
-    },
-    {
-        "title": "VEX: Check if primitive is Planar (Approx)",
-        "category": "vex",
-        "tags": ["planar", "primitive", "flat"],
-        "content": "Verify if prim points all lie on the same plane:\nint pts[] = primpoints(0, @primnum);\nvector n = prim_normal(0, @primnum, {0,0,0});\nfloat error = 0;\nforeach(int p; pts) error += abs(dot(n, point(0, 'P', p) - point(0,'P',pts[0])));\nif (error < 1e-4) i@is_flat = 1;"
-    },
-    {
-        "title": "VEX: Randomize point position on X-axis only",
-        "category": "vex",
-        "tags": ["random", "P", "axis"],
-        "content": "@P.x += (rand(@ptnum) - 0.5) * chf('scale');"
-    },
-    {
-        "title": "VEX: Create custom id from name string hash",
-        "category": "vex",
-        "tags": ["string", "hash", "id"],
-        "content": "Stable ID from a name attribute using random seed hack:\ni@id = int(rand(atof(s@name)) * 1000000);"
-    },
-    {
-        "title": "VEX: Map Y height to Cd color",
-        "category": "vex",
-        "tags": ["color", "gradient", "y"],
-        "content": "@Cd = set(fit01(clamp(@P.y, 0, 10), 0, 1), 0.2, 0.5);"
-    },
-    {
-        "title": "VEX: Simple Vertex attribute lookup",
-        "category": "vex",
-        "tags": ["vertex", "attribute", "lookup"],
-        "content": "Read an attribute from a specific vertex in the second input:\n@uv = vertex(1, 'uv', @vtxnum);"
-    },
-    {
-        "title": "VEX: Blend normals between inputs 0 and 1",
-        "category": "vex",
-        "tags": ["blend", "normal", "lerp"],
-        "content": "vector n1 = point(1, 'N', @ptnum);\n@N = normalize(lerp(@N, n1, chf('blend')));"
-    },
-    {
-        "title": "VEX: Simple Pscale based on Point Number Sequence",
-        "category": "vex",
-        "tags": ["pscale", "ptnum"],
-        "content": "Growing pscale across the point stream:\n@pscale = float(@ptnum) / npoints(0);"
-    },
-    {
-        "title": "VEX: Check for overlapping points (Simple)",
-        "category": "vex",
-        "tags": ["overlaps", "nearpoints", "distance"],
-        "content": "Identify points sharing roughly the same space:\nint pts[] = nearpoints(0, @P, 0.001, 2);\nif (len(pts) > 1) i@is_overlap = 1;"
-    },
-    {
-        "title": "VEX: Sample second input density onto first input points",
-        "category": "vex",
-        "tags": ["volume", "sample", "transfer"],
-        "content": "f@target_density = volumesample(1, 'density', @P);"
-    },
-    {
-        "title": "VEX: Simple Sine animation on Cd",
-        "category": "vex",
-        "tags": ["color", "animation", "flame"],
-        "content": "Pulsing red color over time:\n@Cd.r = 0.5 + 0.5 * sin(@Time * 5);"
+      "tags": [
+        "removeprim",
+        "area",
+        "primitive"
+      ],
+      "content": "Delete primitives with near-zero area:\nif (prim_area(0, @primnum) < 1e-5) {\n    removeprim(0, @primnum, 1);\n}",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "prim wrangle / CVEX",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Lerp Position between inputs",
+      "category": "vex",
+      "tags": [
+        "lerp",
+        "blend",
+        "morph"
+      ],
+      "content": "Blend position between input 0 and input 1:\nvector p1 = point(1, 'P', @ptnum);\n@P = lerp(@P, p1, chf('blend'));",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "point wrangle / CVEX",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Smoothstep Mask",
+      "category": "vex",
+      "tags": [
+        "smoothstep",
+        "mask"
+      ],
+      "content": "Create a smooth transition mask:\nfloat val = @P.x;\nf@mask = smoothstep(chf('min'), chf('max'), val);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "geometry processing",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Checkerboard Pattern",
+      "category": "vex",
+      "tags": [
+        "checker",
+        "math",
+        "mod"
+      ],
+      "content": "Apply a checkerboard pattern based on grid position:\nint ix = int(floor(@P.x * chf('freq')));\nint iz = int(floor(@P.z * chf('freq')));\n@Cd = (ix + iz) % 2 == 0 ? set(1,1,1) : set(0,0,0);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "coloring & texturing",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Random Int attribute",
+      "category": "vex",
+      "tags": [
+        "int",
+        "random",
+        "id"
+      ],
+      "content": "Random integer between 0 and N-1:\ni@class = int(rand(@ptnum + chf('seed')) * chi('num_classes'));",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "beginner",
+      "use_case": "general geometry",
+      "context": "point wrangle / CVEX",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Set Attribute by Point Index Range",
+      "category": "vex",
+      "tags": [
+        "index",
+        "group",
+        "range"
+      ],
+      "content": "Identify the first 100 points:\nif (@ptnum < 100) i@is_special = 1;",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "point wrangle / CVEX",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Triangle Normal Calculation",
+      "category": "vex",
+      "tags": [
+        "normal",
+        "cross",
+        "primitive"
+      ],
+      "content": "Manual normal calculation for a triangle primitive:\nint pts[] = primpoints(0, @primnum);\nvector a = point(0, 'P', pts[0]);\nvector b = point(0, 'P', pts[1]);\nvector c = point(0, 'P', pts[2]);\n@N = normalize(cross(b-a, c-a));",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "prim wrangle / CVEX",
+      "performance_impact": "medium"
+    },
+    {
+      "title": "VEX: Exploded View logic",
+      "category": "vex",
+      "tags": [
+        "explode",
+        "centroid",
+        "primitive"
+      ],
+      "content": "Offset primitives from centroid for an exploded view:\nvector center = getbbox_center(0);\nvector p_center = primintrinsic(0, 'centroid', @primnum);\nvector dir = normalize(p_center - center);\n@P += dir * chf('scale');",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "prim wrangle / CVEX",
+      "performance_impact": "medium"
+    },
+    {
+      "title": "VEX: Sine Displacement along Curve",
+      "category": "vex",
+      "tags": [
+        "curve",
+        "u",
+        "wave"
+      ],
+      "content": "Apply a wave to points on a curve based on their U coordinate:\n@P += @N * sin(f@u * chf('freq') * 2 * PI + @Time) * chf('amp');",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "animation & deformation",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Normalize Vector Attribute",
+      "category": "vex",
+      "tags": [
+        "normalize",
+        "vector"
+      ],
+      "content": "Normalize the velocity attribute:\n@v = normalize(@v);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Cull Points by Camera Frustum (Pseudo)",
+      "category": "vex",
+      "tags": [
+        "frustum",
+        "cull",
+        "camera"
+      ],
+      "content": "Remove points outside a simplified camera field:\nvector p_cam = ptransform('obj/cam1', @P);\nif (abs(p_cam.x) > 1.0 || abs(p_cam.y) > 1.0) {\n    removepoint(0, @ptnum);\n}",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "point wrangle / CVEX",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Add Point at Centroid",
+      "category": "vex",
+      "tags": [
+        "addpoint",
+        "centroid"
+      ],
+      "content": "Calculate the average position and add a point there (run on detail):\nvector avg = {0,0,0};\nfor (int i=0; i<npoints(0); ++i) {\n    avg += point(0, 'P', i);\n}\naddpoint(0, avg / npoints(0));",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "geometry processing",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "medium"
+    },
+    {
+      "title": "VEX: Distance to Curve (Nearpoint to input 1)",
+      "category": "vex",
+      "tags": [
+        "curve",
+        "distance"
+      ],
+      "content": "Find distance to the closest point on a curve in input 1:\nf@dist = distance(@P, point(1, 'P', nearpoint(1, @P)));",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "beginner",
+      "use_case": "geometry processing",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Per-Point Seed for Simulation",
+      "category": "vex",
+      "tags": [
+        "seed",
+        "rand",
+        "id"
+      ],
+      "content": "A stable seed using id if available, else ptnum:\nfloat seed = rand(hasattrib(0, 'id') ? i@id : @ptnum);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "point wrangle / CVEX",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Sample Density from Fog Volume",
+      "category": "vex",
+      "tags": [
+        "volume",
+        "sample",
+        "density"
+      ],
+      "content": "Read density value from first input volume at current point P:\nf@val = volumesample(0, 'density', @P);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Gradient of Volume (Voxel-based)",
+      "category": "vex",
+      "tags": [
+        "volumegradient",
+        "volume"
+      ],
+      "content": "Get the gradient vector of a volume field:\n@N = volumegradient(0, 'density', @P);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "advanced",
+      "use_case": "general geometry",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Volume to Clouds (Density modification)",
+      "category": "vex",
+      "tags": [
+        "volume",
+        "noise",
+        "density"
+      ],
+      "content": "Add 3D noise to a volume density (run on volume points):\nfloat n = noise(@P * chf('freq'));\nf@density *= clamp(n - chf('bias'), 0, 1);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Set Attribute by Point ID map",
+      "category": "vex",
+      "tags": [
+        "id",
+        "map",
+        "attribute"
+      ],
+      "content": "Lookup value from input 1 using stable IDs:\nint other_pt = findattribval(1, 'point', 'id', i@id);\nif (other_pt != -1) @Cd = point(1, 'Cd', other_pt);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "coloring & texturing",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Randomize Normal (Jitter)",
+      "category": "vex",
+      "tags": [
+        "normal",
+        "random",
+        "jitter"
+      ],
+      "content": "Add random noise to normals:\n@N = normalize(@N + (vnoise(@P * 10) - 0.5) * chf('amt'));",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "beginner",
+      "use_case": "general geometry",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Create Polygon from Points (Run on Detail)",
+      "category": "vex",
+      "tags": [
+        "addprim",
+        "polygon"
+      ],
+      "content": "Connect points in order with a polygon (run once on detail):\nint pr = addprim(0, 'poly');\nfor(int i=0; i<npoints(0); ++i) {\n    addvertex(0, pr, i);\n}",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "prim wrangle / CVEX",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Check if Point is inside Bounding Box",
+      "category": "vex",
+      "tags": [
+        "bbox",
+        "overlap",
+        "inside"
+      ],
+      "content": "Test if point P is within the bounds of input 1:\nvector mi, ma;\ngetbbox(1, mi, ma);\nif (@P.x >= mi.x && @P.x <= ma.x && ...) i@inside = 1;",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Tangent calculation for curve",
+      "category": "vex",
+      "tags": [
+        "tangent",
+        "curve",
+        "derivative"
+      ],
+      "content": "Direction from this point to the next along curve:\nint next = (@ptnum + 1) % npoints(0);\n@v = normalize(point(0, 'P', next) - @P);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "point wrangle / CVEX",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Attract to Curve (Proximity Force)",
+      "category": "vex",
+      "tags": [
+        "force",
+        "attract",
+        "curve"
+      ],
+      "content": "Generate a force towards the closest part of a curve:\nint pr; vector uv;\nxyzdist(1, @P, pr, uv);\nvector surf_p = primuv(1, 'P', pr, uv);\n@v += normalize(surf_p - @P) * chf('strength');",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "coloring & texturing",
+      "context": "prim wrangle / CVEX",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Delete by Attribute Mean",
+      "category": "vex",
+      "tags": [
+        "mean",
+        "average",
+        "delete"
+      ],
+      "content": "Remove points with attribute below average (run detail first to get mean):\nfloat mean = detail(0, 'mean_val');\nif (f@value < mean) removepoint(0, @ptnum);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "geometry processing",
+      "context": "point wrangle / CVEX",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Rotate P around Origin",
+      "category": "vex",
+      "tags": [
+        "rotate",
+        "matrix",
+        "origin"
+      ],
+      "content": "Apply global rotation to geometry:\nmatrix3 m = ident();\nrotate(m, radians(@Time * 90), {0,1,0});\n@P *= m;",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "advanced",
+      "use_case": "general geometry",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "medium"
+    },
+    {
+      "title": "VEX: Map Point to UV space (Spherical)",
+      "category": "vex",
+      "tags": [
+        "uv",
+        "spherical",
+        "projection"
+      ],
+      "content": "Simple spherical UV mapping:\nvector n = normalize(@P);\n@uv = set(atan2(n.z, n.x)/(2*PI)+0.5, asin(n.y)/PI+0.5, 0);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "coloring & texturing",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Find Max Attribute Value (Run on Detail)",
+      "category": "vex",
+      "tags": [
+        "max",
+        "attribute",
+        "detail"
+      ],
+      "content": "Find the maximum pscale in the geometry:\nfloat max_val = -1e10;\nfor(int i=0; i<npoints(0); ++i) {\n    max_val = max(max_val, point(0, 'pscale', i));\n}\nf@max_pscale = max_val;",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Simple Gravity Force",
+      "category": "vex",
+      "tags": [
+        "gravity",
+        "velocity"
+      ],
+      "content": "Apply gravity to velocity over time:\n@v.y -= 9.8 * chf('timestep');",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Vellum Hair Pinning",
+      "category": "vex",
+      "tags": [
+        "vellum",
+        "hair",
+        "stopped"
+      ],
+      "content": "Pin first point of every curve for Vellum sim:\nif (vertexprimindex(0, @ptnum) == 0) i@stopped = 1;",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "point wrangle / CVEX",
+      "performance_impact": "medium"
+    },
+    {
+      "title": "VEX: Create ID based on stable seed",
+      "category": "vex",
+      "tags": [
+        "id",
+        "seed",
+        "unique"
+      ],
+      "content": "Generate a unique ID that doesn't change when geometry is re-ordered:\ni@id = int(rand(@P.x * 123.45 + @P.z * 543.21) * 1000000);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Voronoi Cell Center",
+      "category": "vex",
+      "tags": [
+        "voronoi",
+        "wnoise"
+      ],
+      "content": "Get the center position of the nearest Voronoi cell:\nvector cell_center;\nwnoise(@P, 0, cell_center);\n@Cd = cell_center;",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "coloring & texturing",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Simple Bounding Sphere check",
+      "category": "vex",
+      "tags": [
+        "sphere",
+        "radius",
+        "inside"
+      ],
+      "content": "Check if point is inside a world-space sphere:\nif (distance(@P, chv('origin')) < chf('radius')) {\n    i@active = 1;\n}",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Flatten along Axis",
+      "category": "vex",
+      "tags": [
+        "flatten",
+        "projection"
+      ],
+      "content": "Flatten geomety to Y=0 plane:\n@P.y = 0;",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Random Hue to Color",
+      "category": "vex",
+      "tags": [
+        "hsv",
+        "color",
+        "hsvtorgb"
+      ],
+      "content": "Set random color by varying only hue:\n@Cd = hsvtorgb(set(rand(@ptnum), 0.8, 1.0));",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "beginner",
+      "use_case": "coloring & texturing",
+      "context": "point wrangle / CVEX",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Mirror geometry on X (Simple logic)",
+      "category": "vex",
+      "tags": [
+        "mirror",
+        "projection"
+      ],
+      "content": "Move points to their mirrored position on the negative X side:\nif (@P.x > 0) @P.x = -@P.x;",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Simple String manipulation (Search/Replace)",
+      "category": "vex",
+      "tags": [
+        "string",
+        "replace",
+        "re_replace"
+      ],
+      "content": "Simple name update using string substitution:\ns@name = re_replace('old_', 'new_', s@name);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Detect Concave Points (Approx)",
+      "category": "vex",
+      "tags": [
+        "concave",
+        "curvature"
+      ],
+      "content": "Detect points in 'valleys' by checking neighbor distance to average plane:\nvector avg_nb = {0,0,0};\nint nbs[] = neighbours(0, @ptnum);\nforeach(int n; nbs) avg_nb += point(0, 'P', n);\navg_nb /= len(nbs);\nif (dot(@N, normalize(avg_nb - @P)) > 0.1) i@concave = 1;",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "advanced",
+      "use_case": "geometry processing",
+      "context": "point wrangle / CVEX",
+      "performance_impact": "medium"
+    },
+    {
+      "title": "VEX: Simple Heat Diffusion (Feedback)",
+      "category": "vex",
+      "tags": [
+        "diffusion",
+        "heat",
+        "neighbor"
+      ],
+      "content": "Blur an attribute by averaging with neighbors:\nfloat total = f@temp;\nint nbs[] = neighbours(0, @ptnum);\nforeach(int n; nbs) total += point(0, 'temp', n);\nf@temp = total / (len(nbs) + 1);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "advanced",
+      "use_case": "general geometry",
+      "context": "point wrangle / CVEX",
+      "performance_impact": "medium"
+    },
+    {
+      "title": "VEX: Triangle Perimeter count",
+      "category": "vex",
+      "tags": [
+        "perimeter",
+        "length",
+        "primitive"
+      ],
+      "content": "Calculate the length of the primitive boundary:\nf@perim = prim_perimeter(0, @primnum);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "prim wrangle / CVEX",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Group by Point count on Primitive",
+      "category": "vex",
+      "tags": [
+        "group",
+        "primitive",
+        "count"
+      ],
+      "content": "Group triangles vs quads:\nint count = primvertexcount(0, @primnum);\nif (count == 3) setprimgroup(0, 'tris', @primnum, 1);\nelse if (count == 4) setprimgroup(0, 'quads', @primnum, 1);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "prim wrangle / CVEX",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Matrix from Rotation axis and angle",
+      "category": "vex",
+      "tags": [
+        "matrix",
+        "rotate",
+        "axis"
+      ],
+      "content": "Manually build a rotation matrix:\nmatrix3 m = ident();\nrotate(m, radians(45), {0,1,0});",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "advanced",
+      "use_case": "general geometry",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "medium"
+    },
+    {
+      "title": "VEX: Simple Project to Surface",
+      "category": "vex",
+      "tags": [
+        "project",
+        "xyzdist",
+        "primuv"
+      ],
+      "content": "Snap points to closest surface location in input 1:\nint pr; vector uv;\nxyzdist(1, @P, pr, uv);\n@P = primuv(1, 'P', pr, uv);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "coloring & texturing",
+      "context": "prim wrangle / CVEX",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Simple Random Orient",
+      "category": "vex",
+      "tags": [
+        "orient",
+        "random",
+        "quaternion"
+      ],
+      "content": "Assign a completely random orientation to each point:\n@orient = set(rand(@ptnum)-0.5, rand(@ptnum+1)-0.5, rand(@ptnum+2)-0.5, rand(@ptnum+3)-0.5);\n@orient = normalize(@orient);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "point wrangle / CVEX",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Calculate pscale from Area",
+      "category": "vex",
+      "tags": [
+        "pscale",
+        "area"
+      ],
+      "content": "Set pscale based on surrounding face area (approx):\nfloat area = 0;\nint prims[] = pointprims(0, @ptnum);\nforeach(int p; prims) area += prim_area(0, p);\n@pscale = sqrt(area) * 0.5;",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "advanced",
+      "use_case": "general geometry",
+      "context": "point wrangle / CVEX",
+      "performance_impact": "medium"
+    },
+    {
+      "title": "VEX: Offset points along Normal",
+      "category": "vex",
+      "tags": [
+        "offset",
+        "normal",
+        "P"
+      ],
+      "content": "Puff out geometry by moving along N:\n@P += @N * chf('dist');",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Filter by Id attribute",
+      "category": "vex",
+      "tags": [
+        "id",
+        "filter",
+        "delete"
+      ],
+      "content": "Remove points with even IDs:\nif (i@id % 2 == 0) removepoint(0, @ptnum);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "point wrangle / CVEX",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Distance to Bounding Box Edge",
+      "category": "vex",
+      "tags": [
+        "bbox",
+        "distance",
+        "edge"
+      ],
+      "content": "Calculate how close point is to the edge of the scene:\nvector mi, ma;\ngetbbox(0, mi, ma);\nfloat dx = min(@P.x - mi.x, ma.x - @P.x);\nfloat dz = min(@P.z - mi.z, ma.z - @P.z);\nf@dist_to_edge = min(dx, dz);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Simple L-System branch logic",
+      "category": "vex",
+      "tags": [
+        "lsystem",
+        "branch",
+        "iteration"
+      ],
+      "content": "Scale points based on their generation in an L-system:\n@pscale = pow(0.8, i@generation);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "beginner",
+      "use_case": "general geometry",
+      "context": "point wrangle / CVEX",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Group based on Normal direction",
+      "category": "vex",
+      "tags": [
+        "normal",
+        "group",
+        "up"
+      ],
+      "content": "Select top-facing surfaces:\nif (dot(@N, {0,1,0}) > 0.8) setpointgroup(0, 'top', @ptnum, 1);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "point wrangle / CVEX",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Volume Sample Gradient 3D",
+      "category": "vex",
+      "tags": [
+        "volume",
+        "gradient",
+        "vector"
+      ],
+      "content": "Get the steepness and direction of a fog volume:\n@v = volumegradient(0, 'density', @P);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "advanced",
+      "use_case": "general geometry",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Simple Sine wave displacement (radial)",
+      "category": "vex",
+      "tags": [
+        "radial",
+        "sin",
+        "ripple"
+      ],
+      "content": "Create expansion ripples from origin:\nfloat dist = length(@P);\n@P += normalize(@P) * sin(dist * 10 - @Time) * 0.1;",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "animation & deformation",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Randomize Material ID",
+      "category": "vex",
+      "tags": [
+        "random",
+        "material",
+        "id"
+      ],
+      "content": "Assign random material slots:\ni@mat_id = int(rand(@ptnum) * 5);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "beginner",
+      "use_case": "general geometry",
+      "context": "point wrangle / CVEX",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Simple Bounding Cylinder check",
+      "category": "vex",
+      "tags": [
+        "cylinder",
+        "inside",
+        "math"
+      ],
+      "content": "Check if points are within vertical cylinder R=10:\nif (length(set(@P.x, 0, @P.z)) < 10) i@inside = 1;",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Cross Product of two attributes",
+      "category": "vex",
+      "tags": [
+        "cross",
+        "vector",
+        "tangent"
+      ],
+      "content": "Calculate binormal from normal and tangent:\n@up = cross(@N, @v);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Sample Heat attribute at specific UV",
+      "category": "vex",
+      "tags": [
+        "primuv",
+        "heat",
+        "sample"
+      ],
+      "content": "Get attribute from second input at world-UV point {0.5, 0.5}:\nf@target_val = primuv(1, 'heat', 0, set(0.5, 0.5, 0));",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "coloring & texturing",
+      "context": "prim wrangle / CVEX",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Random string name selection",
+      "category": "vex",
+      "tags": [
+        "string",
+        "random",
+        "list"
+      ],
+      "content": "Pick a random name from a hardcoded list:\nstring names[] = {'red', 'blue', 'green'};\ns@c_name = names[int(rand(@ptnum) * len(names))];",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "point wrangle / CVEX",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Matrix Determinant",
+      "category": "vex",
+      "tags": [
+        "matrix",
+        "determinant",
+        "scale"
+      ],
+      "content": "Check if a transformation matrix is inverted:\nif (determinant(m@transform) < 0) i@inverted = 1;",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "advanced",
+      "use_case": "general geometry",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "medium"
+    },
+    {
+      "title": "VEX: Simple Smooth Rotation Quat",
+      "category": "vex",
+      "tags": [
+        "rotate",
+        "quaternion",
+        "time"
+      ],
+      "content": "Slowly spin points around Y:\n@orient = quaternion(radians(@Time * 10), {0,1,0});",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "advanced",
+      "use_case": "geometry processing",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "medium"
+    },
+    {
+      "title": "VEX: Simple Distance to Point 0",
+      "category": "vex",
+      "tags": [
+        "distance",
+        "point"
+      ],
+      "content": "Calculate attribute based on proximity to the first point:\nf@dist_to_start = distance(@P, point(0, 'P', 0));",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "beginner",
+      "use_case": "geometry processing",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Check if primitive is Planar (Approx)",
+      "category": "vex",
+      "tags": [
+        "planar",
+        "primitive",
+        "flat"
+      ],
+      "content": "Verify if prim points all lie on the same plane:\nint pts[] = primpoints(0, @primnum);\nvector n = prim_normal(0, @primnum, {0,0,0});\nfloat error = 0;\nforeach(int p; pts) error += abs(dot(n, point(0, 'P', p) - point(0,'P',pts[0])));\nif (error < 1e-4) i@is_flat = 1;",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "advanced",
+      "use_case": "general geometry",
+      "context": "prim wrangle / CVEX",
+      "performance_impact": "medium"
+    },
+    {
+      "title": "VEX: Randomize point position on X-axis only",
+      "category": "vex",
+      "tags": [
+        "random",
+        "P",
+        "axis"
+      ],
+      "content": "@P.x += (rand(@ptnum) - 0.5) * chf('scale');",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "beginner",
+      "use_case": "general geometry",
+      "context": "point wrangle / CVEX",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Create custom id from name string hash",
+      "category": "vex",
+      "tags": [
+        "string",
+        "hash",
+        "id"
+      ],
+      "content": "Stable ID from a name attribute using random seed hack:\ni@id = int(rand(atof(s@name)) * 1000000);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "beginner",
+      "use_case": "general geometry",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Map Y height to Cd color",
+      "category": "vex",
+      "tags": [
+        "color",
+        "gradient",
+        "y"
+      ],
+      "content": "@Cd = set(fit01(clamp(@P.y, 0, 10), 0, 1), 0.2, 0.5);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "beginner",
+      "use_case": "coloring & texturing",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Simple Vertex attribute lookup",
+      "category": "vex",
+      "tags": [
+        "vertex",
+        "attribute",
+        "lookup"
+      ],
+      "content": "Read an attribute from a specific vertex in the second input:\n@uv = vertex(1, 'uv', @vtxnum);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "coloring & texturing",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Blend normals between inputs 0 and 1",
+      "category": "vex",
+      "tags": [
+        "blend",
+        "normal",
+        "lerp"
+      ],
+      "content": "vector n1 = point(1, 'N', @ptnum);\n@N = normalize(lerp(@N, n1, chf('blend')));",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "point wrangle / CVEX",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Simple Pscale based on Point Number Sequence",
+      "category": "vex",
+      "tags": [
+        "pscale",
+        "ptnum"
+      ],
+      "content": "Growing pscale across the point stream:\n@pscale = float(@ptnum) / npoints(0);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "beginner",
+      "use_case": "general geometry",
+      "context": "point wrangle / CVEX",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Check for overlapping points (Simple)",
+      "category": "vex",
+      "tags": [
+        "overlaps",
+        "nearpoints",
+        "distance"
+      ],
+      "content": "Identify points sharing roughly the same space:\nint pts[] = nearpoints(0, @P, 0.001, 2);\nif (len(pts) > 1) i@is_overlap = 1;",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "geometry processing",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Sample second input density onto first input points",
+      "category": "vex",
+      "tags": [
+        "volume",
+        "sample",
+        "transfer"
+      ],
+      "content": "f@target_density = volumesample(1, 'density', @P);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "general geometry",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
+    },
+    {
+      "title": "VEX: Simple Sine animation on Cd",
+      "category": "vex",
+      "tags": [
+        "color",
+        "animation",
+        "flame"
+      ],
+      "content": "Pulsing red color over time:\n@Cd.r = 0.5 + 0.5 * sin(@Time * 5);",
+      "_source": "Built-in VEX examples",
+      "_source_path": "vex_examples",
+      "difficulty": "intermediate",
+      "use_case": "animation & deformation",
+      "context": "wrangle (context-agnostic)",
+      "performance_impact": "low"
     }
   ]
 }

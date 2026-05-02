@@ -244,13 +244,17 @@ def get_parameter_details(node_path, parm_name):
         if not parm:
             return _err(f"Parameter not found: {parm_name}")
         templ = parm.parmTemplate()
+        try:
+            expression = parm.expression()
+        except Exception:
+            expression = None
         details = {
             "name": parm.name(),
-            "label": parm.label(),
+            "label": parm.description() if hasattr(parm, "description") else parm.name(),
             "type": str(templ.type()),
             "default": templ.defaultValue() if hasattr(templ, "defaultValue") else None,
-            "expression": parm.expression() if parm.expression() else None,
-            "language": str(parm.expressionLanguage()) if parm.expression() else None,
+            "expression": expression,
+            "language": str(parm.expressionLanguage()) if expression else None,
         }
         if hasattr(templ, "numComponents"):
             details["size"] = templ.numComponents()
