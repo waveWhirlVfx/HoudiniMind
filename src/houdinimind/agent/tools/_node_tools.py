@@ -37,6 +37,7 @@ _SOP_TYPE_ALIASES = core.SOP_TYPE_ALIASES
 _FILTER_NODE_TYPES = core.FILTER_NODE_TYPES
 _infer_child_context_core = core._infer_child_context_core
 _validate_vex_with_checker = core._validate_vex_with_checker
+_vex_validation_unavailable = core._vex_validation_unavailable
 _validate_python_code = core._validate_python_code
 _HYBRID_KNOWLEDGE = core._HYBRID_KNOWLEDGE
 HOUDINIMIND_ROOT = core.HOUDINIMIND_ROOT
@@ -266,7 +267,7 @@ def resolve_build_hints(
         return _err(str(e))
 
 
-def _set_node_parameter(node, parm_name, value, parm_cache=None):
+def _set_node_parameter(node, parm_name, value, parm_cache=None, cook_vex=True):
     """Shared parameter-setting logic used by safe_set_parameter and create_node_chain."""
     node_type = node.type().name()
     if not isinstance(parm_name, str) or not parm_name.strip():
@@ -346,6 +347,20 @@ def _set_node_parameter(node, parm_name, value, parm_cache=None):
             parm = None
     else:
         parm = node.parm(parm_name)
+        if not parm:
+            try:
+                parm_tuple = getattr(node, "parmTuple", None)
+                parm = parm_tuple(parm_name) if callable(parm_tuple) else None
+                if parm:
+                    try:
+                        tuple_len = len(parm)
+                    except Exception:
+                        tuple_len = 0
+                    if tuple_len > 1:
+                        value = [value for _ in range(tuple_len)]
+                        is_vector_like = True
+            except Exception:
+                parm = None
     if not parm:
         exact_alias = _resolve_exact_alias(parm_name)
         if exact_alias:
@@ -463,9 +478,67 @@ def _set_node_parameter(node, parm_name, value, parm_cache=None):
     if not is_tuple and isinstance(value, (list, tuple)):
         value = _coerce_component_scalar(parm_name, value)
     old = _snapshot_parm_value(parm)
+    vex_validation = None
+    vex_validation_unavailable = False
+    if parm_name == "snippet" and isinstance(value, str):
+        value = value.replace("\r\n", "\n").replace("\r", "\n")
+        vex_validation = _validate_vex_with_checker(value)
+        if not vex_validation.get("success"):
+            vex_validation_unavailable = _vex_validation_unavailable(vex_validation)
+            if not vex_validation_unavailable:
+                errors = vex_validation.get("errors") or ["Unknown VEX validation error"]
+                return _err(
+                    "VEX validation failed before setting "
+                    f"{node.path()}/snippet. Use write_vex_code() and fix the reported VEX "
+                    f"issue before retrying. First error: {errors[0]}"
+                )
     set_result = _set_parm_value(parm, value)
     if set_result.get("success") is False:
         return _err(f"Failed to set '{parm_name}': {set_result.get('error')}")
+    if parm_name == "snippet" and isinstance(value, str):
+        cook_errors = []
+        if cook_vex:
+            cook_fn = getattr(node, "cook", None)
+            if callable(cook_fn):
+                try:
+                    cook_fn(force=True)
+                except Exception as cook_err:
+                    cook_errors.append(str(cook_err))
+                errors_fn = getattr(node, "errors", None)
+                if callable(errors_fn):
+                    try:
+                        cook_errors.extend(str(err) for err in errors_fn())
+                    except Exception:
+                        pass
+        if cook_errors:
+            try:
+                parm.set(old)
+            except Exception:
+                pass
+            return _err(
+                "VEX cook failed after setting "
+                f"{node.path()}/snippet; previous code was restored. First error: {cook_errors[0]}"
+            )
+        data = {
+            "old": old,
+            "new": value,
+            "vex_validation": "unavailable"
+            if vex_validation_unavailable
+            else vex_validation.get("status", "ok")
+            if isinstance(vex_validation, dict)
+            else "ok",
+            "warnings": (vex_validation or {}).get("warnings", []),
+        }
+        message = f"UNDO_TRACK: Set {node.path()}/snippet to validated VEX"
+        if vex_validation_unavailable:
+            message += (
+                " — WARNING: VEX validator unavailable; snippet was set without compile preflight"
+            )
+        elif data["warnings"]:
+            message += f" — warnings: {data['warnings']}"
+        else:
+            message += " — compiled OK"
+        return _ok(data, message=message)
     if set_result.get("mode") == "expression":
         return _ok(
             {
@@ -645,8 +718,44 @@ def create_node(parent_path, node_type, name=None, cook=True):
             msg += f" (auto-corrected parent to {auto_corrected_parent})"
         if node_type != orig_type:
             msg += f" (auto-corrected '{orig_type}' -> '{node_type}')"
+
+        # Cook-error severity: expected-input errors on filter nodes (proximity,
+        # group, copytopoints, etc.) are normal at creation time because the
+        # node hasn't been wired yet. But "Error while cooking" or "attempted
+        # operation failed" on a generator are real failures the agent must fix.
+        fatal_cook_errors = []
+        if cook_errors:
+            FATAL_MARKERS = (
+                "attempted operation failed",
+                "error while cooking",
+                "invalid source",
+                "no such file",
+            )
+            EXPECTED_NO_INPUT_MARKERS = (
+                "no input",
+                "missing input",
+                "input 0",
+                "input 1",
+                "is not connected",
+            )
+            for err in cook_errors:
+                err_low = str(err).lower()
+                if any(m in err_low for m in EXPECTED_NO_INPUT_MARKERS):
+                    continue
+                if any(m in err_low for m in FATAL_MARKERS):
+                    fatal_cook_errors.append(str(err))
+
         if cook_errors:
             msg += f" — COOK ERRORS DETECTED: {cook_errors}"
+
+        if fatal_cook_errors:
+            return _err(
+                f"Created {node.path()} but it has fatal cook errors: "
+                f"{fatal_cook_errors}. Investigate before continuing — the node "
+                f"is in the scene but not producing valid output. Use get_all_errors "
+                f"and check inputs/parameters, or delete and recreate with a "
+                f"different type if this node type is wrong for the task."
+            )
 
         return _ok(
             {
@@ -1138,9 +1247,10 @@ def write_vex_code(node_path, vex_code):
             return _err(f"No 'snippet' parm on {node_path} — is this a Wrangle node?")
         valid_res = _validate_vex_with_checker(vex_code)
         if not valid_res["success"]:
-            return _ok(
+            return _err(
+                f"VEX compile failed for {node_path}: "
+                f"{valid_res['errors'][0] if valid_res['errors'] else 'Unknown error'}",
                 {"errors": valid_res["errors"], "status": "validation_failed"},
-                message=f"VEX compile failed for {node_path}: {valid_res['errors'][0] if valid_res['errors'] else 'Unknown error'}",
             )
         snippet_parm.set(vex_code)
         try:
@@ -1176,9 +1286,9 @@ def write_python_script(node_path, code):
             return _err(f"No 'python' parm on {node_path} — is this a Python Script SOP?")
         val_res = _validate_python_code(code)
         if not val_res.get("success"):
-            return _ok(
+            return _err(
+                f"Python validation FAILED for {node_path}: {val_res.get('errors')[0]}",
                 {"errors": val_res.get("errors"), "status": "validation_failed"},
-                message=f"Python validation FAILED for {node_path}: {val_res.get('errors')[0]}",
             )
         py_parm.set(code)
         try:
@@ -1195,16 +1305,52 @@ def write_python_script(node_path, code):
         return _err(str(e))
 
 
+def _python_code_writes_wrangle_snippet(code):
+    try:
+        tree = ast.parse(code)
+    except SyntaxError:
+        return False
+    snippet_names = {"snippet", "vex", "vex_code", "vexcode", "vex_snippet"}
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        func = node.func
+        if isinstance(func, ast.Attribute) and func.attr == "set":
+            target = func.value
+            if isinstance(target, ast.Call) and isinstance(target.func, ast.Attribute):
+                if target.func.attr == "parm" and target.args:
+                    arg = target.args[0]
+                    if isinstance(arg, ast.Constant) and str(arg.value).lower() in snippet_names:
+                        return True
+        if isinstance(func, ast.Attribute) and func.attr in {"setParms", "setParmsPending"}:
+            if node.args and isinstance(node.args[0], ast.Dict):
+                for key in node.args[0].keys:
+                    if isinstance(key, ast.Constant) and str(key.value).lower() in snippet_names:
+                        return True
+    return bool(
+        re.search(
+            r"\.parm\s*\(\s*['\"](?:snippet|vex(?:_code|code|_snippet)?)['\"]\s*\)\s*\.set\s*\(",
+            code,
+        )
+        or re.search(r"\.setParms(?:Pending)?\s*\(\s*\{[^}]*['\"]snippet['\"]\s*:", code, re.S)
+    )
+
+
 def execute_python(code):
     """Execute arbitrary Python code in the Houdini session."""
     try:
-        _require_hou()
         val_res = _validate_python_code(code)
         if not val_res.get("success"):
-            return _ok(
+            return _err(
+                f"Python script validation FAILED: {val_res.get('errors')[0]}",
                 {"errors": val_res.get("errors"), "status": "validation_failed"},
-                message=f"Python script validation FAILED: {val_res.get('errors')[0]}",
             )
+        if _python_code_writes_wrangle_snippet(code):
+            return _err(
+                "Direct Python writes to wrangle snippet parameters are blocked. "
+                "Use write_vex_code(node_path, vex_code) so VEX is validated and cooked before it is kept."
+            )
+        _require_hou()
         import io as _io
         from contextlib import redirect_stdout as _redirect_stdout
 

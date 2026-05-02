@@ -444,14 +444,34 @@ def create_usd_light(
         parent = hou.node(lop_parent_path)
         if not parent:
             return _err(f"LOP parent not found: {lop_parent_path}")
+        try:
+            available = set(parent.childTypeCategory().nodeTypes())
+        except Exception:
+            available = set()
         lt_map = {
-            "rectlight": "rectlight",
-            "spherelight": "spherelight",
-            "distantlight": "distantlight",
-            "domelight": "domelight",
+            "rectlight": ["rectlight", "light", "light::2.0"],
+            "spherelight": ["spherelight", "light", "light::2.0"],
+            "distantlight": ["distantlight", "distantlight::2.0", "light", "light::2.0"],
+            "domelight": ["domelight", "domelight::3.0", "domelight::2.0", "light"],
+            "disklight": ["disklight", "light", "light::2.0"],
+            "cylinderlight": ["cylinderlight", "light", "light::2.0"],
         }
-        ltype = lt_map.get(light_type.lower(), light_type)
-        light = parent.createNode(ltype, name)
+        candidates = lt_map.get(light_type.lower(), [light_type, "light", "light::2.0"])
+        if available:
+            candidates = [candidate for candidate in candidates if candidate in available]
+        light = None
+        last_error = ""
+        for candidate in candidates:
+            try:
+                light = parent.createNode(candidate, name)
+                ltype = candidate
+                break
+            except Exception as exc:
+                last_error = str(exc)
+        if light is None:
+            return _err(
+                f"Could not create USD light '{light_type}' in {lop_parent_path}: {last_error}"
+            )
         for p in ("intensity", "light_intensity", "xn__inputsintensity_n2a"):
             if light.parm(p):
                 light.parm(p).set(intensity)
@@ -467,7 +487,11 @@ def create_usd_light(
         if last:
             light.setInput(0, last)
         parent.layoutChildren()
-        return _ok({"light": light.path()})
+        data = {"light": light.path(), "requested_type": light_type, "created_type": ltype}
+        msg = "Created USD light."
+        if ltype != light_type:
+            msg += f" Requested type '{light_type}' was not available; used '{ltype}'."
+        return _ok(data, message=msg)
     except Exception:
         return _err(_tb.format_exc())
 

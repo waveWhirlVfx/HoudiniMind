@@ -79,13 +79,9 @@ class ToolValidator:
                 args["to_in"] = args.pop("input_index")
             # If the user tries to map ports differently, we ignore them or append to path.
             if "from_output" in args:
-                from_path = args.get("from_path", "")
-                if ":" not in from_path and args["from_output"]:
-                    args["from_path"] = f"{from_path}:0"  # naive fallback
+                args.setdefault("from_out", args.pop("from_output"))
             if "to_input" in args:
-                to_path = args.get("to_path", "")
-                if ":" not in to_path and args["to_input"]:
-                    args["to_path"] = f"{to_path}:0"  # naive fallback
+                args.setdefault("to_in", args.pop("to_input"))
 
         schema = self._schemas.get(tool_name)
         if not schema:
@@ -215,71 +211,83 @@ class ToolValidator:
 
         if expected_type == "string":
             if not isinstance(value, str):
-                return str(value)
-            return value
+                coerced = str(value)
+            else:
+                coerced = value
 
         elif expected_type == "integer":
             if isinstance(value, float) and value == int(value):
-                return int(value)
-            if isinstance(value, str):
+                coerced = int(value)
+            elif isinstance(value, str):
                 try:
-                    return int(value)
+                    coerced = int(value)
                 except ValueError:
                     raise ValueError(f"Field '{field}' must be an integer, got '{value}'")
-            if not isinstance(value, int):
+            elif not isinstance(value, int):
                 raise ValueError(f"Field '{field}' must be an integer, got {type(value).__name__}")
-            return value
+            else:
+                coerced = value
 
         elif expected_type == "number":
             if isinstance(value, str):
                 try:
-                    return float(value)
+                    coerced = float(value)
                 except ValueError:
                     raise ValueError(f"Field '{field}' must be a number, got '{value}'")
-            if isinstance(value, (int, float)):
-                return float(value)
-            raise ValueError(f"Field '{field}' must be a number, got {type(value).__name__}")
+            elif isinstance(value, (int, float)):
+                coerced = float(value)
+            else:
+                raise ValueError(f"Field '{field}' must be a number, got {type(value).__name__}")
 
         elif expected_type == "boolean":
             if isinstance(value, str):
                 if value.lower() in ("true", "1", "yes"):
-                    return True
-                if value.lower() in ("false", "0", "no"):
-                    return False
-                raise ValueError(f"Field '{field}' must be boolean, got '{value}'")
-            return bool(value)
+                    coerced = True
+                elif value.lower() in ("false", "0", "no"):
+                    coerced = False
+                else:
+                    raise ValueError(f"Field '{field}' must be boolean, got '{value}'")
+            else:
+                coerced = bool(value)
 
         elif expected_type == "array":
             if isinstance(value, str):
                 try:
                     parsed = json.loads(value)
                     if isinstance(parsed, list):
-                        return parsed
+                        coerced = parsed
+                    else:
+                        raise ValueError(f"Field '{field}' must be an array, got string")
                 except json.JSONDecodeError:
-                    pass
-                raise ValueError(f"Field '{field}' must be an array, got string")
-            if not isinstance(value, list):
+                    raise ValueError(f"Field '{field}' must be an array, got string")
+            elif not isinstance(value, list):
                 raise ValueError(f"Field '{field}' must be an array, got {type(value).__name__}")
-            return value
+            else:
+                coerced = value
 
         elif expected_type == "object":
             if isinstance(value, str):
                 try:
                     parsed = json.loads(value)
                     if isinstance(parsed, dict):
-                        return parsed
+                        coerced = parsed
+                    else:
+                        raise ValueError(f"Field '{field}' must be an object, got string")
                 except json.JSONDecodeError:
-                    pass
-                raise ValueError(f"Field '{field}' must be an object, got string")
-            if not isinstance(value, dict):
+                    raise ValueError(f"Field '{field}' must be an object, got string")
+            elif not isinstance(value, dict):
                 raise ValueError(f"Field '{field}' must be an object, got {type(value).__name__}")
-            return value
+            else:
+                coerced = value
+
+        else:
+            coerced = value
 
         # Enum validation
-        if "enum" in prop and value not in prop["enum"]:
-            raise ValueError(f"Field '{field}' must be one of {prop['enum']}, got '{value}'")
+        if "enum" in prop and coerced not in prop["enum"]:
+            raise ValueError(f"Field '{field}' must be one of {prop['enum']}, got '{coerced}'")
 
-        return value
+        return coerced
 
     def get_correction_prompt(self, error: ToolArgumentError) -> str:
         """

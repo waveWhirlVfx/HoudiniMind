@@ -20,7 +20,13 @@ New in v2:
 """
 
 import json
+import time
 from collections import deque
+
+# Soft wall-clock budget for scene-graph traversal. Keeps a pathological scene
+# (huge / cyclic / proxy-stuffed) from blocking the agent's read tools. If the
+# budget elapses we return what we have so far.
+_DEFAULT_TRAVERSAL_BUDGET_S = 4.0
 
 try:
     import hou
@@ -55,12 +61,21 @@ class SceneReader:
             return []
 
     @staticmethod
-    def _iter_subchildren(root, limit: int | None = None) -> list:
+    def _iter_subchildren(
+        root,
+        limit: int | None = None,
+        time_budget_s: float | None = None,
+    ) -> list:
+        budget = float(time_budget_s) if time_budget_s is not None else _DEFAULT_TRAVERSAL_BUDGET_S
+        deadline = time.monotonic() + budget if budget > 0 else None
+
         direct_children = SceneReader._safe_children(root)
         if direct_children:
             result = []
             queue = deque(direct_children)
             while queue and (limit is None or len(result) < limit):
+                if deadline is not None and time.monotonic() >= deadline:
+                    break
                 node = queue.popleft()
                 result.append(node)
                 if limit is not None and len(result) >= limit:

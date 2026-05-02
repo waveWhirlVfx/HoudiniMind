@@ -69,6 +69,8 @@ mcp_config.json
 .env
 .env.*
 !.env.example
+.credentials.enc
+data/db/.credentials.enc
 
 # Docs build output
 site/

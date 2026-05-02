@@ -4,6 +4,7 @@
 # LinkedIn: https://www.linkedin.com/in/av-0001/
 # ==============================================================================
 import asyncio
+import errno
 import json
 import os
 import socket
@@ -13,7 +14,10 @@ import time
 import traceback
 from concurrent.futures import Future, ThreadPoolExecutor
 
-import websockets
+try:
+    import websockets
+except ImportError:
+    websockets = None
 
 try:
     import hdefereval
@@ -53,6 +57,21 @@ def _default_port():
     return _env_int("HOUDINIMIND_MCP_PORT", DEFAULT_MCP_PORT)
 
 
+def _ping_existing_server(host, port, timeout=1.0):
+    try:
+        with socket.create_connection((host, port), timeout=timeout) as sock:
+            sock.settimeout(timeout)
+            sock.sendall(json.dumps({"method": "ping", "params": {}}).encode("utf-8") + b"\n")
+            data = sock.recv(4096)
+        if not data:
+            return False
+        response = json.loads(data.decode("utf-8").strip())
+        result = response.get("result", response)
+        return isinstance(result, dict) and result.get("status") == "ok"
+    except Exception:
+        return False
+
+
 class MCPHoudiniServer:
     def __init__(self, host=None, port=None):
         self.host = host or _default_host()
@@ -87,9 +106,17 @@ class MCPHoudiniServer:
             self._thread = threading.Thread(target=self._listen_loop, daemon=True)
             self._thread.start()
 
-            # Start WebSocket thread
-            self._ws_thread = threading.Thread(target=self._ws_server_thread, daemon=True)
-            self._ws_thread.start()
+            # Start WebSocket push only when the optional dependency is
+            # available in Houdini's bundled Python. TCP MCP remains the
+            # required path used by mcp_bridge.py.
+            if websockets is not None:
+                self._ws_thread = threading.Thread(target=self._ws_server_thread, daemon=True)
+                self._ws_thread.start()
+            else:
+                print(
+                    "HoudiniMind: websockets package unavailable; "
+                    "MCP TCP server will run without WebSocket event push."
+                )
 
             # Register EventHooks
             try:
@@ -101,10 +128,36 @@ class MCPHoudiniServer:
             except Exception as eh:
                 print(f"HoudiniMind: Failed to register EventHooks: {eh}")
 
-            msg = f"MCP Houdini Server started on {self.host}:{self.port} (WS on {self.ws_port})"
+            ws_suffix = f" (WS on {self.ws_port})" if websockets is not None else ""
+            msg = f"MCP Houdini Server started on {self.host}:{self.port}{ws_suffix}"
             print(f"HoudiniMind: {msg}")
             return msg
+        except OSError as e:
+            self.running = False
+            if self.server_socket:
+                try:
+                    self.server_socket.close()
+                except Exception:
+                    pass
+                self.server_socket = None
+            if e.errno == errno.EADDRINUSE and _ping_existing_server(self.host, self.port):
+                msg = (
+                    f"MCP Houdini Server is already running on {self.host}:{self.port}. "
+                    "Use that endpoint from your MCP client, or restart Houdini to clear it."
+                )
+                print(f"HoudiniMind: {msg}")
+                return msg
+            err_msg = f"Failed to start server: {e}"
+            print(f"HoudiniMind: ERROR: {err_msg}")
+            return err_msg
         except Exception as e:
+            self.running = False
+            if self.server_socket:
+                try:
+                    self.server_socket.close()
+                except Exception:
+                    pass
+                self.server_socket = None
             err_msg = f"Failed to start server: {e}"
             print(f"HoudiniMind: ERROR: {err_msg}")
             return err_msg
@@ -130,6 +183,9 @@ class MCPHoudiniServer:
         return "MCP Houdini Server stopped."
 
     def _ws_server_thread(self):
+        if websockets is None:
+            return
+
         # Bypass Houdini's custom event loop (haio) which is main-thread-only
         asyncio.set_event_loop_policy(asyncio.DefaultEventLoopPolicy())
         self._ws_loop = asyncio.new_event_loop()
@@ -159,7 +215,11 @@ class MCPHoudiniServer:
             self._ws_loop.close()
 
     def broadcast_event(self, category, data):
-        """Broadcasts an event to all connected WebSocket clients."""
+        """Broadcasts an event to all connected WebSocket clients.
+
+        Drops clients whose send raises (closed socket, broken pipe, etc.) so
+        the broadcast set never accumulates dead connections.
+        """
         if not self._ws_loop or not self._ws_clients:
             return
 
@@ -167,11 +227,25 @@ class MCPHoudiniServer:
         payload = json.dumps(
             {"jsonrpc": "2.0", "method": f"notifications/{category}", "params": data}
         )
+        dead = []
         for ws in list(self._ws_clients):
             try:
-                asyncio.run_coroutine_threadsafe(ws.send(payload), self._ws_loop)
+                fut = asyncio.run_coroutine_threadsafe(ws.send(payload), self._ws_loop)
+
+                # Attach a callback that prunes the client if the send fails
+                # asynchronously (most send failures land in the future, not
+                # the schedule call).
+                def _prune_on_error(f, _ws=ws):
+                    try:
+                        f.result(timeout=0)
+                    except Exception:
+                        self._ws_clients.discard(_ws)
+
+                fut.add_done_callback(_prune_on_error)
             except Exception:
-                pass
+                dead.append(ws)
+        for ws in dead:
+            self._ws_clients.discard(ws)
 
     def _listen_loop(self):
         while self.running:
@@ -331,7 +405,11 @@ class MCPHoudiniServer:
     _TOOL_TIMEOUT_S: int = _env_int("HOUDINIMIND_TOOL_TIMEOUT", 90)
 
     def _execute_tool_payload(self, tool_name, params):
-        from houdinimind.agent.tools import TOOL_FUNCTIONS, TOOL_SAFETY_TIERS
+        from houdinimind.agent.tools import (
+            OFF_MAIN_THREAD_TOOLS,
+            TOOL_FUNCTIONS,
+            TOOL_SAFETY_TIERS,
+        )
 
         if tool_name not in TOOL_FUNCTIONS:
             return {"error": {"code": -32601, "message": f"Tool '{tool_name}' not found"}}
@@ -354,7 +432,14 @@ class MCPHoudiniServer:
             def _run():
                 return TOOL_FUNCTIONS[tool_name](**params)
 
-            if HOU_AVAILABLE:
+            # Pure-Python tools (RAG, doc lookup, vex validation, knowledge
+            # search) don't touch hou.* — running them through hdefereval just
+            # blocks them on Houdini's main thread for no reason. Execute
+            # directly in the MCP worker pool so they stay responsive even
+            # while Houdini is cooking.
+            if HOU_AVAILABLE and tool_name in OFF_MAIN_THREAD_TOOLS:
+                result = _run()
+            elif HOU_AVAILABLE:
                 # Use executeDeferred (non-blocking enqueue) + Future so we can
                 # apply a timeout. executeInMainThreadWithResult blocks the MCP
                 # thread indefinitely if Houdini is busy cooking, which makes
@@ -428,7 +513,8 @@ class MCPHoudiniServer:
     def _send_response(self, client_socket, req_id, result):
         response = {"jsonrpc": "2.0", "id": req_id, "result": result}
         try:
-            client_socket.sendall(json.dumps(response).encode("utf-8"))
+            payload = json.dumps(response).encode("utf-8") + b"\n"
+            client_socket.sendall(payload)
         except (BrokenPipeError, ConnectionResetError, OSError):
             pass
 
@@ -438,7 +524,8 @@ class MCPHoudiniServer:
             error["data"] = data
         response = {"jsonrpc": "2.0", "id": req_id, "error": error}
         try:
-            client_socket.sendall(json.dumps(response).encode("utf-8"))
+            payload = json.dumps(response).encode("utf-8") + b"\n"
+            client_socket.sendall(payload)
         except (BrokenPipeError, ConnectionResetError, OSError):
             pass
 

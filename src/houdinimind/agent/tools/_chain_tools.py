@@ -40,6 +40,9 @@ def create_node_chain(parent_path, chain, cleanup_on_error=False):
     This fixes cases where a node references an input that is defined
     later in the chain (e.g. copytopoints referencing a scatter node
     that appears after it).
+
+    If ``cleanup_on_error`` is true, any node created by this call is removed
+    before returning an error.
     """
     try:
         _require_hou()
@@ -174,6 +177,8 @@ def create_node_chain(parent_path, chain, cleanup_on_error=False):
         created = []
         step_errors = []
         created_nodes = []
+        created_nodes_by_step = []
+        created_by_step = {}
         active_sop_parent = None
         generators = {
             "box",
@@ -247,13 +252,18 @@ def create_node_chain(parent_path, chain, cleanup_on_error=False):
                 # Set VEX
                 if vex:
                     vex = vex.replace("\r\n", "\n").replace("\r", "\n")
-                    snippet = node.parm("snippet")
-                    if snippet:
-                        snippet.set(vex)
-                    else:
-                        step_errors.append(
-                            f"Step {step_index} '{node.name()}': no snippet parm for VEX"
-                        )
+                    vr = _set_node_parameter(
+                        node,
+                        "snippet",
+                        vex,
+                        parm_cache={"names": [p.name() for p in node.parms()]},
+                        cook_vex=False,
+                    )
+                    msg = vr.get("message", "")
+                    if vr.get("status") != "ok":
+                        step_errors.append(f"Step {step_index} '{node.name()}' VEX rejected: {msg}")
+                    elif "WARNING:" in msg:
+                        step_errors.append(f"Step {step_index} '{node.name()}' VEX: {msg}")
 
                 info = {
                     "path": node.path(),
@@ -262,6 +272,8 @@ def create_node_chain(parent_path, chain, cleanup_on_error=False):
                     "step_index": step_index,
                 }
                 created.append(info)
+                created_by_step[step_index] = info
+                created_nodes_by_step.append((step_index, node))
                 nodes_by_name[node.name()] = node
                 # Also register the requested name (may differ from actual name
                 # if Houdini appended a number to avoid collisions).
@@ -294,8 +306,9 @@ def create_node_chain(parent_path, chain, cleanup_on_error=False):
 
             # Find the node created for this step
             node = None
-            if step_index <= len(created):
-                node = hou.node(created[step_index - 1]["path"])
+            step_info = created_by_step.get(step_index)
+            if step_info:
+                node = hou.node(step_info["path"])
             if not node and name:
                 node = nodes_by_name.get(name)
             if not node:
@@ -354,7 +367,7 @@ def create_node_chain(parent_path, chain, cleanup_on_error=False):
         # ══════════════════════════════════════════════════════════════
         # POST: Cook all nodes, set display flag, layout
         # ══════════════════════════════════════════════════════════════
-        for step_index, node in enumerate(created_nodes, start=1):
+        for step_index, node in created_nodes_by_step:
             try:
                 node.cook(force=True)
                 cook_res = list(node.errors())

@@ -164,6 +164,81 @@ class WorldModel:
 
         return "\n".join(lines)
 
+    # ── Query API ─────────────────────────────────────────────────────
+    # Used by the agent's planner / tool selection logic. Cheap O(N) scans
+    # over `self.topology` — the world model is small enough that indexing
+    # would be overkill.
+
+    def has_node(self, path: str) -> bool:
+        return any(node.get("path") == path for node in self.topology)
+
+    def find_by_type(self, ntype: str) -> list[str]:
+        ntype_l = ntype.lower()
+        return [
+            node["path"]
+            for node in self.topology
+            if str(node.get("type", "")).lower() == ntype_l and node.get("path")
+        ]
+
+    def find_by_role(self, role: str) -> list[str]:
+        role_l = role.lower()
+        return [path for path, r in self.semantics.items() if str(r).lower() == role_l]
+
+    def display_outputs(self) -> list[str]:
+        return [node["path"] for node in self.topology if node.get("display")]
+
+    def render_outputs(self) -> list[str]:
+        return [node["path"] for node in self.topology if node.get("render")]
+
+    def error_paths(self) -> list[str]:
+        return [
+            issue.get("path", "")
+            for issue in self.issues
+            if issue.get("severity") in {"error", "fatal"} and issue.get("path")
+        ]
+
+    def has_errors(self) -> bool:
+        return any(issue.get("severity") in {"error", "fatal"} for issue in self.issues)
+
+    def is_empty(self) -> bool:
+        return not self.topology
+
+    def derive_tool_hints(self) -> list[str]:
+        """Return a small list of (tool, reason) hints inferred from world state.
+
+        Consumed by AgentLoop as a system-message hint so the LLM gets
+        observation-grounded suggestions before the first tool call. Returns
+        plain strings (already formatted) — keep the list compact (≤4) so
+        we don't bloat the prompt.
+        """
+        hints: list[str] = []
+        if self.is_empty():
+            hints.append(
+                "World model: scene is empty — start with create_node or "
+                "create_node_chain inside /obj before any read/verify tools."
+            )
+            return hints
+        if self.has_errors():
+            err_sample = self.error_paths()[:3]
+            hints.append(
+                "World model: scene has errors at "
+                + ", ".join(err_sample)
+                + " — run get_all_errors / deep_error_trace before further edits."
+            )
+        if not self.display_outputs():
+            hints.append(
+                "World model: no display flag is set — call set_display_flag or "
+                "finalize_sop_network on the intended output before claiming completion."
+            )
+        sources = self.find_by_role("Source/Emitter")
+        sims = self.find_by_role("Simulation Container") + self.find_by_role("Simulation Solver")
+        if sources and not sims:
+            hints.append(
+                f"World model: source(s) {sources[:2]} present but no simulation "
+                "container/solver — wire them into a dopnet or pop/pyro/flip solver."
+            )
+        return hints[:4]
+
     def diff_scene(self) -> dict[str, Any]:
         """
         Compare the previous snapshot to the current snapshot to identify new nodes,
